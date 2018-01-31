@@ -1,1 +1,10 @@
 See https://medium.com/@taylorwan/git-for-dummies-63d0c85a239
+
+How to merge git branches
+: git fetch
+: git commit -m "relevant comment"
+: git pull origin master
+: git status
+: git checkout master
+: git pull BRANCH
+: git push origin master
