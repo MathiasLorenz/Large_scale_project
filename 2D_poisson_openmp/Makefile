@@ -1,12 +1,16 @@
 # put all things related to the compiler here
-CC       = suncc
-OPTIM    = -g -fast -xrestrict
+#CC       = suncc
+#OPTIM    = -g -fast -xrestrict
+CC 		 = gcc
+OPTIM	 = -O3
+
 WARN     =
 LIBS     =
 CHIP     =
-PARA_A	 = -xautopar -xreduction -xloopinfo -xvpara -xipo
-PARA_M	 = -xopenmp -xloopinfo -xvpara
-LFLAGS	 = -xopenmp
+#PARA_A	 = -xautopar -xreduction -xloopinfo -xvpara -xipo
+#PARA_M	 = -xopenmp -xloopinfo -xvpara
+PARA_M   = -fopenmp -Wall
+LFLAGS	 = -fopenmp -lm
 CFLAGS   = $(OPTIM) $(WARN) $(LIBS) $(CHIP)
 
 
