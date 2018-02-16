@@ -35,18 +35,28 @@ int main(int argc, char const *argv[])
 
     // Make the call for the desired function
     double t = omp_get_wtime();
-    if      (strcmp(T,"jseq") == 0)
-        test_jacobi_sequential(N,tol,maxiter);
+    if      (strcmp(T,"jseq") == 0) {
+        fprintf(stderr, "Not available in this build. Only jomp is available.\n");
+        return EXIT_FAILURE;
+    }
     else if (strcmp(T,"jomp") == 0)
-        test_jacobi_openmp(N,tol,maxiter);
-    else if (strcmp(T,"gsseq") == 0)
-        test_gs_sequential(N,tol,maxiter);
-    else if (strcmp(T,"jomp2") == 0)
-        test_jacobi_openmpv2(N,tol,maxiter);
-    else if (strcmp(T,"jompft") == 0)
-        test_jacobi_openmpft(N,tol,maxiter);
-    else
-        fprintf(stderr, "Invalid input\n   Accepts: jseq, jomp, qsseq");
+        test_jacobi(N, tol, maxiter);
+    else if (strcmp(T,"gsseq") == 0) {
+        fprintf(stderr, "Not available in this build. Only jomp is available.\n");
+        return EXIT_FAILURE;
+    }
+    else if (strcmp(T,"jomp2") == 0) {
+        fprintf(stderr, "Not available in this build. Only jomp is available.\n");
+        return EXIT_FAILURE;
+    }
+    else if (strcmp(T,"jompft") == 0) {
+        fprintf(stderr, "Not available in this build. Only jomp is available.\n");
+        return EXIT_FAILURE;
+    }
+    else  {
+        fprintf(stderr, "Invalid input\n   Accepts: jomp");
+        return EXIT_FAILURE;
+    }
     double timespent = omp_get_wtime() - t;
 
     if (strcmp("timing",getenv("OUTPUT_INFO")) == 0){

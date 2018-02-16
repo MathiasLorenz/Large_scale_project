@@ -7,10 +7,10 @@ CC	=gcc
 # - C flags
 OPTIM    =-O3
 WARN     =-Wall
-LIBS     =-std=gnu99 -lm
+LIBS     =-std=gnu99
 CHIP     =
 PARA     =-fopenmp
-LFLAGS   =-fopenmp
+LFLAGS   =-fopenmp -lm
 
 CFLAGS   = $(OPTIM) $(WARN) $(LIBS) $(CHIP) $(PARA)
 
@@ -19,8 +19,8 @@ CFLAGS   = $(OPTIM) $(WARN) $(LIBS) $(CHIP) $(PARA)
 # -- File definitions and macros
 
 EXEC     = jacobiSolver
-COBJS    = main tests init_data matrix_routines gauss_seidel
-COBJS   += jacobi_sequential jacobi_openmp jacobi_openmpv2 jacobi_vectorize
+COBJS    = main tests init_data matrix_routines
+COBJS   += jacobi_openmp
 
 SRCDIR	 = src
 LIBDIR   = lib
@@ -35,7 +35,7 @@ OBJECTS  = $(addprefix $(OBJDIR)/, $(addsuffix .o, $(COBJS)))
 
 # - Main
 $(EXEC) : $(OBJECTS)
-	$(CC) -o $(EXEC) $(OBJECTS) -I$(LIBDIR) $(CFLAGS) $(LFLAGS)
+	$(CC) -o $(EXEC) $(OBJECTS) -I$(LIBDIR) $(LFLAGS)
 	@echo -e "\nmake: '$(EXEC)' was build sucessfully."
 
 # - C Files
@@ -66,8 +66,4 @@ src/main.o: lib/tests.h
 src/tests.o: lib/tests.h lib/matrix_routines.h lib/poisson.h lib/init_data.h
 src/init_data.o: lib/init_data.h
 src/matrix_routines.o: lib/matrix_routines.h
-src/gauss_seidel.o: lib/matrix_routines.h lib/poisson.h
-src/jacobi_sequential.o: lib/matrix_routines.h lib/poisson.h
 src/jacobi_openmp.o: lib/matrix_routines.h lib/poisson.h
-src/jacobi_openmpv2.o: lib/matrix_routines.h lib/poisson.h
-src/jacobi_vectorize.o: lib/matrix_routines.h lib/poisson.h

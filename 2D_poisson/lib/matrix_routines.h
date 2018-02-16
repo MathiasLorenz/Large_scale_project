@@ -1,6 +1,11 @@
 #ifndef __MY_MATRIX_ROUTINES__
 #define __MY_MATRIX_ROUTINES__
 
+// Macros:
+// Min
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+
+
 double ** dmalloc_2d(int m, int n);
 void dfree_2d(double **A);
 double * dmalloc_1d(int m);

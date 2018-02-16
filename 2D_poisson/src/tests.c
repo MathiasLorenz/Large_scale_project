@@ -7,6 +7,7 @@
 #include "poisson.h"
 #include "init_data.h"
 
+/*
 void test_jacobi_sequential(int N,double tol,int maxiter){
 
     int N_total = N+2;              // Total grid points
@@ -37,7 +38,8 @@ void test_jacobi_sequential(int N,double tol,int maxiter){
     dfree_2d(R);
 
 }
-void test_jacobi_openmp(int N,double tol,int maxiter){
+*/
+void test_jacobi(int N,double tol,int maxiter){
 
     int N_total = N+2;              // Total grid points
     double h    = 2.0/(N + 1.0);    // stepsize
@@ -67,6 +69,7 @@ void test_jacobi_openmp(int N,double tol,int maxiter){
     dfree_2d(f);
     dfree_2d(R);
 }
+/*
 void test_gs_sequential(int N,double tol,int maxiter){
     int N_total = N+2;              // Total grid points
     double h    = 2.0/(N + 1.0);    // stepsize
@@ -152,3 +155,4 @@ void test_jacobi_openmpft(int N,double tol,int maxiter){
     dfree_2d(f);
     dfree_2d(R);
 }
+*/

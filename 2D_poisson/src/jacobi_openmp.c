@@ -7,7 +7,8 @@
 #include "matrix_routines.h"
 #include "poisson.h"
 
-#define ACCESS_2D(A, r, c, rC) (A[(r)*(rC) + c])
+// Macro for accessing 2D array A with linear indexing
+#define ACCESS_2D(A, r, c, rC) (A[(r)*(rC) + (c)])
 
 extern double MFLOP;
 
@@ -23,7 +24,6 @@ void jacobi_openmp(int N_total, int maxit, double threshold,
     double norm_diff = 10.0;
 
 
-
     // Jacobi iteration
     bool use_tol = false;
     if (strcmp("on",getenv("USE_TOLERANCE")) == 0)
@@ -31,7 +31,8 @@ void jacobi_openmp(int N_total, int maxit, double threshold,
 
     for(k = 0; k < maxit ; k++){
         norm_diff = 0.0;
-        // Linear indexing
+
+        // For linear indexing
         double * u_lin = *u;
 
         #pragma omp parallel for\
@@ -48,15 +49,18 @@ void jacobi_openmp(int N_total, int maxit, double threshold,
                 //                + step*f[i][j]);
 
                 // Linear indexing and macro
+
                 tmp[i][j] = frac*( ACCESS_2D(u_lin, i-1, j, N)
                                  + ACCESS_2D(u_lin, i+1, j, N)
                                  + ACCESS_2D(u_lin, i, j-1, N)
                                  + ACCESS_2D(u_lin, i, j+1, N)
                                  + step*f[i][j]);
 
+
                 norm_diff += (u[i][j]-tmp[i][j])*(u[i][j]-tmp[i][j]);
             }
         }
+        //swap_matrix(&tmp,&u);
         swap_matrix(&tmp,&u);
         norm_diff = sqrt(norm_diff);
 
