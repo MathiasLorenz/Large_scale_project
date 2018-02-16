@@ -2,26 +2,29 @@
 # -- Definitions
 
 # - Compilers
-CC	= gcc
+CC	=gcc
 
 # - C flags
-OPTIM    = -O3
-WARN     = -Wall
-LIBS     = -std=gnu99
+OPTIM    =-O3
+WARN     =-Wall
+LIBS     =-std=gnu99 -lm
 CHIP     =
+PARA     =-fopenmp
+LFLAGS   =-fopenmp
 
-CFLAGS   = $(OPTIM) $(WARN) $(LIBS) $(CHIP)
+CFLAGS   = $(OPTIM) $(WARN) $(LIBS) $(CHIP) $(PARA)
 
 # -- End of Definitions
 #==============================================================================
 # -- File definitions and macros
 
-EXEC     = test
-COBJS    = main cfile
+EXEC     = jacobiSolver
+COBJS    = main tests init_data matrix_routines gauss_seidel
+COBJS   += jacobi_sequential jacobi_openmp jacobi_openmpv2 jacobi_vectorize
 
 SRCDIR	 = src
 LIBDIR   = lib
-OBJDIR   = objects
+OBJDIR   = obj
 
 SOURCES  = $(addprefix $(SRCDIR)/, $(addsuffix .c, $(COBJS)))
 OBJECTS  = $(addprefix $(OBJDIR)/, $(addsuffix .o, $(COBJS)))
@@ -32,7 +35,7 @@ OBJECTS  = $(addprefix $(OBJDIR)/, $(addsuffix .o, $(COBJS)))
 
 # - Main
 $(EXEC) : $(OBJECTS)
-	$(CC) -o $(EXEC) $(OBJECTS) -I$(LIBDIR) $(CFLAGS)
+	$(CC) -o $(EXEC) $(OBJECTS) -I$(LIBDIR) $(CFLAGS) $(LFLAGS)
 	@echo -e "\nmake: '$(EXEC)' was build sucessfully."
 
 # - C Files
@@ -51,13 +54,20 @@ clean :
 realclean : clean
 	@rm -f $(EXEC)
 depend :
-	@MakeDepend -Y$(LIBDIR) $(SOURCES)
-	@rm -f makefile.bak MDP.err
+	makedepend -Y$(LIBDIR) $(SOURCES)
+	@rm -f Makefile.bak MDP.err
 
 # -- End of utility commands
 #==============================================================================
 # -- Compile dependecies
 # DO NOT DELETE
 
-src/main.o: lib/hfile.h
-src/cfile.o: lib/hfile.h
+src/main.o: lib/tests.h
+src/tests.o: lib/tests.h lib/matrix_routines.h lib/poisson.h lib/init_data.h
+src/init_data.o: lib/init_data.h
+src/matrix_routines.o: lib/matrix_routines.h
+src/gauss_seidel.o: lib/matrix_routines.h lib/poisson.h
+src/jacobi_sequential.o: lib/matrix_routines.h lib/poisson.h
+src/jacobi_openmp.o: lib/matrix_routines.h lib/poisson.h
+src/jacobi_openmpv2.o: lib/matrix_routines.h lib/poisson.h
+src/jacobi_vectorize.o: lib/matrix_routines.h lib/poisson.h
