@@ -1,47 +1,63 @@
-# put all things related to the compiler here
-CC       = suncc
-OPTIM    = -g -fast -xrestrict
-WARN     =
-LIBS     =
+#==============================================================================
+# -- Definitions
+
+# - Compilers
+CC	= gcc
+
+# - C flags
+OPTIM    = -O3
+WARN     = -Wall
+LIBS     = -std=gnu99
 CHIP     =
-PARA_A	 = -xautopar -xreduction -xloopinfo -xvpara -xipo
-PARA_M	 = -xopenmp -xloopinfo -xvpara
-LFLAGS	 = -xopenmp
+
 CFLAGS   = $(OPTIM) $(WARN) $(LIBS) $(CHIP)
 
-
+# -- End of Definitions
+#==============================================================================
 # -- File definitions and macros
-EXEC     = jacobiSolver
-MOBJECTS = main.o matrix_routines.o tests.o init_data.o
-ALGOS    = jacobi_sequential.o jacobi_openmp.o gauss_seidel.o \
-		   jacobi_vectorize.o jacobi_openmpv2.o
 
-OBJECTS  = $(MOBJECTS) $(ALGOS)
-# -- Compile main program
+EXEC     = test
+COBJS    = main cfile
+
+SRCDIR	 = src
+LIBDIR   = lib
+OBJDIR   = objects
+
+SOURCES  = $(addprefix $(SRCDIR)/, $(addsuffix .c, $(COBJS)))
+OBJECTS  = $(addprefix $(OBJDIR)/, $(addsuffix .o, $(COBJS)))
+
+# -- End of File definitions
+#==============================================================================
+# -- Compilations                             (Avoid changes beyond this point)
+
+# - Main
 $(EXEC) : $(OBJECTS)
-	$(CC) $(CFLAGS) $(LFLAGS) -o $(EXEC) $(OBJECTS)
+	$(CC) -o $(EXEC) $(OBJECTS) -I$(LIBDIR) $(CFLAGS)
+	@echo -e "\nmake: '$(EXEC)' was build sucessfully."
 
+# - C Files
+.SUFFIXES: .c
+$(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
+	$(CC) -o $@ -c $< -I$(LIBDIR) $(CFLAGS)
 
-jacobi_sequential.o :
-init_data.o : CFLAGS += $(PARA_M)
-jacobi_openmp.o : CFLAGS += $(PARA_M)
-jacobi_openmpv2.o : CFLAGS += $(PARA_M)
-
+# -- End of compilations
+#==============================================================================
 # -- Utility commands
+
+$(OBJDIR):
+	@mkdir -p $(OBJDIR)
 clean :
-	@rm -f *.o core
+	@rm -fr $(OBJDIR) core
 realclean : clean
 	@rm -f $(EXEC)
+depend :
+	@MakeDepend -Y$(LIBDIR) $(SOURCES)
+	@rm -f makefile.bak MDP.err
 
+# -- End of utility commands
+#==============================================================================
 # -- Compile dependecies
 # DO NOT DELETE
 
-gauss_seidel.o: matrix_routines.h poisson.h
-init_data.o: init_data.h
-jacobi_openmp.o: matrix_routines.h poisson.h
-jacobi_openmpv2.o: matrix_routines.h poisson.h
-jacobi_sequential.o: matrix_routines.h poisson.h
-jacobi_vectorize.o: matrix_routines.h poisson.h
-main.o: tests.h
-matrix_routines.o: matrix_routines.h
-tests.o: tests.h matrix_routines.h poisson.h init_data.h
+src/main.o: lib/hfile.h
+src/cfile.o: lib/hfile.h
