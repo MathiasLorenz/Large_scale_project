@@ -54,7 +54,7 @@ int main(int argc, char const *argv[])
         return EXIT_FAILURE;
     }
     else  {
-        fprintf(stderr, "Invalid input\n   Accepts: jomp");
+        fprintf(stderr, "Invalid input\n   Accepts: jomp\n");
         return EXIT_FAILURE;
     }
     double timespent = omp_get_wtime() - t;

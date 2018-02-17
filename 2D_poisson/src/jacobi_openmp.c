@@ -8,7 +8,9 @@
 #include "poisson.h"
 
 // Macro for accessing 2D array A with linear indexing
+// You need to call this function with rC = N+2 in 2D
 #define ACCESS_2D(A, r, c, rC) (A[(r)*(rC) + (c)])
+
 
 extern double MFLOP;
 
@@ -50,10 +52,10 @@ void jacobi_openmp(int N_total, int maxit, double threshold,
 
                 // Linear indexing and macro
 
-                tmp[i][j] = frac*( ACCESS_2D(u_lin, i-1, j, N)
-                                 + ACCESS_2D(u_lin, i+1, j, N)
-                                 + ACCESS_2D(u_lin, i, j-1, N)
-                                 + ACCESS_2D(u_lin, i, j+1, N)
+                tmp[i][j] = frac*( ACCESS_2D(u_lin, i-1, j, N+2)
+                                 + ACCESS_2D(u_lin, i+1, j, N+2)
+                                 + ACCESS_2D(u_lin, i, j-1, N+2)
+                                 + ACCESS_2D(u_lin, i, j+1, N+2)
                                  + step*f[i][j]);
 
 
