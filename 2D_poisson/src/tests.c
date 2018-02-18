@@ -58,9 +58,7 @@ void test_jacobi(int N,double tol,int maxiter){
     if (strcmp("timing",getenv("OUTPUT_INFO")) == 0)
         printf("Memory: %10.4f ", 3.0*N_total*N_total*8/1024);
 
-    jacobi_openmp(N_total, maxiter, tol, U, f, R);
-
-
+    jacobi_openmp(N_total, maxiter, tol, *U, *f, *R);
 
     if (strcmp("matrix",getenv("OUTPUT_INFO")) == 0)
         dmatrix_print_2d(U, N_total, N_total, "%10g ");

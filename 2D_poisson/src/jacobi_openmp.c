@@ -7,15 +7,10 @@
 #include "matrix_routines.h"
 #include "poisson.h"
 
-// Macro for accessing 2D array A with linear indexing
-// You need to call this function with rC = N+2 in 2D
-#define ACCESS_2D(A, r, c, rC) (A[(r)*(rC) + (c)])
-
-
 extern double MFLOP;
 
 void jacobi_openmp(int N_total, int maxit, double threshold,
-    double **u, double **f, double **tmp)
+    double *u, double *f, double *tmp)
 {
     if(!u || !f || !tmp) {fprintf(stderr,"Pointer is NULL.\n"); return;}
     int N = N_total-2;
@@ -25,7 +20,6 @@ void jacobi_openmp(int N_total, int maxit, double threshold,
     double step = h*h;
     double norm_diff = 10.0;
 
-
     // Jacobi iteration
     bool use_tol = false;
     if (strcmp("on",getenv("USE_TOLERANCE")) == 0)
@@ -34,36 +28,26 @@ void jacobi_openmp(int N_total, int maxit, double threshold,
     for(k = 0; k < maxit ; k++){
         norm_diff = 0.0;
 
-        // For linear indexing
-        double * u_lin = *u;
 
         #pragma omp parallel for\
             private(i,j) reduction(+: norm_diff) schedule(runtime)
         for(i=1; i<N+1; i++){
             for(j=1; j<N+1; j++){
-                //tmp[i][j] = frac*(u[i-1][j]+u[i+1][j]+
-                //    u[i][j-1]+u[i][j+1]+step*f[i][j]);
+                // Linear indexing with macro
+                ACCESS_2D(tmp, i, j, N_total) =
+                        frac*( ACCESS_2D(u, i-1, j, N_total)
+                             + ACCESS_2D(u, i+1, j, N_total)
+                             + ACCESS_2D(u, i, j-1, N_total)
+                             + ACCESS_2D(u, i, j+1, N_total)
+                             + step*ACCESS_2D(f, i, j, N_total));
 
-                // With linear indexing
-                //tmp[i][j] -> tmp[i*N + j]
-                //tmp[i][j] = frac*(u_lin[(i-1)*N + j] + u_lin[(i+1)*N + j]
-                //                + u_lin[i*N + j-1] + u_lin[i*N + j]
-                //                + step*f[i][j]);
-
-                // Linear indexing and macro
-
-                tmp[i][j] = frac*( ACCESS_2D(u_lin, i-1, j, N+2)
-                                 + ACCESS_2D(u_lin, i+1, j, N+2)
-                                 + ACCESS_2D(u_lin, i, j-1, N+2)
-                                 + ACCESS_2D(u_lin, i, j+1, N+2)
-                                 + step*f[i][j]);
-
-
-                norm_diff += (u[i][j]-tmp[i][j])*(u[i][j]-tmp[i][j]);
+                double uij   = ACCESS_2D(u, i, j, N_total);
+                double tmpij = ACCESS_2D(tmp, i, j, N_total);
+                norm_diff += (uij-tmpij)*(uij-tmpij);
             }
         }
         //swap_matrix(&tmp,&u);
-        swap_matrix(&tmp,&u);
+        swap_array(&tmp,&u);
         norm_diff = sqrt(norm_diff);
 
         if (use_tol && (norm_diff < threshold))

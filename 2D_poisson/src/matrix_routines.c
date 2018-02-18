@@ -97,6 +97,15 @@ void matmult_nat(int m, int n, int k, double** A,
 }
 
 
+void swap_array(double ** A, double ** B)
+{
+    if(!A || !B) {fprintf(stderr,"Pointer is NULL.\n"); return;}
+    double * temp;
+    temp = *A;
+    *A = *B;
+    *B = temp;
+}
+
 void swap_matrix(double ***A, double ***B)
 {
     if(!A || !B) {fprintf(stderr,"Pointer is NULL.\n"); return;}
