@@ -1,10 +1,9 @@
 #ifndef __TESTS_H
 #define __TESTS_H
 
-//void test_jacobi_sequential(int N,double tol,int maxiter);
+// This function contains the prototypes for all tests that does not include
+// any CUDA code.
+
 void test_jacobi(int N, double tol, int maxiter);
-//void test_gs_sequential(int N,double tol,int maxiter);
-//void test_jacobi_openmpft(int N,double tol,int maxiter);
-//void test_jacobi_openmpv2(int N,double tol,int maxiter);
 
 #endif // __TESTS_H

@@ -3,15 +3,7 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <helper_cuda.h>
-#include "cuda_tests.h"
-
-
-void cuda_test()
-{
-	printf("We are now testing the cuda function\n");
-	cu_test<<<1,1>>>();
-	checkCudaErrors(cudaDeviceSynchronize());
-}
+#include "cuda_routines.h"
 
 __global__ void cu_test()
 {

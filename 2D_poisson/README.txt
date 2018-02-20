@@ -45,7 +45,7 @@ based on these. The environmental variables supported is:
             are present and jomp have been implemented such that the schedule
             can be set during Runtime using OMP_SCHEDULE.
 
-    Extra Variables:
+    Extra environmental variables: ( > ./jacobiSolver ... ENV_NAME=value )
         PROBLEM_NAME: [default: rad]
             Defines the problem that should to be solved.
             sin : The well defined example where the Boundary condition and

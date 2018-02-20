@@ -41,7 +41,7 @@ EXEC    = jacobiSolver
 # - Source files
 COBJS   = main tests init_data matrix_routines
 COBJS  += jacobi_openmp
-CUOBJS	= cuda_tests
+CUOBJS	= tests_cuda cuda_routines
 
 # - Directories
 SRCDIR	= src
@@ -94,4 +94,5 @@ src/tests.o: lib/tests.h lib/matrix_routines.h lib/poisson.h lib/init_data.h
 src/init_data.o: lib/init_data.h
 src/matrix_routines.o: lib/matrix_routines.h
 src/jacobi_openmp.o: lib/matrix_routines.h lib/poisson.h
-src/cuda_tests.o: lib/cuda_tests.h
+src/cuda_tests.o: lib/cuda_tests.h lib/cuda_routines.h
+src/cuda_routines.o: lib/cuda_routines.h
