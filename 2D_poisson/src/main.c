@@ -4,6 +4,7 @@
 #include <string.h>
 #include <omp.h>
 #include "tests.h"
+#include "cuda_tests.h"
 
 double MFLOP=0.0;
 
@@ -52,6 +53,9 @@ int main(int argc, char const *argv[])
     else if (strcmp(T,"jompft") == 0) {
         fprintf(stderr, "Not available in this build. Only jomp is available.\n");
         return EXIT_FAILURE;
+    }
+    else if (strcmp(T,"cuda") == 0){
+	cuda_test();
     }
     else  {
         fprintf(stderr, "Invalid input\n   Accepts: jomp\n");

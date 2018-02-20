@@ -2,32 +2,57 @@
 # -- Definitions
 
 # - Compilers
-CC	=gcc
+CC	= mpicc
+CU	= nvcc
 
-# - C flags
-OPTIM    =-O3
-WARN     =-Wall
-LIBS     =-std=gnu99
-CHIP     =
-PARA     =-fopenmp
-LFLAGS   =-fopenmp -lm
+# - C Flags
+OPTIM   =-O3
+WARN    =-Wall
+LIBS    =-std=gnu99
+CHIP    =
+PARA    =-fopenmp
+LFLAGS  =-fopenmp -lm
 
-CFLAGS   = $(OPTIM) $(WARN) $(LIBS) $(CHIP) $(PARA)
+CFLAGS  = $(OPTIM) $(WARN) $(LIBS) $(CHIP) $(PARA)
+
+# - CU Flags
+CUOPT 	=-O3
+CUOPTS	=
+CUWARN	=-Wall
+CULIBS	=-lcudart -L/appl/cuda/9.1/lib64
+CUARCH	=-arch=sm_30
+CUPARA	=
+
+# - CU Library setup
+CUDA_PATH ?=/appl/cuda/9.1
+CUINCLUDES =-I$(CUDA_PATH)/include -I$(CUDA_PATH)/samples/common/inc
+
+CUFLAGS=-Xcompiler "$(CUOPT) $(CUPIC) $(CUOMP)" $(CUARCH) $(CUOPTS)
+LUFLAGS=$(CUINCLUDES) $(CULIBS)
+
 
 # -- End of Definitions
 #==============================================================================
 # -- File definitions and macros
 
-EXEC     = jacobiSolver
-COBJS    = main tests init_data matrix_routines
-COBJS   += jacobi_openmp
+# - Excecutable
+EXEC    = jacobiSolver
 
-SRCDIR	 = src
-LIBDIR   = lib
-OBJDIR   = obj
+# - Source files
+COBJS   = main tests init_data matrix_routines
+COBJS  += jacobi_openmp
+CUOBJS	= cuda_tests
 
+# - Directories
+SRCDIR	= src
+LIBDIR  = lib
+OBJDIR  = obj
+
+# - Combining files to their correct directory
 SOURCES  = $(addprefix $(SRCDIR)/, $(addsuffix .c, $(COBJS)))
+SOURCES	+= $(addprefix $(SRCDIR)/, $(addsuffix .cu,$(CUOBJS)))
 OBJECTS  = $(addprefix $(OBJDIR)/, $(addsuffix .o, $(COBJS)))
+OBJECTS += $(addprefix $(OBJDIR)/, $(addsuffix .o, $(CUOBJS)))
 
 # -- End of File definitions
 #==============================================================================
@@ -35,13 +60,15 @@ OBJECTS  = $(addprefix $(OBJDIR)/, $(addsuffix .o, $(COBJS)))
 
 # - Main
 $(EXEC) : $(OBJECTS)
-	$(CC) -o $(EXEC) $(OBJECTS) -I$(LIBDIR) $(LFLAGS)
+	$(CC) -o $(EXEC) $(OBJECTS) -I$(LIBDIR) $(LFLAGS) $(LUFLAGS)
 	@echo -e "\nmake: '$(EXEC)' was build sucessfully."
 
 # - C Files
-.SUFFIXES: .c
+.SUFFIXES: .c .cu
 $(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
 	$(CC) -o $@ -c $< -I$(LIBDIR) $(CFLAGS)
+$(OBJDIR)/%.o: $(SRCDIR)/%.cu | $(OBJDIR)
+	$(CU) -o $@ -c $< -I$(LIBDIR) $(CUINCLUDES) $(CUFLAGS)
 
 # -- End of compilations
 #==============================================================================
@@ -62,8 +89,9 @@ depend :
 # -- Compile dependecies
 # DO NOT DELETE
 
-src/main.o: lib/tests.h
+src/main.o: lib/tests.h lib/cuda_tests.h
 src/tests.o: lib/tests.h lib/matrix_routines.h lib/poisson.h lib/init_data.h
 src/init_data.o: lib/init_data.h
 src/matrix_routines.o: lib/matrix_routines.h
 src/jacobi_openmp.o: lib/matrix_routines.h lib/poisson.h
+src/cuda_tests.o: lib/cuda_tests.h
