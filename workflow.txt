@@ -1,10 +1,17 @@
 See https://medium.com/@taylorwan/git-for-dummies-63d0c85a239
 
-How to merge git branches
-: git fetch
-: git commit -m "relevant comment"
-: git pull origin master
-: git status
-: git checkout master
-: git pull BRANCH
-: git push origin master
+How to add, commit and update the online repository
+> git add FOLDER/FILE
+> git commit -am "Message related to the changes"
+> git push origin BRANCH
+
+How to merge git branches:
+> git fetch
+> git commit -m "relevant comment"
+> git pull origin master
+> git status
+> git checkout master
+> git pull origin BRANCH
+> git push origin master
+
+
