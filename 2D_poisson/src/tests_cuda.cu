@@ -8,7 +8,7 @@
 #include "cuda_routines.h"
 
 
-void test_cuda(int N, double tol, int maxiter)
+void test_cuda(int Nx, int Ny, int Nz)
 {
 	printf("We are now testing the cuda function\n");
 	cu_test<<<1,1>>>();
