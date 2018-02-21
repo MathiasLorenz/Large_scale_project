@@ -9,6 +9,8 @@
 // You need to call this function with rC = N+2 in 2D
 #define ACCESS_2D(A, r, c, rC) (A[(r)*(rC) + (c)])
 
+#define IND_2D(r, c, rC) ((r)*(rC) + (c))
+
 
 double ** dmalloc_2d(int m, int n);
 void dfree_2d(double **A);

@@ -34,15 +34,15 @@ void jacobi_openmp(int N_total, int maxit, double threshold,
         for(i=1; i<N+1; i++){
             for(j=1; j<N+1; j++){
                 // Linear indexing with macro
-                ACCESS_2D(tmp, i, j, N_total) =
-                        frac*( ACCESS_2D(u, i-1, j, N_total)
-                             + ACCESS_2D(u, i+1, j, N_total)
-                             + ACCESS_2D(u, i, j-1, N_total)
-                             + ACCESS_2D(u, i, j+1, N_total)
-                             + step*ACCESS_2D(f, i, j, N_total));
+                tmp[IND_2D(i, j, N_total)] =
+                        frac*( u[IND_2D(i-1, j, N_total)]
+                             + u[IND_2D(i+1, j, N_total)]
+                             + u[IND_2D(i, j-1, N_total)]
+                             + u[IND_2D(i, j+1, N_total)]
+                             + step*f[IND_2D(i, j, N_total)]);
 
-                double uij   = ACCESS_2D(u, i, j, N_total);
-                double tmpij = ACCESS_2D(tmp, i, j, N_total);
+                double uij   = u[IND_2D(i, j, N_total)];
+                double tmpij = tmp[IND_2D(i, j, N_total)];
                 norm_diff += (uij-tmpij)*(uij-tmpij);
             }
         }
