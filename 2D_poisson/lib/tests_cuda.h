@@ -7,7 +7,8 @@ extern "C"{
 #endif
 
 // Define all test functions which include CUDA code.
-void test_cuda(int N, double tol, int maxiter);
+void test_cuda(int Nx, int Ny, int Nz);
+
 
 #ifdef __cplusplus
 } // Extern "C"

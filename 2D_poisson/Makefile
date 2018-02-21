@@ -40,7 +40,7 @@ EXEC    = jacobiSolver
 
 # - Source files
 COBJS   = main tests init_data matrix_routines
-COBJS  += jacobi_openmp
+COBJS  += jacobi_openmp_2D
 CUOBJS	= tests_cuda cuda_routines
 
 # - Directories
