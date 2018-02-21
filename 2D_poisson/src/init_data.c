@@ -2,14 +2,14 @@
 #include <math.h>
 #include "init_data.h"
 
-void init_sin(double **u, double **f, double **R, int N_total, double h){
+void init_sin_2D(double **u, double **f, double **R, int Nx, int Ny, double h){
     if(!f || !u || !R) {fprintf(stderr,"Pointer is NULL.\n"); return;}
 
     double M_PI_sq = M_PI*M_PI;
     double x = -1.0, y = -1.0, res = 0.0;
-    for(int i = 0; i < N_total; i++) {
+    for(int i = 0; i < Ny; i++) {
         x = -1.0;
-        for(int j = 0; j < N_total; j++) {
+        for(int j = 0; j < Nx; j++) {
             res = 2.0*M_PI_sq*sin(M_PI*x)*sin(M_PI*y);
             f[i][j] = res;
             x += h;
@@ -17,17 +17,16 @@ void init_sin(double **u, double **f, double **R, int N_total, double h){
         y += h;
     }
 
-    for(int i = 0; i < N_total*N_total; i++) {
+    for(int i = 0; i < Nx*Ny; i++) {
         u[0][i] = 0.0;
         R[0][i] = 0.0;
     }
 }
-void init_rad(double **u, double **f, double **R, int N_total, double h){
+void init_rad_2D(double **u, double **f, double **R, int Nx, int Ny, double h){
 
     if(!f || !u || !R) {fprintf(stderr,"Pointer is NULL.\n"); return;}
 
-
-    for(int i = 0; i < N_total*N_total; i++)
+    for(int i = 0; i < Nx*Ny; i++)
         f[0][i] = 0.0;
 
     for(int j = lround(1.0/h); j <= lround(4.0/(h*3.0)); j++) {
@@ -37,18 +36,18 @@ void init_rad(double **u, double **f, double **R, int N_total, double h){
     }
 
     // Set u to zeros
-    for(int i = 0; i < N_total*N_total; i++) {
+    for(int i = 0; i < Nx*Ny; i++) {
         u[0][i] = 0.0;
         R[0][i] = 0.0;
     }
 
     // Set BC of u
-    for(int i = 0; i < N_total; i++) {
-        u[i][N_total-1] = R[i][N_total-1]   = 20;
-        u[N_total-1][i] = R[N_total-1][i]   = 20;
-        u[i][0]         = R[i][0]           = 20;
+    // Assumes uniform grid right now
+    for(int i = 0; i < Ny; i++) {
+        u[i][Ny-1] = R[i][Ny-1]   = 20;
+        u[Ny-1][i] = R[Ny-1][i]   = 20;
+        u[i][0]    = R[i][0]      = 20;
     }
-
 }
 
 

@@ -9,8 +9,41 @@
 #include "init_data.h"
 
 
-void test_jacobi(int N,double tol,int maxiter){
+void test_jacobi_2D(int Nx, int Ny, double tol, int maxiter)
+{
+    double h    = 2.0/((Nx-2) + 1.0);    // Stepsize, we assume uniform grid here!
 
+    double **U = dmalloc_2d(Nx, Ny);
+    double **f = dmalloc_2d(Nx, Ny);
+    double **R = dmalloc_2d(Nx, Ny);
+    if(!U || !f || !R)
+        {fprintf(stderr,"Error in malloc, Pointer is NULL.\n"); return;}
+
+    if (strcmp("sin",getenv("PROBLEM_NAME")) == 0)
+        init_sin_2D(U, f, R, Nx, Ny, h);
+    else if (strcmp("rad",getenv("PROBLEM_NAME")) == 0)
+        init_rad_2D(U, f, R, Nx, Ny, h);
+    else
+        {fprintf(stderr,"Error in problem specification.\n"); return;}
+
+    if (strcmp("timing",getenv("OUTPUT_INFO")) == 0)
+        printf("Memory: %10.4f ", 3.0*Nx*Ny*8/1024);
+
+    jacobi_openmp_2D(Nx, Ny, maxiter, tol, *U, *f, *R);
+
+    if (strcmp("matrix",getenv("OUTPUT_INFO")) == 0)
+        dmatrix_print_2d(U, Nx, Ny, "%10g ");
+
+    dfree_2d(U);
+    dfree_2d(f);
+    dfree_2d(R);
+}
+
+
+void test_jacobi_3D(int Nx, int Ny, int Nz, double tol, int maxiter)
+{ return; }
+/*
+{
     int N_total = N+2;              // Total grid points
     double h    = 2.0/(N + 1.0);    // stepsize
 
@@ -21,14 +54,14 @@ void test_jacobi(int N,double tol,int maxiter){
         return;}
 
     if (strcmp("sin",getenv("PROBLEM_NAME")) == 0)
-        init_sin(U, f, R, N_total, h);
+        init_sin_2D(U, f, R, N_total, h);
     if (strcmp("rad",getenv("PROBLEM_NAME")) == 0)
-        init_rad(U, f, R, N_total, h);
+        init_rad_2D(U, f, R, N_total, h);
 
     if (strcmp("timing",getenv("OUTPUT_INFO")) == 0)
         printf("Memory: %10.4f ", 3.0*N_total*N_total*8/1024);
 
-    jacobi_openmp(N_total, maxiter, tol, *U, *f, *R);
+    jacobi_openmp_2D(N_total, maxiter, tol, *U, *f, *R);
 
     if (strcmp("matrix",getenv("OUTPUT_INFO")) == 0)
         dmatrix_print_2d(U, N_total, N_total, "%10g ");
@@ -37,4 +70,4 @@ void test_jacobi(int N,double tol,int maxiter){
     dfree_2d(f);
     dfree_2d(R);
 }
-
+*/
