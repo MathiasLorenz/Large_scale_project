@@ -9,7 +9,7 @@
 #include "init_data.h"
 
 
-void test_jacobi_2D(int Nx, int Ny, double tol, int maxiter)
+void test_jacobi_2D(int Nx, int Ny)
 {
     double h    = 2.0/((Nx-2) + 1.0);    // Stepsize, we assume uniform grid here!
 
@@ -25,9 +25,12 @@ void test_jacobi_2D(int Nx, int Ny, double tol, int maxiter)
         init_rad_2D(U, f, R, Nx, Ny, h);
     else
         {fprintf(stderr,"Error in problem specification.\n"); return;}
-
+    
     if (strcmp("timing",getenv("OUTPUT_INFO")) == 0)
         printf("Memory: %10.4f ", 3.0*Nx*Ny*8/1024);
+
+    int maxiter = atoi(getenv("MAX_ITER"));
+    double tol  = atof(getenv("TOLERANCE"));
 
     jacobi_openmp_2D(Nx, Ny, maxiter, tol, *U, *f, *R);
 
@@ -40,7 +43,7 @@ void test_jacobi_2D(int Nx, int Ny, double tol, int maxiter)
 }
 
 
-void test_jacobi_3D(int Nx, int Ny, int Nz, double tol, int maxiter)
+void test_jacobi_3D(int Nx, int Ny, int Nz)
 { return; }
 /*
 {

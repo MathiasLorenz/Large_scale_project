@@ -11,15 +11,15 @@ double MFLOP=0.0;
 
 int main(int argc, char const *argv[])
 {
-	// Handle inputs and default values
+	// Handle input and help.
 	if (argc == 1){
 		printf(
-			"\nThis function accepts the following arguments,\n"
-			"	testName,	name of the test that should be performed\n"
-			"   Nx			size of the first axis in the grid.\n"
-			"	Ny			size of the second axis in the grid.\n"
-			"	Nz			size of the third axis in the grid.\n\n"
-			"See README.txt for additional information.\n\n");
+		"\nThis function accepts the following arguments,\n"
+		"	testName,		name of the test that should be performed\n"
+		"	Nx			size of the first axis in the grid.\n"
+		"	Ny			size of the second axis in the grid.\n"
+		"	Nz			size of the third axis in the grid.\n\n"
+		"See README.txt for additional information.\n\n");
 		return EXIT_SUCCESS;
 	} else if (argc < 3){
 		fprintf(stderr,
@@ -30,6 +30,7 @@ int main(int argc, char const *argv[])
 		return EXIT_FAILURE;
 	}
 	
+	// Reading the inputs
 	char const * T = argv[1];
 	int Nx, Ny, Nz;
 
@@ -38,14 +39,19 @@ int main(int argc, char const *argv[])
 	else if (argc < 5){
 		Nx = atoi(argv[2]);
 		Ny = atoi(argv[3]);
-		Nz = 1;
+		Nz = 3;
 	} else {
 		Nx = atoi(argv[2]);
 		Ny = atoi(argv[3]);
 		Nz = atoi(argv[4]);
 	}
+	if (Nx <= 2 || Ny <= 2 || Nz <= 2){
+		fprintf(stderr,
+		"\nInvalid dimension inputs. Minimal value is 3.\n"
+		"	Nx: %i, Ny: %i, Nz: %i.\n\n",Nx,Ny,Nz);
+		return EXIT_FAILURE;
+	}
 	
-
 
 	// Handle Enviromental values
 	char *problem_name, *output_info, *use_tol, *tol_env, *maxiter;
@@ -60,20 +66,20 @@ int main(int argc, char const *argv[])
 		putenv( "MAX_ITER=10000" );
 	if ( (tol_env = getenv("TOLERANCE")) == NULL)
 		putenv( "TOLERANCE=1e-6" );
-
-	maxiter = getenv("MAX_ITER");
-	tol_env = getenv("TOLERANCE");
-	printf("maxiter = %d, tol_env = %f\n", atoi(maxiter), atof(tol_env));
+	
 
 	// Make the call for the desired test
 	double t = omp_get_wtime();
 
 	if (strcmp(T,"omp2d") == 0)
-		test_jacobi_2D(Nx, Ny, atof(tol_env), atoi(maxiter));
-	else if (strcmp(T,"omp3d"))
-		test_jacobi_3D(Nx, Ny, Nz, atof(tol_env), atoi(maxiter));
+		test_jacobi_2D(Nx, Ny);
+
+	else if (strcmp(T,"omp3d") == 0)
+		test_jacobi_3D(Nx, Ny, Nz);
+
 	else if (strcmp(T,"cuda") == 0)
 		test_cuda(Nx, Ny, Nz);
+
 	else {
 		fprintf(stderr, 
 			"\nInvalid test name\n"

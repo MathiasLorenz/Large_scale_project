@@ -9,6 +9,7 @@
 *.sln.docstates
 *._
 merge.sh
+*.bin
 
 # Build results
 [Dd]ebug/
