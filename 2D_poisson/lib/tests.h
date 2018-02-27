@@ -4,7 +4,7 @@
 // This function contains the prototypes for all tests that does not include
 // any CUDA code.
 
-void test_jacobi_2D(int Nx, int Ny, double tol, int maxiter);
-void test_jacobi_3D(int Nx, int Ny, int Nz, double tol, int maxiter);
+void test_jacobi_2D(int Nx, int Ny);
+void test_jacobi_3D(int Nx, int Ny, int Nz);
 
 #endif // __TESTS_H

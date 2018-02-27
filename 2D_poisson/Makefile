@@ -36,23 +36,23 @@ LUFLAGS=$(CUINCLUDES) $(CULIBS)
 # -- File definitions and macros
 
 # - Excecutable
-EXEC    = jacobiSolver
+EXEC    = jacobiSolver.bin
 
 # - Source files
 COBJS   = main tests init_data matrix_routines
 COBJS  += jacobi_openmp_2D
-CUOBJS	= tests_cuda cuda_routines
+CUOBJS  = tests_cuda cuda_routines
 
 # - Directories
 SRCDIR	= src
-LIBDIR  = lib
-OBJDIR  = obj
+LIBDIR	= lib
+OBJDIR	= obj
 
 # - Combining files to their correct directory
-SOURCES  = $(addprefix $(SRCDIR)/, $(addsuffix .c, $(COBJS)))
+SOURCES	 = $(addprefix $(SRCDIR)/, $(addsuffix .c, $(COBJS)))
 SOURCES	+= $(addprefix $(SRCDIR)/, $(addsuffix .cu,$(CUOBJS)))
-OBJECTS  = $(addprefix $(OBJDIR)/, $(addsuffix .o, $(COBJS)))
-OBJECTS += $(addprefix $(OBJDIR)/, $(addsuffix .o, $(CUOBJS)))
+OBJECTS	 = $(addprefix $(OBJDIR)/, $(addsuffix .o, $(COBJS)))
+OBJECTS	+= $(addprefix $(OBJDIR)/, $(addsuffix .o, $(CUOBJS)))
 
 # -- End of File definitions
 #==============================================================================
@@ -89,10 +89,10 @@ depend :
 # -- Compile dependecies
 # DO NOT DELETE
 
-src/main.o: lib/tests.h lib/cuda_tests.h
+src/main.o: lib/tests.h lib/tests_cuda.h
 src/tests.o: lib/tests.h lib/matrix_routines.h lib/poisson.h lib/init_data.h
 src/init_data.o: lib/init_data.h
 src/matrix_routines.o: lib/matrix_routines.h
-src/jacobi_openmp.o: lib/matrix_routines.h lib/poisson.h
-src/cuda_tests.o: lib/cuda_tests.h lib/cuda_routines.h
+src/jacobi_openmp_2D.o: lib/matrix_routines.h lib/poisson.h
+src/tests_cuda.o: lib/tests_cuda.h lib/cuda_routines.h
 src/cuda_routines.o: lib/cuda_routines.h
