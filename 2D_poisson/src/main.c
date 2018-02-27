@@ -15,7 +15,7 @@ int main(int argc, char const *argv[])
 	if (argc == 1){
 		printf(
 		"\nThis function accepts the following arguments,\n"
-		"	testName,		name of the test that should be performed\n"
+		"	testName,	name of the test that should be performed\n"
 		"	Nx			size of the first axis in the grid.\n"
 		"	Ny			size of the second axis in the grid.\n"
 		"	Nz			size of the third axis in the grid.\n\n"
@@ -31,7 +31,7 @@ int main(int argc, char const *argv[])
 	}
 	
 	// Reading the inputs
-	char const * T = argv[1];
+	char const *T = argv[1];
 	int Nx, Ny, Nz;
 
 	if (argc < 4)
@@ -45,14 +45,13 @@ int main(int argc, char const *argv[])
 		Ny = atoi(argv[3]);
 		Nz = atoi(argv[4]);
 	}
-	if (Nx <= 2 || Ny <= 2 || Nz <= 2){
+	if (Nx <= 2 || Ny <= 2){
 		fprintf(stderr,
 		"\nInvalid dimension inputs. Minimal value is 3.\n"
 		"	Nx: %i, Ny: %i, Nz: %i.\n\n",Nx,Ny,Nz);
 		return EXIT_FAILURE;
 	}
 	
-
 	// Handle Enviromental values
 	char *problem_name, *output_info, *use_tol, *tol_env, *maxiter;
 

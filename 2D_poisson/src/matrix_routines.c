@@ -1,7 +1,11 @@
+// ============================================================================
+// INCLUDES
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include "matrix_routines.h"
+
 /*
 #if defined(__MACH__) && defined(__APPLE__)
 #include <Accelerate/Accelerate.h>
@@ -10,7 +14,34 @@
 #endif
 */
 
-// allocate a double-prec m x n matrix
+// ============================================================================
+// ALLOCATION AND DEALLOCATION
+
+// Allocate vector.
+double * dmalloc_1d(int m)
+{
+    if (m <= 0) return NULL;
+    double * arr = malloc(m*sizeof(*arr));
+    if (arr)
+        return arr;
+    else
+        return NULL;
+}
+
+// Allocate a linear indexed m x n matrix
+double * dmalloc_2d_l(int m, int n)
+{
+    if (m <= 0 || n <= 0) return NULL;
+    double *A = malloc(m * n * sizeof(double *));
+    if (A == NULL) return NULL;
+	A[0] = 0.0;
+    for (int i = 1; i < m; i++)
+        A[i] = A[0] + i * n;
+
+    return A;
+}
+
+// Allocate a double-prec m x n matrix
 double ** dmalloc_2d(int m, int n)
 {
     if (m <= 0 || n <= 0) return NULL;
@@ -34,29 +65,22 @@ void dfree_2d(double **A)
     free(A);
 }
 
-double * dmalloc_1d(int m)
-{
-    if (m <= 0) return NULL;
-    double * arr = malloc(m*sizeof(*arr));
-    if (arr)
-        return arr;
-    else
-        return NULL;
-}
+// ============================================================================
+// PRINTING
 
-
-// Print matrix
+// Print 2d matrix
 void dmatrix_print_2d(double **A, const int m, const int n,const char* fmt)
 {
     if (!A) {
         fprintf(stderr, "Pointer is NULL\n");
         return;
     }
+	fprintf(stdout, "\n  ");
     for(size_t i = 0; i < m; i++) {
         for(size_t j = 0; j < n; j++) {
             fprintf(stdout, fmt, A[i][j]);
         }
-        fprintf(stdout, "\n");
+        fprintf(stdout, "\n  ");
     }
     printf("\n");
 }
@@ -64,22 +88,28 @@ void dmatrix_print_2d(double **A, const int m, const int n,const char* fmt)
 // Print vector
 void dvector_print(double *v, const int m)
 {
+	if (!v) {
+        fprintf(stderr, "Pointer is NULL\n");
+        return;
+    }
+	fprintf(stdout, "\n  ");
     for(size_t i = 0; i < m; i++)
-        fprintf(stdout, "%5.3f\n", v[i]);
+        fprintf(stdout, "  %5.3f\n", v[i]);
     fprintf(stdout, "\n");
 }
 
+// ============================================================================
+// MATRIX-MATRIX OPERATIONS
 
 // Multiply matrices A and B into C.
-void matmult_nat(int m, int n, int k, double** A,
-        double** B, double** C)
+void matmult_nat(int m, int n, int k, 
+	double** A, double** B, double** C)
 {
 
     if (!A || !B || !C) {
         fprintf(stderr, "Pointer is NULL\n");
         return;
     }
-
 
     // Initialize C matrix
     for (size_t i = 0; i < m*n; i++)
@@ -96,7 +126,8 @@ void matmult_nat(int m, int n, int k, double** A,
     }
 }
 
-
+// ============================================================================
+// SWAPPING OPERATIONS
 void swap_array(double ** A, double ** B)
 {
     if(!A || !B) {fprintf(stderr,"Pointer is NULL.\n"); return;}
@@ -124,6 +155,8 @@ void swap_double(double *A, double *B)
     *B = temp;
 }
 
+// ============================================================================
+// NORMS AND MEASUREMENTS
 
 double frobenius_difference(double **A, double **B, int N_total)
 {
@@ -137,7 +170,6 @@ double frobenius_difference(double **A, double **B, int N_total)
     sum = sqrt(sum);
     return sum;
 }
-
 
 double frobenius_norm(double **A, int N_total)
 {
