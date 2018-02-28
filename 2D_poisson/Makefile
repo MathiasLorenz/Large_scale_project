@@ -39,20 +39,26 @@ LUFLAGS=$(CUINCLUDES) $(CULIBS)
 EXEC    = jacobiSolver.bin
 
 # - Source files
-COBJS   = main tests init_data matrix_routines
-COBJS  += jacobi_openmp_2D jacobi_openmp_3D 
-CUOBJS  = tests_cuda cuda_routines
+UOBJS   = main tests init_data matrix_routines
+JOBJS   = jacobi_openmp_2D jacobi_openmp_3D 
+CUUOBJS = 
+CUJOBJS = tests_cuda cuda_routines
 
 # - Directories
 SRCDIR	= src
 LIBDIR	= lib
 OBJDIR	= obj
+JDIR 	= $(SRCDIR)/jacobi
+UDIR 	= $(SRCDIR)/util
 
 # - Combining files to their correct directory
-SOURCES	 = $(addprefix $(SRCDIR)/, $(addsuffix .c, $(COBJS)))
-SOURCES	+= $(addprefix $(SRCDIR)/, $(addsuffix .cu,$(CUOBJS)))
-OBJECTS	 = $(addprefix $(OBJDIR)/, $(addsuffix .o, $(COBJS)))
-OBJECTS	+= $(addprefix $(OBJDIR)/, $(addsuffix .o, $(CUOBJS)))
+SOURCES	 = $(addprefix $(JDIR)/, $(addsuffix .c, $(JOBJS)))
+SOURCES	+= $(addprefix $(JDIR)/, $(addsuffix .cu, $(CUJOBJS)))
+SOURCES	+= $(addprefix $(UDIR)/, $(addsuffix .c, $(UOBJS)))
+SOURCES	+= $(addprefix $(UDIR)/, $(addsuffix .cu, $(CUUOBJS)))
+
+OBJECTS	 = $(addprefix $(OBJDIR)/, $(addsuffix .o, $(UOBJS) $(JOBJS)))
+OBJECTS	+= $(addprefix $(OBJDIR)/, $(addsuffix .o, $(CUUOBJS) $(CUJOBJS)))
 
 # -- End of File definitions
 #==============================================================================
@@ -65,9 +71,13 @@ $(EXEC) : $(OBJECTS)
 
 # - C Files
 .SUFFIXES: .c .cu
-$(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
+$(OBJDIR)/%.o: $(JDIR)/%.c | $(OBJDIR)
 	$(CC) -o $@ -c $< -I$(LIBDIR) $(CFLAGS)
-$(OBJDIR)/%.o: $(SRCDIR)/%.cu | $(OBJDIR)
+$(OBJDIR)/%.o: $(UDIR)/%.c | $(OBJDIR)
+	$(CC) -o $@ -c $< -I$(LIBDIR) $(CFLAGS)
+$(OBJDIR)/%.o: $(JDIR)/%.cu | $(OBJDIR)
+	$(CU) -o $@ -c $< -I$(LIBDIR) $(CUINCLUDES) $(CUFLAGS)
+$(OBJDIR)/%.o: $(UDIR)/%.cu | $(OBJDIR)
 	$(CU) -o $@ -c $< -I$(LIBDIR) $(CUINCLUDES) $(CUFLAGS)
 
 # -- End of compilations
