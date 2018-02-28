@@ -26,22 +26,22 @@ void init_sin_2D(double *U, double *F, double *Unew, int Nx, int Ny)
 	double hj = 2.0 / (J - 1.0);
 	double M_PI_sq = M_PI*M_PI;
 
-	double y, x = -1.0;
+	double y = -1.0;
 
 	// Initialising arrays
 	// #pragma omp parallel for private(i, j, x, y) shared(M_PI_sq, F, U, Unew)
 	for (int i = 0; i < I; i++)
 	{
-		y = -1.0;
+		double x = -1.0;
 		for (int j = 0; j < J; j++)
 		{
 			F[IND_2D(i, j, I, J)] = 2.0 * M_PI_sq * sin(M_PI * x) * sin(M_PI * y);
-			y += hi;
+			x += hj;
 		}
-		x += hj;
+		y += hi;
 	}
 
-	for (int i = 0; i < I * J; i++)
+	for (int i = 0; i < I*J; i++)
 	{
 		U[i] = 0.0;
 		Unew[i] = 0.0;
@@ -65,7 +65,7 @@ void init_rad_2D(double *U, double *F, double *Unew, int Nx, int Ny)
 	double hi = 2.0 / (I - 1.0);
 	double hj = 2.0 / (J - 1.0);
 
-	for (int i = 0; i < Nx * Ny; i++)
+	for (int i = 0; i < I*J; i++)
 		F[i] = 0.0;
 
 	for (int i = lround(1.0 / (hi * 3.0)); i <= lround(2.0 / (hi * 3.0)); i++)
@@ -77,7 +77,7 @@ void init_rad_2D(double *U, double *F, double *Unew, int Nx, int Ny)
 	}
 
 	// Set U to zeros
-	for (int i = 0; i < Nx * Ny; i++)
+	for (int i = 0; i < I*J; i++)
 	{
 		U[i] = 0.0;
 		Unew[i] = 0.0;

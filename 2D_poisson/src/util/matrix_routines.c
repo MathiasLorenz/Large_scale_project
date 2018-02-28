@@ -70,14 +70,16 @@ void dfree_2d(double **A)
 // Print 2d array
 void array_print_2d(double *A, const int m, const int n,const char* fmt)
 {
+    int I = n;
+    int J = m;
     if (!A) {
         fprintf(stderr, "Pointer is NULL\n");
         return;
     }
 	fprintf(stdout, "\n  ");
-    for(size_t i = 0; i < m; i++) {
-        for(size_t j = 0; j < n; j++) {
-            fprintf(stdout, fmt, A[IND_2D(i,j,m,n)]);
+    for(size_t i = 0; i < I; i++) {
+        for(size_t j = 0; j < J; j++) {
+            fprintf(stdout, fmt, A[IND_2D(i,j,I,J)]);
         }
         fprintf(stdout, "\n  ");
     }
