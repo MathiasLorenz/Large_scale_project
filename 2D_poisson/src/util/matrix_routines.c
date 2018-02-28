@@ -68,6 +68,23 @@ void dfree_2d(double **A)
 // ============================================================================
 // PRINTING
 
+// Print 2d array
+void array_print_2d(double *A, const int m, const int n,const char* fmt)
+{
+    if (!A) {
+        fprintf(stderr, "Pointer is NULL\n");
+        return;
+    }
+	fprintf(stdout, "\n  ");
+    for(size_t i = 0; i < m; i++) {
+        for(size_t j = 0; j < n; j++) {
+            fprintf(stdout, fmt, A[IND_2D(i,j,m,n)]);
+        }
+        fprintf(stdout, "\n  ");
+    }
+    printf("\n");
+}
+
 // Print 2d matrix
 void dmatrix_print_2d(double **A, const int m, const int n,const char* fmt)
 {

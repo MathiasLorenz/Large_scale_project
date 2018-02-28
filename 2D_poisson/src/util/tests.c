@@ -19,8 +19,8 @@ void test_jacobi_2D(int Nx, int Ny)
 	// Allocation
     double **U = dmalloc_2d(Nx, Ny);
     double **f = dmalloc_2d(Nx, Ny);
-    double **R = dmalloc_2d(Nx, Ny);
-    if(!U || !f || !R)
+    double **Unew = dmalloc_2d(Nx, Ny);
+    if(!U || !f || !Unew)
         {fprintf(stderr,"Error in malloc, Pointer is NULL.\n"); return;}
 
 	// Stepsize, we assume uniform grid here!
@@ -28,9 +28,9 @@ void test_jacobi_2D(int Nx, int Ny)
 
 	// Initialise the boundary values
     if (strcmp("sin",getenv("PROBLEM_NAME")) == 0)
-        init_sin_2D(U, f, R, Nx, Ny, h);
+        init_sin_2D(U, f, Unew, Nx, Ny, h);
     else if (strcmp("rad",getenv("PROBLEM_NAME")) == 0)
-        init_rad_2D(U, f, R, Nx, Ny, h);
+        init_rad_2D(U, f, Unew, Nx, Ny, h);
     else
         {fprintf(stderr,"Error in problem specification.\n"); return;}
     
@@ -38,7 +38,7 @@ void test_jacobi_2D(int Nx, int Ny)
     int maxiter = atoi(getenv("MAX_ITER"));
     double tol  = atof(getenv("TOLERANCE"));
 
-    jacobi_openmp_2D(Nx, Ny, maxiter, tol, *U, *f, *R);
+    jacobi_openmp_2D(Nx, Ny, maxiter, tol, *U, *f, *Unew);
 
 	// Print the needed information
 	if (strcmp("timing",getenv("OUTPUT_INFO")) == 0)
@@ -49,7 +49,7 @@ void test_jacobi_2D(int Nx, int Ny)
 	// Free the arrays created for the computation
     dfree_2d(U);
     dfree_2d(f);
-    dfree_2d(R);
+    dfree_2d(Unew);
 }
 
 // ============================================================================
@@ -64,25 +64,25 @@ void test_jacobi_3D(int Nx, int Ny, int Nz)
 
     double **U = dmalloc_2d(N_total,N_total);
     double **f = dmalloc_2d(N_total,N_total);
-    double **R = dmalloc_2d(N_total,N_total);
-    if(!U || !f || !R) {fprintf(stderr,"Error in malloc, Pointer is NULL.\n");
+    double **Unew = dmalloc_2d(N_total,N_total);
+    if(!U || !f || !Unew) {fprintf(stderr,"Error in malloc, Pointer is NULL.\n");
         return;}
 
     if (strcmp("sin",getenv("PROBLEM_NAME")) == 0)
-        init_sin_2D(U, f, R, N_total, h);
+        init_sin_2D(U, f, Unew, N_total, h);
     if (strcmp("rad",getenv("PROBLEM_NAME")) == 0)
-        init_rad_2D(U, f, R, N_total, h);
+        init_rad_2D(U, f, Unew, N_total, h);
 
     if (strcmp("timing",getenv("OUTPUT_INFO")) == 0)
         printf("Memory: %10.4f ", 3.0*N_total*N_total*8/1024);
 
-    jacobi_openmp_2D(N_total, maxiter, tol, *U, *f, *R);
+    jacobi_openmp_2D(N_total, maxiter, tol, *U, *f, *Unew);
 
     if (strcmp("matrix",getenv("OUTPUT_INFO")) == 0)
         dmatrix_print_2d(U, N_total, N_total, "%10g ");
 
     dfree_2d(U);
     dfree_2d(f);
-    dfree_2d(R);
+    dfree_2d(Unew);
 }
 */
