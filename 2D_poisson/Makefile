@@ -99,10 +99,10 @@ depend :
 # -- Compile dependecies
 # DO NOT DELETE
 
-src/main.o: lib/tests.h lib/tests_cuda.h
-src/tests.o: lib/tests.h lib/matrix_routines.h lib/poisson.h lib/init_data.h
-src/init_data.o: lib/init_data.h
-src/matrix_routines.o: lib/matrix_routines.h
-src/jacobi_openmp_2D.o: lib/matrix_routines.h lib/poisson.h
-src/tests_cuda.o: lib/tests_cuda.h lib/cuda_routines.h
-src/cuda_routines.o: lib/cuda_routines.h
+src/jacobi/jacobi_openmp_2D.o: lib/matrix_routines.h lib/poisson.h
+src/jacobi/jacobi_openmp_3D.o: lib/matrix_routines.h lib/poisson.h
+src/util/main.o: lib/tests.h lib/tests_cuda.h
+src/util/tests.o: lib/tests.h lib/matrix_routines.h lib/poisson.h
+src/util/tests.o: lib/init_data.h
+src/util/init_data.o: lib/matrix_routines.h lib/init_data.h
+src/util/matrix_routines.o: lib/matrix_routines.h

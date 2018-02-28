@@ -31,14 +31,13 @@ double * dmalloc_1d(int m)
 // Allocate a linear indexed m x n matrix
 double * dmalloc_2d_l(int m, int n)
 {
-    if (m <= 0 || n <= 0) return NULL;
-    double *A = malloc(m * n * sizeof(double *));
-    if (A == NULL) return NULL;
-	A[0] = 0.0;
-    for (int i = 1; i < m; i++)
-        A[i] = A[0] + i * n;
-
-    return A;
+	int S = m*n;
+    if (S <= 0) return NULL;
+    double * arr = malloc(S*sizeof(*arr));
+    if (arr)
+        return arr;
+    else
+        return NULL;
 }
 
 // Allocate a double-prec m x n matrix

@@ -1,163 +1,98 @@
+// ============================================================================
+// INCLUDES
+
 #include <stdio.h>
 #include <math.h>
+
+#include "matrix_routines.h"
 #include "init_data.h"
 
-void init_sin_2D(double **u, double **f, double **R, int Nx, int Ny, double h){
-    if(!f || !u || !R) {fprintf(stderr,"Pointer is NULL.\n"); return;}
+// ============================================================================
+// SINUSOIDAL PROBLEM
 
-    double M_PI_sq = M_PI*M_PI;
-    double x = -1.0, y = -1.0, res = 0.0;
-    for(int i = 0; i < Ny; i++) {
-        x = -1.0;
-        for(int j = 0; j < Nx; j++) {
-            res = 2.0*M_PI_sq*sin(M_PI*x)*sin(M_PI*y);
-            f[i][j] = res;
-            x += h;
-        }
-        y += h;
-    }
+void init_sin_2D(double *U, double *F, double *Unew, int Nx, int Ny)
+{
+	if (!U || !F || !Unew)
+	{
+		fprintf(stderr, "Pointer is NULL.\n");
+		return;
+	}
 
-    for(int i = 0; i < Nx*Ny; i++) {
-        u[0][i] = 0.0;
-        R[0][i] = 0.0;
-    }
-}
-void init_rad_2D(double **u, double **f, double **R, int Nx, int Ny, double h){
+	// Rewritting to C style coordinates
+	int I = Ny, J = Nx;
 
-    if(!f || !u || !R) {fprintf(stderr,"Pointer is NULL.\n"); return;}
+	// Setting up steps and variables
+	double hi = 2.0 / (I - 1.0);
+	double hj = 2.0 / (J - 1.0);
+	double M_PI_sq = M_PI*M_PI;
 
-    for(int i = 0; i < Nx*Ny; i++)
-        f[0][i] = 0.0;
+	double y, x = -1.0;
 
-    for(int j = lround(1.0/h); j <= lround(4.0/(h*3.0)); j++) {
-        for(int i = lround(1.0/(h*3.0)); i <= lround(2.0/(h*3.0)); i++) {
-            f[i][j] = 200;
-        }
-    }
+	// Initialising arrays
+	// #pragma omp parallel for private(i, j, x, y) shared(M_PI_sq, F, U, Unew)
+	for (int i = 0; i < I; i++)
+	{
+		y = -1.0;
+		for (int j = 0; j < J; j++)
+		{
+			F[IND_2D(i, j, I, J)] = 2.0 * M_PI_sq * sin(M_PI * x) * sin(M_PI * y);
+			y += hi;
+		}
+		x += hj;
+	}
 
-    // Set u to zeros
-    for(int i = 0; i < Nx*Ny; i++) {
-        u[0][i] = 0.0;
-        R[0][i] = 0.0;
-    }
-
-    // Set BC of u
-    // Assumes uniform grid right now
-    for(int i = 0; i < Ny; i++) {
-        u[i][Ny-1] = R[i][Ny-1]   = 20;
-        u[Ny-1][i] = R[Ny-1][i]   = 20;
-        u[i][0]    = R[i][0]      = 20;
-    }
+	for (int i = 0; i < I * J; i++)
+	{
+		U[i] = 0.0;
+		Unew[i] = 0.0;
+	}
 }
 
+// ============================================================================
+// RADIATOR PROBLEM
 
-void init_sin_gs(double **u, double **f, int N_total, double h){
-    if(!f || !u) {fprintf(stderr,"Pointer is NULL.\n"); return;}
+void init_rad_2D(double *U, double *F, double *Unew, int Nx, int Ny)
+{
+	if (!U || !F || !Unew)
+	{
+		fprintf(stderr, "Pointer is NULL.\n");
+		return;
+	}
 
-    double M_PI_sq = M_PI*M_PI;
-    double x = -1.0, y = -1.0, res = 0.0;
-    for(int i = 0; i < N_total; i++) {
-        x = -1.0;
-        for(int j = 0; j < N_total; j++) {
-            res = 2.0*M_PI_sq*sin(M_PI*x)*sin(M_PI*y);
-            f[i][j] = res;
-            x += h;
-        }
-        y += h;
-    }
+	int I = Ny, J = Nx;
 
-    for(int i = 0; i < N_total*N_total; i++) {
-        u[0][i] = 0.0;
-    }
-}
-void init_rad_gs(double **u, double **f, int N_total, double h){
+	// Setting up steps and variables
+	double hi = 2.0 / (I - 1.0);
+	double hj = 2.0 / (J - 1.0);
 
-    if(!f || !u) {fprintf(stderr,"Pointer is NULL.\n"); return;}
+	for (int i = 0; i < Nx * Ny; i++)
+		F[i] = 0.0;
 
+	for (int i = lround(1.0 / (hi * 3.0)); i <= lround(2.0 / (hi * 3.0)); i++)
+	{
+		for (int j = lround(1.0 / hj); j <= lround(4.0 / (hj * 3.0)); j++)
+		{
+			F[IND_2D(i, j, I, J)] = 200;
+		}
+	}
 
-    for(int i = 0; i < N_total*N_total; i++)
-        f[0][i] = 0.0;
+	// Set U to zeros
+	for (int i = 0; i < Nx * Ny; i++)
+	{
+		U[i] = 0.0;
+		Unew[i] = 0.0;
+	}
 
-    for(int i = lround(1.0/h+0.5); i <= lround(4.0/(h*3.0)-0.5); i++) {
-        for(int j = lround(1.0/(h*3.0)+0.5); j <= lround(2.0/(h*3.0)-0.5); j++) {
-            f[j][i] = 200;
-        }
-    }
-
-    // Set u to zeros
-    for(int i = 0; i < N_total*N_total; i++)
-        u[0][i] = 0.0;
-
-    // Set BC of u
-    for(int i = 0; i < N_total; i++) {
-        u[i][N_total-1] = 20;
-        u[N_total-1][i] = 20;
-        u[i][0]         = 20;
-    }
-
-}
-
-void init_sin_omp(double **u, double **f, double **R, int N_total, double h){
-    if(!f || !u || !R) {fprintf(stderr,"Pointer is NULL.\n"); return;}
-
-
-    double M_PI_sq = M_PI*M_PI;
-    double x = 0.0, y = 0.0;
-
-    int i, j;
-    #pragma omp parallel for private(i,j,x,y) shared(M_PI_sq, f, u, R)
-    for(i = 1; i < N_total-1; i++) {
-        x = -1.0;
-        y = -1.0 + i*h;
-        for(j = 1; j < N_total-1; j++) {
-            x += h;
-            f[i][j] = 2.0*M_PI_sq*sin(M_PI*x)*sin(M_PI*y);
-            u[i][j] = 0.0;
-            R[i][j] = 0.0;
-        }
-    } // End of parallel
-
-    // Set BC
-    for(int i = 0; i < N_total; i++) {
-        //u[0][i] = 0.0;
-        //R[0][i] = 0.0;
-        u[0][i] = R[0][i] = f[0][i] = 0;
-        u[i][0] = R[i][0] = f[i][0] = 0;
-        u[N_total-1][i] = R[N_total-1][i] = f[N_total-1][i] = 0;
-        u[i][N_total-1] = R[i][N_total-1] = f[i][N_total-1] = 0;
-    }
-}
-void init_rad_omp(double **u, double **f, double **R, int N_total, double h){
-
-    if(!f || !u || !R) {fprintf(stderr,"Pointer is NULL.\n"); return;}
-
-    // Initialize interior points with first touch
-    int i, j;
-    #pragma omp parallel for private(i,j) shared(f, u, R)
-    for(i = 1; i < N_total-1; i++) {
-        for(j = 1; j < N_total-1; j++) {
-            f[i][j] = 0.0;
-            u[i][j] = 0.0;
-            R[i][j] = 0.0;
-        }
-    } // End parallel
-
-
-    // Update interior points for source
-    for(int j = lround(1.0/h); j <= lround(4.0/(h*3.0)); j++) {
-        for(int i = lround(1.0/(h*3.0)); i <= lround(2.0/(h*3.0)); i++) {
-            f[i][j] = 200;
-        }
-    }
-
-
-    // Set BC of all
-    for(int i = 0; i < N_total; i++) {
-        u[i][N_total-1] = R[i][N_total-1]   = 20;
-        u[N_total-1][i] = R[N_total-1][i]   = 20;
-        u[i][0]         = R[i][0]           = 20;
-        u[0][i]         = R[0][i]           = 0.0;
-        f[i][0] = f[0][i] = f[i][N_total-1] = f[N_total-1][i] = 0.0;
-    }
+	// Set BC of U
+	// Assumes uniform grid right now
+	for (int i = 0; i < I; i++)
+	{
+		U[IND_2D(i,0,I,J)] = Unew[IND_2D(i,0,I,J)] = 20;
+		U[IND_2D(i,J-1,I,J)] = Unew[IND_2D(i,J-1,I,J)] = 20;
+	}
+	for (int j = 0; j < J; j++)
+		U[IND_2D(I-1,j,I,J)] = Unew[IND_2D(I-1,j,I,J)] = 20;
 
 }
+// END OF FILE
+// ============================================================================
