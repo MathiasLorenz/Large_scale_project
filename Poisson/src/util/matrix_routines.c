@@ -18,20 +18,37 @@
 // ALLOCATION AND DEALLOCATION
 
 // Allocate vector.
-double * dmalloc_1d(int m)
+double * dmalloc_1d(int Nx)
 {
-    if (m <= 0) return NULL;
-    double * arr = malloc(m*sizeof(*arr));
+    if (Nx <= 0) return NULL;
+    double * arr = malloc(Nx*sizeof(*arr));
     if (arr)
         return arr;
     else
         return NULL;
 }
 
-// Allocate a linear indexed m x n matrix
-double * dmalloc_2d_l(int m, int n)
+// Allocate a double-prec Nx x n matrix
+double ** dmalloc_2d(int Nx, int Ny)
 {
-	int S = m*n;
+    if (Nx <= 0 || Ny <= 0) return NULL;
+    double **A = malloc(Nx * sizeof(double *));
+    if (A == NULL) return NULL;
+    A[0] = malloc(Nx*Ny*sizeof(double));
+    if (A[0] == NULL) {
+        free(A);
+        return NULL;
+    }
+    for (int i = 1; i < Nx; i++)
+        A[i] = A[0] + i * Ny;
+
+    return A;
+}
+
+// Allocate a linear indexed Nx x n matrix
+double * dmalloc_2d_l(int Nx, int Ny)
+{
+	int S = Nx*Ny;
     if (S <= 0) return NULL;
     double * arr = malloc(S*sizeof(*arr));
     if (arr)
@@ -40,23 +57,17 @@ double * dmalloc_2d_l(int m, int n)
         return NULL;
 }
 
-// Allocate a double-prec m x n matrix
-double ** dmalloc_2d(int m, int n)
+// Allocate a linear indexed Nx x n x Nz matrix
+double * dmalloc_3d_l(int Nx, int Ny, int Nz)
 {
-    if (m <= 0 || n <= 0) return NULL;
-    double **A = malloc(m * sizeof(double *));
-    if (A == NULL) return NULL;
-    A[0] = malloc(m*n*sizeof(double));
-    if (A[0] == NULL) {
-        free(A);
+	int S = Nx*Ny*Nz;
+    if (S <= 0) return NULL;
+    double * arr = malloc(S*sizeof(*arr));
+    if (arr)
+        return arr;
+    else
         return NULL;
-    }
-    for (int i = 1; i < m; i++)
-        A[i] = A[0] + i * n;
-
-    return A;
 }
-
 
 void dfree_2d(double **A)
 {
@@ -67,11 +78,24 @@ void dfree_2d(double **A)
 // ============================================================================
 // PRINTING
 
-// Print 2d array
-void array_print_2d(double *A, const int m, const int n,const char* fmt)
+// Print vector
+void dvector_print(double *v, const int Nx)
 {
-    int I = n;
-    int J = m;
+	if (!v) {
+        fprintf(stderr, "Pointer is NULL\n");
+        return;
+    }
+	fprintf(stdout, "\n  ");
+    for(size_t i = 0; i < Nx; i++)
+        fprintf(stdout, "  %5.3f\n", v[i]);
+    fprintf(stdout, "\n");
+}
+
+// Print 2d array
+void array_print_2d(double *A, const int Nx, const int Ny, const char* fmt)
+{
+    int I = Ny;
+    int J = Nx;
     if (!A) {
         fprintf(stderr, "Pointer is NULL\n");
         return;
@@ -87,15 +111,18 @@ void array_print_2d(double *A, const int m, const int n,const char* fmt)
 }
 
 // Print 2d matrix
-void dmatrix_print_2d(double **A, const int m, const int n,const char* fmt)
+void dmatrix_print_2d(double **A, const int Nx, const int Ny,const char* fmt)
 {
+	int I = Ny;
+    int J = Nx;
+
     if (!A) {
         fprintf(stderr, "Pointer is NULL\n");
         return;
     }
 	fprintf(stdout, "\n  ");
-    for(size_t i = 0; i < m; i++) {
-        for(size_t j = 0; j < n; j++) {
+    for(size_t i = 0; i < I; i++) {
+        for(size_t j = 0; j < J; j++) {
             fprintf(stdout, fmt, A[i][j]);
         }
         fprintf(stdout, "\n  ");
@@ -103,18 +130,44 @@ void dmatrix_print_2d(double **A, const int m, const int n,const char* fmt)
     printf("\n");
 }
 
-// Print vector
-void dvector_print(double *v, const int m)
+// Print 3d array slice
+void print_3d_slice(double *A, const int Nx, const int Ny, const int Nz, 
+	const int slice, const char* fmt)
 {
-	if (!v) {
-        fprintf(stderr, "Pointer is NULL\n");
-        return;
-    }
+    if (!A) { fprintf(stderr, "Pointer is NULL\n"); return; }
+    int I = Nz;
+    int J = Ny;
+	int K = Nx;
+
+	int k = slice;
 	fprintf(stdout, "\n  ");
-    for(size_t i = 0; i < m; i++)
-        fprintf(stdout, "  %5.3f\n", v[i]);
-    fprintf(stdout, "\n");
+    for(size_t i = 0; i < I; i++) {
+        for(size_t j = 0; j < J; j++) {
+            fprintf(stdout, fmt, A[IND_3D(i,j,k,I,J,K)]);
+        }
+        fprintf(stdout, "\n  ");
+    }
+    printf("\n");
 }
+
+// Print 3d array 
+void print_3d_array(double *A, const int Nx, const int Ny, const int Nz,
+	const char* fmt)
+{
+    if (!A) { fprintf(stderr, "Pointer is NULL\n"); return; }
+    int I = Nz;
+    int J = Ny;
+	int K = Nx;
+
+	fprintf(stdout, "%d %d %d\n",I,J,K);
+    for(size_t i = 0; i < I; i++)
+        for(size_t j = 0; j < J; j++)
+			for(size_t k = 0; k < K; k++)
+            	fprintf(stdout, fmt, A[IND_3D(i,j,k,I,J,K)]);
+	
+    printf("\n");
+}
+
 
 // ============================================================================
 // MATRIX-MATRIX OPERATIONS

@@ -53,33 +53,36 @@ void test_jacobi_2D(int Nx, int Ny)
 // JACOBI 3D TEST
 
 void test_jacobi_3D(int Nx, int Ny, int Nz)
-{ return; }
-/*
 {
-    int N_total = N+2;              // Total grid points
-    double h    = 2.0/(N + 1.0);    // stepsize
+	// Allocation
+    double *U = dmalloc_3d_l(Nx, Ny, Nz);
+    double *F = dmalloc_3d_l(Nx, Ny, Nz);
+    double *Unew = dmalloc_3d_l(Nx, Ny, Nz);
+    if(!U || !F || !Unew)
+        {fprintf(stderr,"Error in malloc, Pointer is NULL.\n"); return;}
 
-    double **U = dmalloc_2d(N_total,N_total);
-    double **F = dmalloc_2d(N_total,N_total);
-    double **Unew = dmalloc_2d(N_total,N_total);
-    if(!U || !F || !Unew) {fprintf(stderr,"Error in malloc, Pointer is NULL.\n");
-        return;}
-
+	// Initialise the boundary values
     if (strcmp("sin",getenv("PROBLEM_NAME")) == 0)
-        init_sin_2D(U, F, Unew, N_total, h);
-    if (strcmp("rad",getenv("PROBLEM_NAME")) == 0)
-        init_rad_2D(U, F, Unew, N_total, h);
+        init_sin_3D(U, F, Unew, Nx, Ny, Nz);
+    // else if (strcmp("rad",getenv("PROBLEM_NAME")) == 0)
+    //    init_rad_2D(U, F, Unew, Nx, Ny);
+    else
+        {fprintf(stderr,"Error in problem specification.\n"); return;}
+    
+	// Handle the environmental variables
+    int maxiter = atoi(getenv("MAX_ITER"));
+    double tol  = atof(getenv("TOLERANCE"));
 
-    if (strcmp("timing",getenv("OUTPUT_INFO")) == 0)
-        printf("Memory: %10.4f ", 3.0*N_total*N_total*8/1024);
+    jacobi_openmp_3D(Nx, Ny, Nz, maxiter, tol, U, F, Unew);
 
-    jacobi_openmp_2D(N_total, maxiter, tol, *U, *F, *Unew);
+	// Print the needed information
+	if (strcmp("timing",getenv("OUTPUT_INFO")) == 0)
+        printf("Memory: %10.4f ", 3.0*Nx*Ny*8/1024);
+    else if (strcmp("matrix",getenv("OUTPUT_INFO")) == 0)
+        array_print_3d(U, Nx, Ny, Nz, "%10g ");
 
-    if (strcmp("matrix",getenv("OUTPUT_INFO")) == 0)
-        dmatrix_print_2d(U, N_total, N_total, "%10g ");
-
-    dfree_2d(U);
-    dfree_2d(F);
-    dfree_2d(Unew);
+	// Free the arrays created for the computation
+    free(U);
+    free(F);
+    free(Unew);
 }
-*/

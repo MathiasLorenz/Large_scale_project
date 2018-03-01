@@ -1,3 +1,6 @@
+// ============================================================================
+// INCLUDES
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -9,8 +12,11 @@
 
 double MFLOP=0.0;
 
+// ============================================================================
+// MAIN FUNCTION
 int main(int argc, char const *argv[])
 {
+	// ------------------------------------------------------------------------
 	// Handle input and help.
 	if (argc == 1){
 		printf(
@@ -29,7 +35,8 @@ int main(int argc, char const *argv[])
 			"  See README.txt for full documentation.\n\n");
 		return EXIT_FAILURE;
 	}
-	
+
+	// ------------------------------------------------------------------------
 	// Reading the inputs
 	char const *T = argv[1];
 	int Nx, Ny, Nz;
@@ -52,7 +59,9 @@ int main(int argc, char const *argv[])
 		return EXIT_FAILURE;
 	}
 	
+	// ------------------------------------------------------------------------
 	// Handle Enviromental values
+
 	char *problem_name, *output_info, *use_tol, *tol_env, *maxiter;
 
 	if ( (problem_name = getenv("PROBLEM_NAME")) == NULL )
@@ -66,7 +75,7 @@ int main(int argc, char const *argv[])
 	if ( (tol_env = getenv("TOLERANCE")) == NULL)
 		putenv( "TOLERANCE=1e-6" );
 	
-
+	// ------------------------------------------------------------------------
 	// Make the call for the desired test
 	double t = omp_get_wtime();
 
@@ -86,10 +95,10 @@ int main(int argc, char const *argv[])
 		return EXIT_FAILURE;
 	}
 
-	double timespent = omp_get_wtime() - t;
-
+	// ------------------------------------------------------------------------
 	// Handling the printing of statistics and data.
-
+	
+	double timespent = omp_get_wtime() - t;
 	if (strcmp("timing",getenv("OUTPUT_INFO")) == 0){
 		printf("Mflops: %10.4f ", MFLOP/timespent*1e-6 );
 		printf("Walltime: %10.4f\n", timespent);

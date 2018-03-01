@@ -14,14 +14,19 @@
 
 // Allocation and Deallocation of matrices and vectors
 double *  dmalloc_1d	(int m);
-double *  dmalloc_2d_l	(int m, int n);
 double ** dmalloc_2d	(int m, int n);
+double *  dmalloc_2d_l	(int m, int n);
+double *  dmalloc_3d_l	(int m, int n, int k);
 void dfree_2d	(double **A);
 
 // Printing of matrices and vectors
 void dvector_print(double *v, const int m);
 void dmatrix_print_2d(double **A, const int m, const int n, const char* set);
 void array_print_2d(double *A, const int m, const int n, const char* set);
+void array_print_3d(double *A, const int Nx, const int Ny, const int Nz,
+	const char* fmt);
+void array_print_3d_slice(double *A, const int Nx, const int Ny, const int Nz,
+	const int slice, const char* fmt);
 
 // Matrix-Matrix opperations
 void matmult_nat(int m, int n, int k, double **A, double **B, double **C);
