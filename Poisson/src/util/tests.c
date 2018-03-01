@@ -79,7 +79,7 @@ void test_jacobi_3D(int Nx, int Ny, int Nz)
 	if (strcmp("timing",getenv("OUTPUT_INFO")) == 0)
         printf("Memory: %10.4f ", 3.0*Nx*Ny*8/1024);
     else if (strcmp("matrix",getenv("OUTPUT_INFO")) == 0)
-        array_print_3d(U, Nx, Ny, Nz, "%10g ");
+        array_print_3d_slice(U, Nx, Ny, Nz, Nz/2, "%10g ");
 
 	// Free the arrays created for the computation
     free(U);

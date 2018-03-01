@@ -17,7 +17,7 @@ double *  dmalloc_1d	(int m);
 double ** dmalloc_2d	(int m, int n);
 double *  dmalloc_2d_l	(int m, int n);
 double *  dmalloc_3d_l	(int m, int n, int k);
-void dfree_2d	(double **A);
+void free_2d (double **A);
 
 // Printing of matrices and vectors
 void dvector_print(double *v, const int m);

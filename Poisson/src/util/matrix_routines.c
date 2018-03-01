@@ -69,7 +69,8 @@ double * dmalloc_3d_l(int Nx, int Ny, int Nz)
         return NULL;
 }
 
-void dfree_2d(double **A)
+// Free 2 dimentional array
+void free_2d(double **A)
 {
     free(A[0]);
     free(A);
@@ -131,18 +132,23 @@ void dmatrix_print_2d(double **A, const int Nx, const int Ny,const char* fmt)
 }
 
 // Print 3d array slice
-void print_3d_slice(double *A, const int Nx, const int Ny, const int Nz, 
+void array_print_3d_slice(double *A, const int Nx, const int Ny, const int Nz, 
 	const int slice, const char* fmt)
 {
     if (!A) { fprintf(stderr, "Pointer is NULL\n"); return; }
+	if (slice > Nz) 
+	{ 
+		fprintf(stderr, "Slice is not contained in the data\n"); 
+		return; 
+	}
     int I = Nz;
     int J = Ny;
 	int K = Nx;
 
-	int k = slice;
+	int i = slice;
 	fprintf(stdout, "\n  ");
-    for(size_t i = 0; i < I; i++) {
-        for(size_t j = 0; j < J; j++) {
+    for(size_t j = 0; j < J; j++) {
+        for(size_t k = 0; k < K; k++) {
             fprintf(stdout, fmt, A[IND_3D(i,j,k,I,J,K)]);
         }
         fprintf(stdout, "\n  ");
@@ -151,7 +157,7 @@ void print_3d_slice(double *A, const int Nx, const int Ny, const int Nz,
 }
 
 // Print 3d array 
-void print_3d_array(double *A, const int Nx, const int Ny, const int Nz,
+void array_print_3d(double *A, const int Nx, const int Ny, const int Nz,
 	const char* fmt)
 {
     if (!A) { fprintf(stderr, "Pointer is NULL\n"); return; }

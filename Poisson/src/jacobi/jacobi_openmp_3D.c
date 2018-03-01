@@ -36,6 +36,8 @@ void jacobi_openmp_3D(int Nx, int Ny, int Nz, int maxit, double threshold,
     double stepi = hi*hi;
 	double stepj = hj*hj;
 	double stepk = hk*hk;
+	double f3 = 1.0/3.0;
+	double f6 = 1.0/6.0;
 
     // Prepare stop criterion
     bool use_tol = false; int iter = 0; 
@@ -58,18 +60,18 @@ void jacobi_openmp_3D(int Nx, int Ny, int Nz, int maxit, double threshold,
 					double ui =
 							U[IND_3D(i-1, j, k, I, J, K)] 
 						+ U[IND_3D(i+1, j, k, I, J, K)]
-						+ 0.5*stepi*F[IND_3D(i, j, k, I, J, K)];
+						+ f3*stepi*F[IND_3D(i, j, k, I, J, K)];
 					double uj =
 							U[IND_3D(i, j-1, k, I, J, K)] 
 						+ U[IND_3D(i, j+1, k, I, J, K)]
-						+ 0.5*stepj*F[IND_3D(i, j, k, I, J, K)];
+						+ f3*stepj*F[IND_3D(i, j, k, I, J, K)];
 					double uk =
 							U[IND_3D(i, j, k-1, I, J, K)] 
 						+ U[IND_3D(i, j, k+1, I, J, K)]
-						+ 0.5*stepk*F[IND_3D(i, j, k, I, J, K)];
+						+ f3*stepk*F[IND_3D(i, j, k, I, J, K)];
 					
 					// Collect the terms
-					Unew[IND_3D(i, j, k, I, J, K)] = 0.25*( ui + uj + uk );
+					Unew[IND_3D(i, j, k, I, J, K)] = f6*( ui + uj + uk );
 
 					// Compute the stop criterion
 					double u   = U[IND_3D(i, j, k, I, J, K)];
