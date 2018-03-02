@@ -5,6 +5,9 @@ function output_matrix = read3DMatrixFromFile(file)
 
 % Open file
 fid = fopen(file, 'r');
+if fid == -1
+    error('Cannot open file.');
+end
 
 % Read in header
 C = textscan(fid, '%d %d %d', 1);
