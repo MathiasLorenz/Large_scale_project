@@ -1,7 +1,4 @@
 function corePerformance(FileNames,PlotName,PlotTitle)
-if nargin ==0
-    matlabschedule
-end
 
 %% Get and shape the data.
 for i = 1:length(FileNames)

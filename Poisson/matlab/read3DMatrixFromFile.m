@@ -1,4 +1,7 @@
 function output_matrix = read3DMatrixFromFile(file)
+% Function to read in 3D matrix from file.
+% The file must in the first line have 3 integers with Nx Ny Nz specified.
+% The next line contains space seperated values of the matrix.
 
 % Open file
 fid = fopen(file, 'r');
