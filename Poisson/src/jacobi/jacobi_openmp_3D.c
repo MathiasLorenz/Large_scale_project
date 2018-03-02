@@ -57,20 +57,17 @@ void jacobi_openmp_3D(int Nx, int Ny, int Nz, int maxit, double threshold,
             for(j=1; j < J-1; j++){
 				for(k=1; k < K-1; k++){
 					// Linear indexing with macro
-					double ui =
-							U[IND_3D(i-1, j, k, I, J, K)] 
-						+ U[IND_3D(i+1, j, k, I, J, K)]
-						+ f3*stepi*F[IND_3D(i, j, k, I, J, K)];
-					double uj =
-							U[IND_3D(i, j-1, k, I, J, K)] 
-						+ U[IND_3D(i, j+1, k, I, J, K)]
-						+ f3*stepj*F[IND_3D(i, j, k, I, J, K)];
-					double uk =
-							U[IND_3D(i, j, k-1, I, J, K)] 
-						+ U[IND_3D(i, j, k+1, I, J, K)]
-						+ f3*stepk*F[IND_3D(i, j, k, I, J, K)];
+					double ui = U[IND_3D(i-1, j, k, I, J, K)] 
+							  + U[IND_3D(i+1, j, k, I, J, K)]
+							  + f3*stepi*F[IND_3D(i, j, k, I, J, K)];
+					double uj = U[IND_3D(i, j-1, k, I, J, K)] 
+							  + U[IND_3D(i, j+1, k, I, J, K)]
+							  + f3*stepj*F[IND_3D(i, j, k, I, J, K)];
+					double uk = U[IND_3D(i, j, k-1, I, J, K)] 
+							  + U[IND_3D(i, j, k+1, I, J, K)]
+							  + f3*stepk*F[IND_3D(i, j, k, I, J, K)];
 					
-					// Collect the terms
+					// Collect terms
 					Unew[IND_3D(i, j, k, I, J, K)] = f6*( ui + uj + uk );
 
 					// Compute the stop criterion
