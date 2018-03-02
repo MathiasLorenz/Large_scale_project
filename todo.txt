@@ -2,3 +2,4 @@ Things that must be done:
 
 ( - : Not done, + : Done.
 + Fix non rectangular grids. Not sure if it is correct.
+- Check that FLOP is counted over all timed functions.

@@ -3,17 +3,17 @@
 # --  General options 
 
 # Naming of the job and queue name
-#BSUB -J My_Application
+#BSUB -J mflop
 #BSUB -q hpc
 
 # Specify
-#BSUB -oo Output_%J.out 
-#BSUB -eo Error_%J.err 
+#BSUB -oo Output.out 
+#BSUB -eo Error.err 
 
 # -- Technical options
 
 # Ask for 4 cores placed on 1 host.
-#BSUB -n 4 
+#BSUB -n 1 
 #BSUB -R "span[hosts=1]"
 
 # Memory specifications. Amount we need and when to kill the
@@ -22,7 +22,7 @@
 #BSUB -M 3GB
 
 # Time specifications (hh:mm)
-#BSUB -W 24:00 
+#BSUB -W 00:01 
 
 # -- Notification options
 
@@ -30,34 +30,105 @@
 ##BSUB -u your_email_address
 #BSUB -B		# Send notification at start
 #BSUB -N 		# Send notification at completion
-echo %J 
-exit;
 
-# Meta variables
-OUTPTH=../data
-FIGPTH=../figures
-MTLB=../matlabcode
-LOGS=../logs
+LSB_PROC=$(echo | grep -c '' $LSB_NODEFILE)
+# LSB_NODE=$(($LSB_PROC/$LSB_NUM_PPN))
+echo --------------------------------------------------------------------------
+echo 'Job: '$LSB_JOBNAME', is running on '$LSB_NODE' nodes'
+echo --------------------------------------------------------------------------
+echo LSB: job identifier is $LSB_JOBID
+echo LSB: executing queue is $LSB_QUEUE
+echo LSB: number of nodes is $LSB_NODE
+echo LSB: number of processors per node is $LSB_NUM_PPN
+echo LSB: total number of processors is $LSB_PROC
+echo LSB: working directory is $LSB_O_WORKDIR
+echo LSB: current home directory is $LSB_O_HOME
+echo --------------------------------------------------------------------------
 
-# Load needed modules
-module load studio
+# End of LSB info
+#==============================================================================
+# Define Preparation
 
-# ======= GENERIC PART ======= #
-# Directory and cpu info
-cd $PBS_O_WORKDIR
-lscpu >> $PBS_JOBNAME.cpu
+DPATH=../../data
+FPATH=../../figures
+LPATH=../
+MPATH=../../matlab
 
-# Run the actual code
-echo Running $PBS_JOBNAME
-./$PBS_JOBNAME.sh
+LOGS="Output.out Error.err $LSB_JOBNAME.cpu"
+DATA=$LSB_JOBNAME.dat
+FIGS=$LSB_JOBNAME.fig
 
-# Export data with matlab
-matlab -r "addpath('$OUTPTH');addpath('$MTLB');matlab$PBS_JOBNAME();ExportFigures();exit;"
+Prepare()
+{
+	echo ' '
+	echo Preparing
+	mkdir -p $FIGS
+	lscpu >> $LSB_JOBNAME.cpu
+	
+	# Define modules
+	module load cuda/9.1 mpi/2.1.0-gcc-6.3.0
+}
 
-# Cleanup
-echo Cleaning
-mv -f -t $LOGS $PBS_JOBNAME.out $PBS_JOBNAME.err $PBS_JOBNAME.cpu
-mv -f -t $OUTPTH output*
-mv -f -t $FIGPTH Figures/*
-cd ../
-rm -f -r $PBS_JOBNAME
+# End of Preparation
+#==============================================================================
+# Define Program
+
+Program()
+{
+	echo ' '
+	echo Running computations
+	./$LSB_JOBNAME.sh
+
+	mv -t $DPATH *.dat 
+}
+
+# End of Program
+#==============================================================================
+# Define Visualize
+
+Visualize()
+{
+	echo ' '
+	echo Visualizing
+	cd $MPATH
+	matlab -r "matlab$LSB_JOBNAME('$FIGS');exit;"
+	cd ../logs/$LSB_JOBNAME
+}
+
+# End of Visualize
+#==============================================================================
+# Define Finalize
+
+Finalize()
+{
+	echo ' '
+	echo Finalizing
+
+	mv -ft $FPATH $FIGS/*
+	
+}
+
+# End of Visualize
+#==============================================================================
+# Define Early Termination
+
+early()
+{
+	echo ' '
+	echo ' ================= WARNING: EARLY TERMINATION ================= '
+	echo ' '
+}
+trap 'early' 2 9 15
+
+# End of Early Termination
+#==============================================================================
+# Call Functions
+
+Prepare
+Program
+Visualize
+Finalize
+
+echo ' '
+echo --------------------------------------------------------------------------
+# ==============================   End of File   ==============================

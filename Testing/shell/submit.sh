@@ -1,31 +1,35 @@
 #!/bin/sh
 
-# Run make command to ensure 
-# Meta vars
-DATA=results/
-LOGS=logs/
-FIGPTH=figures/
-SHDIR=shell/
+# Define all needed folders relative to project head.
+EPATH=Poisson
+DPATH=Testing/data
+FPATH=Testing/figures
+LPATH=Testing/logs
+SPATH=Testing/shell
 
+# Make sure the excecutable is up to date
+cd $EPATH; make; cd ../
 
 # Define files needed by the execution in all tests
-FILE="jacobiSolver.bin"
+FILE="$EPATH/jacobiSolver.bin"
 
 # Define which shell script will be executed
 VER="mflop"
 
-# Do stuff
-mkdir -p $DATA $LOGS $FIGPTH
+# Create all needed folders
+mkdir -p $DPATH $FPATH $LPATH
 
-mkdir $VER -p
 for ver in $VER
 do
-	ls
-	# Copy all files
-	cp -ft $LOGS/$ver shell/submit$ver.sh shell/$ver.sh $FILE
+	# Create the folder needed
+	rm -fr $LPATH/$ver/*
+	mkdir -p $LPATH/$ver
+
+	# Clean and copy all files needed
+	cp -ft $LPATH/$ver $SPATH/submit$ver.sh $SPATH/$ver.sh $FILE
 
 	# Move to the directory submit the code and return
-	cd $ver/
+	cd $LPATH/$ver
 	bsub < submit$ver.sh
-	cd ../
+	cd ../../../
 done
