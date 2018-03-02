@@ -11,7 +11,7 @@
 #include "matrix_routines.h"
 #include "poisson.h"
 
-extern double MFLOP;
+extern double FLOP;
 
 // ============================================================================
 // JACOBI 2D SOLVER
@@ -93,7 +93,7 @@ void jacobi_openmp_2D(int Nx, int Ny, int maxit, double threshold,
     }
 
     if (strcmp("timing",getenv("OUTPUT_INFO")) == 0){
-        MFLOP = (10.0*I*J + 4.0)*iter;
+        FLOP = (14.0*I*J + 4.0)*iter;
     }
 }
 // END OF FILE

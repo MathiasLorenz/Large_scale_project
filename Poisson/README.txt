@@ -52,7 +52,7 @@ Extra environmental variables: ( > ./jacobiSolver ... ENV_NAME=value )
 		matrix: Defines that the result matrix should be printed as the
 				output.
 		timing: Defines that the output should be the timing info. Giving
-				the memory footprint, Mflops and Walltime for the main loop.
+				the memory footprint (kB), Mflops and Walltime for the main loop.
 
 	TOLERANCE:	[default: 1e-6]
 		Sets the tolerance for the methods. The methods will terminate 

@@ -10,7 +10,7 @@
 #include "tests.h"
 #include "tests_cuda.h"
 
-double MFLOP=0.0;
+double FLOP=0.0;
 
 // ============================================================================
 // MAIN FUNCTION
@@ -100,7 +100,7 @@ int main(int argc, char const *argv[])
 	
 	double timespent = omp_get_wtime() - t;
 	if (strcmp("timing",getenv("OUTPUT_INFO")) == 0){
-		printf("Mflops: %10.4f ", MFLOP/timespent*1e-6 );
+		printf("Mflops: %10.4f ", FLOP/timespent*1e-6 );
 		printf("Walltime: %10.4f\n", timespent);
 	}
 

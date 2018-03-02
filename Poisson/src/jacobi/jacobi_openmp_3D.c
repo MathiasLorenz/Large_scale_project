@@ -11,7 +11,7 @@
 #include "matrix_routines.h"
 #include "poisson.h"
 
-extern double MFLOP;
+extern double FLOP;
 
 // ============================================================================
 // JACOBI 3D SOLVER
@@ -52,7 +52,7 @@ void jacobi_openmp_3D(int Nx, int Ny, int Nz, int maxit, double threshold,
 
 		// Run a single iteration in OpenMP parallel.
         #pragma omp parallel for\
-            private(i,j) reduction(+: norm_diff) schedule(runtime)
+            private(i,j,k) reduction(+: norm_diff) schedule(runtime)
         for(i=1; i < I-1; i++){
             for(j=1; j < J-1; j++){
 				for(k=1; k < K-1; k++){
@@ -74,9 +74,9 @@ void jacobi_openmp_3D(int Nx, int Ny, int Nz, int maxit, double threshold,
 					Unew[IND_3D(i, j, k, I, J, K)] = f6*( ui + uj + uk );
 
 					// Compute the stop criterion
-					double u   = U[IND_3D(i, j, k, I, J, K)];
+					double u    = U[IND_3D(i, j, k, I, J, K)];
 					double unew = Unew[IND_3D(i, j, k, I, J, K)];
-					norm_diff +=  (u - unew)*(u - unew);
+					norm_diff  += (u - unew)*(u - unew);
 				}
             }
         }
@@ -101,7 +101,7 @@ void jacobi_openmp_3D(int Nx, int Ny, int Nz, int maxit, double threshold,
     }
 
     if (strcmp("timing",getenv("OUTPUT_INFO")) == 0){
-        MFLOP = (10.0*I*J + 4.0)*iter;
+        FLOP = (19.0*I*J*K + 4.0)*iter;
     }
 }
 // END OF FILE

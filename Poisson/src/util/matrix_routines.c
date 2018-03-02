@@ -165,7 +165,7 @@ void array_print_3d(double *A, const int Nx, const int Ny, const int Nz,
     int J = Ny;
 	int K = Nx;
 
-	fprintf(stdout, "%d %d %d\n",I,J,K);
+	fprintf(stdout, "%d %d %d\n",Nx,Ny,Nz);
     for(size_t i = 0; i < I; i++)
         for(size_t j = 0; j < J; j++)
 			for(size_t k = 0; k < K; k++)
