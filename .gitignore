@@ -3,6 +3,22 @@
 # =============================================================================
 # Folders
 [Oo]bj
+[Ll]ogs
+[Dd]ata
+[Ffigures]
+
+# Data files
+*.dat
+*.mat
+
+# Excecutables
+*.bin
+*.exe
+*.dmg
+
+# Object files
+*.o
+*.obj
 
 # Temporary and autosave files
 *.swp
@@ -10,15 +26,6 @@
 *.tmp
 *.m~
 ._*
-
-# Object files
-*.o
-*.obj
-
-# Excecutables
-*.bin
-*.exe
-*.dmg
 
 # Windows Files
 [Dd]esktop.ini

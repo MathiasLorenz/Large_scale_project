@@ -1,3 +1,0 @@
-Memory:     2.3438 Mflops:   188.2158 Walltime:     0.0003
-Memory:    58.5938 Mflops:    58.5658 Walltime:     0.7155
-Memory:   234.3750 Mflops:    29.7810 Walltime:    22.4313
