@@ -1,23 +1,37 @@
-#!/bin/sh
+#!/bin/sh 
 
-# ========== HOW TO ========== #
-# To use this submition. Change the
-# PBS name, the Meta variables and
-# the modules needed ect. All output
-# files from functions must be named
-# outputSOMETHING.EXTENSION
-# otherwise they are removed.
+# --  General options 
 
-# Definition for the job and output
-#PBS -N mflop
-#PBS -o $PBS_JOBNAME.out
-#PBS -e	$PBS_JOBNAME.err
+# Naming of the job and queue name
+#BSUB -J My_Application
+#BSUB -q hpc
 
-# Definition of the technical stuff
-#PBS -q hpcintro
-#PBS -l walltime=1:00:00
-#PBS -l feature=XeonE5-2660
-#PBS -l nodes=1:ppn=1
+# Specify
+#BSUB -oo Output_%J.out 
+#BSUB -eo Error_%J.err 
+
+# -- Technical options
+
+# Ask for 4 cores placed on 1 host.
+#BSUB -n 4 
+#BSUB -R "span[hosts=1]"
+
+# Memory specifications. Amount we need and when to kill the
+# program using too much memory.
+#BSUB -R "rusage[mem=2GB]"
+#BSUB -M 3GB
+
+# Time specifications (hh:mm)
+#BSUB -W 24:00 
+
+# -- Notification options
+
+# Set the email to recieve to and when to recieve it
+##BSUB -u your_email_address
+#BSUB -B		# Send notification at start
+#BSUB -N 		# Send notification at completion
+echo %J 
+exit;
 
 # Meta variables
 OUTPTH=../data
