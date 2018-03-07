@@ -14,7 +14,7 @@ double FLOP=0.0;
 
 // ============================================================================
 // MAIN FUNCTION
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
 	// ------------------------------------------------------------------------
 	// Handle input and help.
@@ -79,19 +79,22 @@ int main(int argc, char const *argv[])
 	// Make the call for the desired test
 	double t = omp_get_wtime();
 
-	if (strcmp(T,"omp2d") == 0)
+	if (strcmp(T, "omp2d") == 0)
 		test_jacobi_2D(Nx, Ny);
 
-	else if (strcmp(T,"omp3d") == 0)
+	else if (strcmp(T, "omp3d") == 0)
 		test_jacobi_3D(Nx, Ny, Nz);
 
-	else if (strcmp(T,"cuda") == 0)
+	else if (strcmp(T, "mpi3d_1") == 0)
+		test_jacobi_mpi3D_1(Nx, Ny, Nz, &argc, &argv);
+
+	else if (strcmp(T, "cuda") == 0)
 		test_cuda(Nx, Ny, Nz);
 
 	else {
 		fprintf(stderr, 
 			"\nInvalid test name\n"
-			"   Accepts: omp2d, omp3d, cuda\n\n");
+			"   Accepts: omp2d, omp3d, mpi3d_1 or cuda\n\n");
 		return EXIT_FAILURE;
 	}
 
