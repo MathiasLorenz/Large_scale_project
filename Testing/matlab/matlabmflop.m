@@ -1,26 +1,15 @@
 function matlabmflop(datPath,figPath)
 
+FuncName = {'omp2d','omp3d'};
+PlotTitle= {'Performance OpenMP Jacobi in 2D',...
+			'Performance OpenMP Jacobi in 3D'};
 
-%% OpenMP in 2D
-FuncName = {'omp2d'};
-FileName = [datPath,'mflop',FuncName{1},'.dat'];
-disp(FileName);
-PlotName = 'omp2d_performance';
-PlotTitle= 'Performance OpenMP Jacobi in 2D';
-memoryVflops(FileName,PlotName,PlotTitle,FuncName);
+%% Performance plots
 
-%% OpenMP in 3D
-FuncName = {'omp3d'};
-FileName = [datPath,'mflop',FuncName{1},'.dat'];
-PlotName = 'omp3d_performance';
-PlotTitle= 'Performance OpenMP Jacobi in 3D';
-memoryVflops(FileName,PlotName,PlotTitle,FuncName);
-
-%% Compare the different methods
-FileNames = {[datPath,'mflopomp2d.dat'],[datPath,'mflopomp3d.dat']};
-PlotName = 'jseq_restrict';
-PlotTitle= 'Restrict Vs no Restrict for Sequential Jacobi';
-FuncName = {'Restrict','No Restrict'};
-memoryVflopsCompare(FileNames,PlotName,PlotTitle,FuncName);
+for i = 1:length(FuncName)
+	FileName = [datPath,'mflop',FuncName{i},'.dat'];
+	PlotName = [FuncName{i},'_performance'];
+	memoryVflops(FileName,PlotName,PlotTitle{i},FuncName{i});
+end
 
 ExportFigures([],figPath);

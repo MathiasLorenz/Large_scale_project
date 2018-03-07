@@ -15,9 +15,14 @@ How to merge git branches:
 > git push origin master
 
 How to setup a test with name XXX:
-- Use submitmflop.sh and mflop.sh as templates to create the files submitXXX.sh and XXX.sh
-- In submitXXX.sh change LSB variables to fit the test needed. Change LSB -J to XXX.
-- XXX.sh should contain all code related to the test call and save the .dat files needed for the figures.
+- Use submitmflop.sh as templates to create the file submitXXX.sh.
+- In submitXXX.sh change LSB variables to fit the test needed. Change the jobname "LSB -J " to XXX.
+- In the subroutine "Program" change the code between the dashed lines to the test that should be done.
+- The data needed for plots in matlab should be saved as .dat files.
 - In submit.sh, add the test XXX to the list of tests.
+
+All matlab plot functions called by the submitted test should be named "matlabXXX.m"
+All matlab plot functions should have 2 inputs. Data path and Figure path.
+If matlabmflop.m is used as a template this should be trivially defined
 
 To run the tests use submit.sh and write which tests you want to run.
