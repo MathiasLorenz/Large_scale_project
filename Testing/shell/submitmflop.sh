@@ -22,7 +22,7 @@
 #BSUB -M 3GB
 
 # Time specifications (hh:mm)
-#BSUB -W 00:01 
+#BSUB -W 00:02 
 
 # -- Notification options
 
@@ -77,6 +77,7 @@ Program()
 {
 	echo ' '
 	echo Running computations
+	
 	./$LSB_JOBNAME.sh
 
 	mv -t $DPATH *.dat 
@@ -90,9 +91,7 @@ Visualize()
 {
 	echo ' '
 	echo Visualizing
-	cd $MPATH
-	matlab -r "matlab$LSB_JOBNAME('$FIGS');exit;"
-	cd ../logs/$LSB_JOBNAME
+	matlab -r "addpath(genpath('../../'));matlab$LSB_JOBNAME('$DPATH/','$FIGS');exit;"
 }
 
 # End of Visualize
@@ -105,7 +104,9 @@ Finalize()
 	echo Finalizing
 
 	mv -ft $FPATH $FIGS/*
-	
+
+	echo Figures moved to $FPATH.
+	echo Test concluded successfully.
 }
 
 # End of Visualize
@@ -125,8 +126,20 @@ trap 'early' 2 9 15
 # Call Functions
 
 Prepare
+
+echo ' '
+echo --------------------------------------------------------------------------
+
 Program
+
+echo ' '
+echo --------------------------------------------------------------------------
+
 Visualize
+
+echo ' '
+echo --------------------------------------------------------------------------
+
 Finalize
 
 echo ' '

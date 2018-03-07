@@ -1,5 +1,9 @@
 function [Data] = loadTXT(filename)
-fileID = fopen(filename);
+if exist(filename,'file')
+	fileID = fopen(filename);
+else
+	error('LOADTXT:FILENOTFOUND','Cannot locate the file:\n  %s\n',filename);
+end
 x = textscan(fileID,'%s %f %s %f %s %f');
 fclose(fileID);
 

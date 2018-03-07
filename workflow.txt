@@ -14,4 +14,10 @@ How to merge git branches:
 > git pull origin BRANCH
 > git push origin master
 
+How to setup a test with name XXX:
+- Use submitmflop.sh and mflop.sh as templates to create the files submitXXX.sh and XXX.sh
+- In submitXXX.sh change LSB variables to fit the test needed. Change LSB -J to XXX.
+- XXX.sh should contain all code related to the test call and save the .dat files needed for the figures.
+- In submit.sh, add the test XXX to the list of tests.
 
+To run the tests use submit.sh and write which tests you want to run.

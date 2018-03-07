@@ -18,6 +18,6 @@ do
 	for n in $N
 	do
 		echo $n
-		./jacobiSolver.bin $met $n $n $n >> $met.dat
+		./jacobiSolver.bin $met $n $n $n >> mflop$met.dat
 	done
 done
