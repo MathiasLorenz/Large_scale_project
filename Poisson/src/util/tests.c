@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <omp.h>
+#include <mpi.h>
 
 #include "tests.h"
 #include "matrix_routines.h"
@@ -87,4 +88,21 @@ void test_jacobi_3D(int Nx, int Ny, int Nz)
     free(U);
     free(F);
     free(Unew);
+}
+
+
+void test_jacobi_mpi3D_1(int Nx, int Ny, int Nz, int *argc, char ***argv)
+{
+    // Initalize MPI
+	MPI_Init(argc, argv);
+	MPI_Comm comm = MPI_COMM_WORLD;
+	int size, rank;
+	MPI_Comm_size(comm, &size);
+	MPI_Comm_rank(comm, &rank);
+
+    printf("Hi, I'm %d out of %d\n", rank, size);
+
+    MPI_Finalize();
+
+    return;
 }
