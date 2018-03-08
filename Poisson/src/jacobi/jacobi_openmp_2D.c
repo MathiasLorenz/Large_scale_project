@@ -11,7 +11,7 @@
 #include "matrix_routines.h"
 #include "poisson.h"
 
-extern double FLOP;
+extern double MFLOP;
 
 // ============================================================================
 // JACOBI 2D SOLVER
@@ -83,6 +83,8 @@ void jacobi_openmp_2D(int Nx, int Ny, int maxit, double threshold,
 
 	// ------------------------------------------------------------------------
 	// Finalise
+	
+	MFLOP = 1e-6*(14.0*I*J + 4.0)*iter;
 
     if (strcmp("matrix",getenv("OUTPUT_INFO")) == 0){
         // Print exit cause
@@ -90,10 +92,6 @@ void jacobi_openmp_2D(int Nx, int Ny, int maxit, double threshold,
             fprintf(stdout, "Exited because norm < threshold\n");
         else
             fprintf(stdout, "Exited because iter = maxit\n");
-    }
-
-    if (strcmp("timing",getenv("OUTPUT_INFO")) == 0){
-        FLOP = (14.0*I*J + 4.0)*iter;
     }
 }
 // END OF FILE

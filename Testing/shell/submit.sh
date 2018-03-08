@@ -24,7 +24,9 @@ fi
 # Create all needed folders
 mkdir -p $DPATH $FPATH $LPATH
 echo Submitting the following tests:
+echo ' '
 echo $TEST
+echo ' '
 
 for test in $TEST
 do

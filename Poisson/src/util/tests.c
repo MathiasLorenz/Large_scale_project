@@ -12,6 +12,9 @@
 #include "poisson.h"
 #include "init_data.h"
 
+extern double MEMORY;
+extern double TIME_SPENT;
+
 // ============================================================================
 // JACOBI 2D TEST
 
@@ -36,12 +39,17 @@ void test_jacobi_2D(int Nx, int Ny)
     int maxiter = atoi(getenv("MAX_ITER"));
     double tol  = atof(getenv("TOLERANCE"));
 
+	// Main computation and time
+	double t = omp_get_wtime();
+
     jacobi_openmp_2D(Nx, Ny, maxiter, tol, U, F, Unew);
 
+	// Save global variables
+	TIME_SPENT 	= omp_get_wtime() - t;
+	MEMORY		= 3.0*Nx*Ny*8.0/1024.0;
+
 	// Print the needed information
-	if (strcmp("timing",getenv("OUTPUT_INFO")) == 0)
-        printf("Memory: %10.4f ", 3.0*Nx*Ny*8/1024);
-    else if (strcmp("matrix",getenv("OUTPUT_INFO")) == 0)
+	if (strcmp("matrix",getenv("OUTPUT_INFO")) == 0)
         array_print_2d(U, Nx, Ny, "%10g ");
 
 	// Free the arrays created for the computation
@@ -74,12 +82,16 @@ void test_jacobi_3D(int Nx, int Ny, int Nz)
     int maxiter = atoi(getenv("MAX_ITER"));
     double tol  = atof(getenv("TOLERANCE"));
 
+	// Main computation and time
+	double t = omp_get_wtime();
     jacobi_openmp_3D(Nx, Ny, Nz, maxiter, tol, U, F, Unew);
 
+	// Save global variables
+	TIME_SPENT 	= omp_get_wtime() - t;
+	MEMORY		= 3.0*Nx*Ny*Nz*8.0/1024.0;
+
 	// Print the needed information
-	if (strcmp("timing", getenv("OUTPUT_INFO")) == 0)
-        printf("Memory: %10.4f ", 3.0*Nx*Ny*Nz*8/1024);
-    else if (strcmp("matrix", getenv("OUTPUT_INFO")) == 0)
+    if (strcmp("matrix", getenv("OUTPUT_INFO")) == 0)
         array_print_3d_slice(U, Nx, Ny, Nz, Nz/2, "%10g ");
     else if (strcmp("full_matrix", getenv("OUTPUT_INFO")) == 0)
         array_print_3d(U, Nx, Ny, Nz, "%10g ");
@@ -90,19 +102,23 @@ void test_jacobi_3D(int Nx, int Ny, int Nz)
     free(Unew);
 }
 
+// ============================================================================
+// 3D MPI TEST 1
 
 void test_jacobi_mpi3D_1(int Nx, int Ny, int Nz, int *argc, char ***argv)
 {
-    // Initalize MPI
-	MPI_Init(argc, argv);
 	MPI_Comm comm = MPI_COMM_WORLD;
 	int size, rank;
 	MPI_Comm_size(comm, &size);
 	MPI_Comm_rank(comm, &rank);
 
+	// Main computation and time
+	double t = omp_get_wtime();
     printf("Hi, I'm %d out of %d\n", rank, size);
 
-    MPI_Finalize();
+	// Save global variables
+	TIME_SPENT 	= omp_get_wtime() - t;
+	MEMORY		= 3.0*Nx*Ny*Nz*8.0/1024.0;
 
     return;
 }

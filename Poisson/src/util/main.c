@@ -6,11 +6,14 @@
 #include <time.h>
 #include <string.h>
 #include <omp.h>
+#include <mpi.h>
 
 #include "tests.h"
 #include "tests_cuda.h"
 
-double FLOP=0.0;
+double MFLOP=0;
+double MEMORY=0.0;
+double TIME_SPENT=0.0;
 
 // ============================================================================
 // MAIN FUNCTION
@@ -37,7 +40,17 @@ int main(int argc, char *argv[])
 	}
 
 	// ------------------------------------------------------------------------
+	// Initalize MPI
+
+	MPI_Init(&argc, &argv);
+	MPI_Comm comm = MPI_COMM_WORLD;
+	int size, rank;
+	MPI_Comm_size(comm, &size);
+	MPI_Comm_rank(comm, &rank);
+
+	// ------------------------------------------------------------------------
 	// Reading the inputs
+
 	char const *T = argv[1];
 	int Nx, Ny, Nz;
 
@@ -77,8 +90,7 @@ int main(int argc, char *argv[])
 	
 	// ------------------------------------------------------------------------
 	// Make the call for the desired test
-	double t = omp_get_wtime();
-
+	
 	if (strcmp(T, "omp2d") == 0)
 		test_jacobi_2D(Nx, Ny);
 
@@ -101,11 +113,12 @@ int main(int argc, char *argv[])
 	// ------------------------------------------------------------------------
 	// Handling the printing of statistics and data.
 	
-	double timespent = omp_get_wtime() - t;
-	if (strcmp("timing",getenv("OUTPUT_INFO")) == 0){
-		printf("Mflops: %10.4f ", FLOP/timespent*1e-6 );
-		printf("Walltime: %10.4f\n", timespent);
+	if (strcmp("timing",getenv("OUTPUT_INFO")) == 0 && rank == 0){
+		printf("Memory: %10.4f ", MEMORY);
+		printf("Mflops: %10.4f ", MFLOP/TIME_SPENT );
+		printf("Walltime: %10.4f\n", TIME_SPENT);
 	}
 
+    MPI_Finalize();
 	return EXIT_SUCCESS;
 }

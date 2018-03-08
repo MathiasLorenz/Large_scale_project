@@ -6,14 +6,6 @@
 #include <math.h>
 #include "matrix_routines.h"
 
-/*
-#if defined(__MACH__) && defined(__APPLE__)
-#include <Accelerate/Accelerate.h>
-#else
-#include <cblas.h>
-#endif
-*/
-
 // ============================================================================
 // ALLOCATION AND DEALLOCATION
 
