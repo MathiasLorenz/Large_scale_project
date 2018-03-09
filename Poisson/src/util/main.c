@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
 		test_jacobi_3D(Nx, Ny, Nz);
 
 	else if (strcmp(T, "mpi3d_1") == 0)
-		test_jacobi_mpi3D_1(Nx, Ny, Nz, &argc, &argv);
+		test_jacobi_mpi3D_1(Nx, Ny, Nz);
 
 	else if (strcmp(T, "cuda") == 0)
 		test_cuda(Nx, Ny, Nz);

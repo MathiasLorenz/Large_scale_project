@@ -105,7 +105,7 @@ void test_jacobi_3D(int Nx, int Ny, int Nz)
 // ============================================================================
 // 3D MPI TEST 1
 
-void test_jacobi_mpi3D_1(int Nx, int Ny, int Nz, int *argc, char ***argv)
+void test_jacobi_mpi3D_1(int Nx, int Ny, int Nz)
 {
 	MPI_Comm comm = MPI_COMM_WORLD;
 	int size, rank;
@@ -119,6 +119,4 @@ void test_jacobi_mpi3D_1(int Nx, int Ny, int Nz, int *argc, char ***argv)
 	// Save global variables
 	TIME_SPENT 	= omp_get_wtime() - t;
 	MEMORY		= 3.0*Nx*Ny*Nz*8.0/1024.0;
-
-    return;
 }
