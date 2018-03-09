@@ -65,13 +65,18 @@ int main(int argc, char *argv[])
 		Ny = atoi(argv[3]);
 		Nz = atoi(argv[4]);
 	}
-	if (Nx <= 2 || Ny <= 2 || Nz <= 2){
+	if (Nx <= 2 || Ny <= 2 || Nz <= 2) {
 		fprintf(stderr,
 		"\nInvalid dimension inputs. Minimal value is 3.\n"
 		"	Nx: %i, Ny: %i, Nz: %i.\n\n",Nx,Ny,Nz);
 		MPI_Finalize();
 		return EXIT_FAILURE;
 	}
+
+	// Ensure our grid is of even size.
+	if (Nx % 2 != 0) Nx++;
+	if (Ny % 2 != 0) Ny++;
+	if (Nz % 2 != 0) Nz++;
 	
 	// ------------------------------------------------------------------------
 	// Handle Enviromental values

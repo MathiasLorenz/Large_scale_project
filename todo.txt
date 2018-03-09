@@ -4,3 +4,7 @@ Things that must be done:
 + Fix non rectangular grids. Not sure if it is correct.
 + Check that FLOP is counted over all timed functions.
 - Write report with simple cases and indexing.
+- In MPI test 1, consider the fail cases when allocating arrays.
+- In MPI init 1, remember hi is incorrect. Make the computation general.
+- In MPI jacobi 1, we need to handle tolerances via broadcast or similar.
+- In jacobi util, we need to change how we handle h's and steps.

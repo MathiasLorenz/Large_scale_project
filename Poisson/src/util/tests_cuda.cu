@@ -5,9 +5,13 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <helper_cuda.h>
+#include <omp.h>
 
 #include "tests_cuda.h"
 #include "cuda_routines.h"
+
+extern double MEMORY;
+extern double TIME_SPENT;
 
 // ============================================================================
 // CUDA TEST
