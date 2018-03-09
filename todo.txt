@@ -8,3 +8,4 @@ Things that must be done:
 - In MPI init 1, remember hi is incorrect. Make the computation general.
 - In MPI jacobi 1, we need to handle tolerances via broadcast or similar.
 - In jacobi util, we need to change how we handle h's and steps.
+- Sendrecv doesn't work with -oversubscribe, test if it works when submitted.

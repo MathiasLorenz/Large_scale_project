@@ -150,8 +150,8 @@ void init_sin_mpi3D_1(double *U, double *F, double *Unew,
 	// Initialising arrays
 	// #pragma omp parallel for private(i, j, x, y) shared(M_PI_sq, F, U, Unew)
 
-	// This is based on an offset where z is split.
-	double z = -1.0 + hi*loc_Nz*rank;
+	// This is based on an offset where z is split once.
+	double z = -1.0 + hi*(loc_Nz - 1.0)*rank;
 	for (int i = 0; i < I; i++)
 	{
 		double y = -1.0;

@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <math.h>
 #include <omp.h>
+#include <mpi.h>
 
 #include "matrix_routines.h"
 #include "jacobi_util.h"
@@ -20,11 +21,18 @@ extern double MFLOP;
 void jacobi_mpi3D_1(int loc_Nx, int loc_Ny, int loc_Nz, int maxit, double threshold, int rank,
     double *U, double *F, double *Unew)
 {
-
 	// ------------------------------------------------------------------------
 	// Preparation
+	// Send and receive buffers for MPI
+	double *s_buf = dmalloc_2d_l(loc_Nx, loc_Ny); // Buffer to send with MPI
+	double *r_buf = dmalloc_2d_l(loc_Nx, loc_Ny); // Buffer to send with MPI
+    if(!U || !F || !Unew || !s_buf || !r_buf) {
+		fprintf(stderr,"Pointer is NULL.\n");
+		return;
+	}
 
-    if(!U || !F || !Unew) {fprintf(stderr,"Pointer is NULL.\n"); return;}
+	// Set buffer size
+	int N_buffer = loc_Nx*loc_Ny;
 
 	// Rewritting to C style coordinates
     int I, J, K;
@@ -41,7 +49,6 @@ void jacobi_mpi3D_1(int loc_Nx, int loc_Ny, int loc_Nz, int maxit, double thresh
 	
 	// Prepare stop criterion
 	int iter = 0; 
-
     
 
 	// ------------------------------------------------------------------------
@@ -57,6 +64,31 @@ void jacobi_mpi3D_1(int loc_Nx, int loc_Ny, int loc_Nz, int maxit, double thresh
 
         // Swap the arrays and check for convergence
         swap_array( &U, &Unew );
+
+		// Extract boundaries
+		double *U_ptr;
+		if (rank == 0) {
+			U_ptr = &U[IND_3D(loc_Nz - 2, 0, 0, I, J, K)];
+			memcpy(s_buf, U_ptr, N_buffer);
+		} else { // rank == 1 now
+			U_ptr = &U[IND_3D(1, 0, 0, I, J, K)];
+			memcpy(s_buf, U_ptr, N_buffer);
+		}
+
+		// Determine source and destination
+		int src, dest;
+		if (rank == 0) {src = 0; dest = 1;}
+		else {src = 1; dest = 0;}
+
+		// Send boundaries
+		printf("I'm rank %d before send.\n", rank);
+		MPI_Sendrecv(s_buf, N_buffer, MPI_DOUBLE, dest, 0, r_buf, N_buffer,
+			MPI_DOUBLE, src, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		printf("I'm rank %d after send.\n", rank);
+		MPI_Barrier(MPI_COMM_WORLD);
+
+		// Insert received boundaries
+		memcpy(U_ptr, r_buf, N_buffer);
 
 		// Remember to implement tolerance
 		/*
