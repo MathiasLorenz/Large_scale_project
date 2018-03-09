@@ -11,7 +11,7 @@
 #include "tests.h"
 #include "tests_cuda.h"
 
-double MFLOP=0;
+double MFLOP=0.0;
 double MEMORY=0.0;
 double TIME_SPENT=0.0;
 
@@ -19,6 +19,7 @@ double TIME_SPENT=0.0;
 // MAIN FUNCTION
 int main(int argc, char *argv[])
 {
+	
 	// ------------------------------------------------------------------------
 	// Handle input and help.
 	if (argc == 1){
@@ -41,7 +42,6 @@ int main(int argc, char *argv[])
 
 	// ------------------------------------------------------------------------
 	// Initalize MPI
-
 	MPI_Init(&argc, &argv);
 	MPI_Comm comm = MPI_COMM_WORLD;
 	int size, rank;
@@ -65,10 +65,11 @@ int main(int argc, char *argv[])
 		Ny = atoi(argv[3]);
 		Nz = atoi(argv[4]);
 	}
-	if (Nx <= 2 || Ny <= 2){
+	if (Nx <= 2 || Ny <= 2 || Nz <= 2){
 		fprintf(stderr,
 		"\nInvalid dimension inputs. Minimal value is 3.\n"
 		"	Nx: %i, Ny: %i, Nz: %i.\n\n",Nx,Ny,Nz);
+		MPI_Finalize();
 		return EXIT_FAILURE;
 	}
 	
@@ -107,6 +108,8 @@ int main(int argc, char *argv[])
 		fprintf(stderr, 
 			"\nInvalid test name\n"
 			"   Accepts: omp2d, omp3d, mpi3d_1 or cuda\n\n");
+		
+		MPI_Finalize();
 		return EXIT_FAILURE;
 	}
 
