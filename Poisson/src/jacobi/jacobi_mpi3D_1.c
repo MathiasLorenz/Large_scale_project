@@ -81,7 +81,10 @@ void jacobi_mpi3D_1(int loc_Nx, int loc_Ny, int loc_Nz, int maxit, double thresh
 		else {src = 1; dest = 0;}
 
 		// Send boundaries
-		printf("I'm rank %d before send.\n", rank);
+		printf("I'm rank %d before send.\n"
+				"N_buffer = %d, s_buf size = %zu\n"
+				"src = %d, dest = %d\n",
+				rank, N_buffer, sizeof(s_buf), src, dest);
 		MPI_Sendrecv(s_buf, N_buffer, MPI_DOUBLE, dest, 0, r_buf, N_buffer,
 			MPI_DOUBLE, src, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 		printf("I'm rank %d after send.\n", rank);
@@ -101,6 +104,9 @@ void jacobi_mpi3D_1(int loc_Nx, int loc_Ny, int loc_Nz, int maxit, double thresh
 
 	// ------------------------------------------------------------------------
 	// Finalise
+
+	free(s_buf);
+	free(r_buf);
 	
 	MFLOP = 1e-6*(19.0*I*J*K + 4.0)*iter;
 

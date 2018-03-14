@@ -129,7 +129,7 @@ void test_jacobi_mpi3D_1(int Nx, int Ny, int Nz)
 	int loc_Nx, loc_Ny, loc_Nz;
 	loc_Nx = Nx;
 	loc_Ny = Ny;
-	loc_Nz = Nz/2 + 1; // We know this is valid as Nz is even
+	loc_Nz = Nz/2 + 1;
 
 	// Allocation
 	double *U = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
@@ -157,7 +157,7 @@ void test_jacobi_mpi3D_1(int Nx, int Ny, int Nz)
 
 	// Main computation and time
 	double t = omp_get_wtime();
-	jacobi_mpi3D_1(Nx, Ny, Nz, maxiter, tol, rank, U, F, Unew);
+	jacobi_mpi3D_1(loc_Nx, loc_Ny, loc_Nz, maxiter, tol, rank, U, F, Unew);
 
 	// Save global variables
 	TIME_SPENT = omp_get_wtime() - t;
