@@ -21,6 +21,11 @@ extern double MFLOP;
 void jacobi_mpi3D_1(int loc_Nx, int loc_Ny, int loc_Nz, int maxit, double threshold, int rank,
     double *U, double *F, double *Unew)
 {
+	
+	int size;
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
+	MPI_Request req;
+
 	// ------------------------------------------------------------------------
 	// Preparation
 	// Send and receive buffers for MPI
@@ -76,21 +81,18 @@ void jacobi_mpi3D_1(int loc_Nx, int loc_Ny, int loc_Nz, int maxit, double thresh
 		}
 
 		// Determine source and destination
-		int src, dest;
-		if (rank == 0) {src = 0; dest = 1;}
-		else {src = 1; dest = 0;}
+		int src, dst;
+		if (rank == 0) {src = 0; dst = 1;}
+		else {src = 1; dst = 0;}
 
 		// Send boundaries
-		printf("I'm rank %d before send.\n"
-				"N_buffer = %d, s_buf size = %zu\n"
-				"src = %d, dest = %d\n",
-				rank, N_buffer, sizeof(s_buf), src, dest);
-		MPI_Sendrecv(s_buf, N_buffer, MPI_DOUBLE, dest, 0, r_buf, N_buffer,
-			MPI_DOUBLE, src, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-		printf("I'm rank %d after send.\n", rank);
-		MPI_Barrier(MPI_COMM_WORLD);
+		MPI_Isend(s_buf, N_buffer, MPI_DOUBLE, dst, 0, MPI_COMM_WORLD, &req);
 
-		// Insert received boundaries
+		// Receive boundaries
+		MPI_Irecv(s_buf, N_buffer, MPI_DOUBLE, src, 0, MPI_COMM_WORLD, &req);
+
+		// Synchronize and swap
+		MPI_Barrier(MPI_COMM_WORLD);
 		memcpy(U_ptr, r_buf, N_buffer);
 
 		// Remember to implement tolerance
@@ -107,6 +109,7 @@ void jacobi_mpi3D_1(int loc_Nx, int loc_Ny, int loc_Nz, int maxit, double thresh
 
 	free(s_buf);
 	free(r_buf);
+	MPI_Request_free(&req);
 	
 	MFLOP = 1e-6*(19.0*I*J*K + 4.0)*iter;
 
