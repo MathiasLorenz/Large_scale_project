@@ -26,3 +26,10 @@ All matlab plot functions should have 2 inputs. Data path and Figure path.
 If matlabmflop.m is used as a template this should be trivially defined
 
 To run the tests use submit.sh and write which tests you want to run.
+
+
+To get interactive node on hpcint with 4 cores
+-bsub -W 4:00 -q hpcint -qpp qrsh -env "TERM" -Is -n 4 "reset; $SHELL -l"
+
+To add GPUs in gpuv100i add this to above
+-gpu "num=2:mode=shared:mps=yes"
