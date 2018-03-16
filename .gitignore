@@ -39,6 +39,7 @@ Icon
 
 # IDE's and other programs
 .vscode
+*.code-workspace
 
 # END OF FILE
 # =============================================================================
