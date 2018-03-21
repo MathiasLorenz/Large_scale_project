@@ -168,21 +168,23 @@ void array_print_3d(double *A, const int Nx, const int Ny, const int Nz,
 }
 
 // Print 3d array sliced in the z-axis with MPI
-// All ranks send their data to rank 0, which prints to a file
+// All ranks send their data to rank 0, which prints to stdout
 void print_jacobi3d_z_sliced(const double *U,
-    const int loc_Nx, const int loc_Ny, const int loc_Nz, const int rank,
-    const char* fmt)
+    const int loc_Nx, const int loc_Ny, const int loc_Nz, const int global_Nz,
+    const int rank, const char* fmt)
 {
     // Initialise
-    if (!A) { fprintf(stderr, "Pointer is NULL\n"); return; }
+    if (!U) { fprintf(stderr, "Pointer is NULL\n"); return; }
     int I = loc_Nz;
     int J = loc_Ny;
 	int K = loc_Nx;
 
+    printf("I'm rank %d, loc_Nx = %d, loc_Ny = %d, loc_Nz = %d, global_Nz = %d\n",
+        rank, K, J, I, global_Nz);
+
     // Get MPI communicator size
     int size;
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
-	MPI_Request req;
 
     // If we are rank 1..end-1 post a non-blocking send of array without the last z-slide
     if ( (rank > 0) && (rank < (size - 1)) )
@@ -190,8 +192,9 @@ void print_jacobi3d_z_sliced(const double *U,
         // Elements to send
         int N_buffer = loc_Nx*loc_Ny*(loc_Nz-1);
 
+        printf("I'm rank %d sending %d numbers.\n", rank, N_buffer);
         // Send to rank 0
-        MPI_Isend(U, N_buffer, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &req);
+        MPI_Send(U, N_buffer, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
     }
 
     // If we are the last rank (size - 1) send all of the array
@@ -201,68 +204,77 @@ void print_jacobi3d_z_sliced(const double *U,
         // Elements to send
         int N_buffer = loc_Nx*loc_Ny*loc_Nz;
 
+        printf("I'm rank %d sending %d numbers.\n", rank, N_buffer);
         // Send to rank 0
-        MPI_Isend(U, N_buffer, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &req);
+        MPI_Send(U, N_buffer, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
     }
+
+    /*
+    int N_buffer;
+    if ( (rank > 0) && (rank < (size - 1)) )
+    {
+        N_buffer = loc_Nx*loc_Ny*(loc_Nz-1);
+    } else if ( rank == (size - 1) )
+        N_buffer = loc_Nx*loc_Ny*loc_Nz;
+    }
+    */
 
     // If we are rank 0, collect all data and print it to a file
     if ( rank == 0 )
     {
-        // Determine global array size
-        global_Nz = size*loc_Nz;
-
-        // Open file
-        const char* fname = "jacobi_3d_print.dat";
-        FILE *fid = fopen(fname, "w");
-
         // Print rank 0
-        fprintf(stdout, "%d %d %d\n",loc_Nx, loc_Ny, global_Nz);
+        fprintf(stdout, "%d %d %d\n", loc_Nx, loc_Ny, global_Nz);
         for(size_t i = 0; i < (I-1); i++) // Do not write the last slice
             for(size_t j = 0; j < J; j++)
                 for(size_t k = 0; k < K; k++)
-                    fprintf(fid, fmt, U[IND_3D(i,j,k,I,J,K)]);
-        
+                    fprintf(stdout, fmt, U[IND_3D(i,j,k,I,J,K)]);
 
         // Allocate buffer (must be able to hold the larger array from last rank)
         int N_buffer = loc_Nx*loc_Ny*loc_Nz;
-        double *r_buf = malloc(N_buffer*sizeof(*r_buf));
+        printf("I'm rank %d allocating %d numbers.\n", rank, N_buffer);
+        double *r_buf = malloc(N_buffer*sizeof(double));
         if (!r_buf) { fprintf(stderr, "Pointer is NULL\n"); return; }
 
+        printf("Hiii\n");
+
         // For rank 1..end-1 receive the data and print it
-        for (int r = 1; r < size - 2; r++)
+        for (int r = 1; r < (size - 1); r++)
         {
             // Do not send last slize (because it is shared with the next process)
             int loc_N_buffer = loc_Nx*loc_Ny*(loc_Nz - 1);
 
+            printf("Hiii2, r = %d\n", r);
+            if (!r_buf) { fprintf(stderr, "Pointer is NULL\n"); return; }
             // Get data with blocking receive
             MPI_Recv(r_buf, loc_N_buffer, MPI_DOUBLE, r, 0,
                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            
+            printf("Hiii3\n");
             
             // Print to file
             for(size_t i = 0; i < (I-1); i++) // Do not write the last slice
                 for(size_t j = 0; j < J; j++)
                     for(size_t k = 0; k < K; k++)
-                        fprintf(fid, fmt, r_buf[IND_3D(i,j,k,I,J,K)]);
+                        fprintf(stdout, fmt, r_buf[IND_3D(i,j,k,I,J,K)]);
 
         }
 
         // For the last rank receive the complete array and print
         MPI_Recv(r_buf, N_buffer, MPI_DOUBLE, size - 1, 0,
             MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
         // Print to file
         for(size_t i = 0; i < I; i++) // Do write the last slice for last process
             for(size_t j = 0; j < J; j++)
                 for(size_t k = 0; k < K; k++)
-                    fprintf(fid, fmt, r_buf[IND_3D(i,j,k,I,J,K)]);
+                    fprintf(stdout, fmt, r_buf[IND_3D(i,j,k,I,J,K)]);
 
-        // Close file and exit
-        fclose(fid);
+        // Free buffer array
         free(r_buf);
     }
 
-    MPI_Request_free(&req);
+    MPI_Barrier(MPI_COMM_WORLD);
     return;
-
 }
 
 

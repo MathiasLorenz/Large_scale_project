@@ -18,8 +18,8 @@ extern double MFLOP;
 // ============================================================================
 // JACOBI 3D SOLVER
 
-void jacobi_mpi3D_2(int loc_Nx, int loc_Ny, int loc_Nz, int maxit, double threshold, int rank,
-    double *U, double *F, double *Unew)
+void jacobi_mpi3D_2(int loc_Nx, int loc_Ny, int loc_Nz, int maxit,
+	double threshold, int rank, double *U, double *F, double *Unew)
 {
 	
 	int size;
@@ -55,8 +55,7 @@ void jacobi_mpi3D_2(int loc_Nx, int loc_Ny, int loc_Nz, int maxit, double thresh
 	*/
 	
 	// Prepare stop criterion
-	int iter = 0; 
-    
+	int iter = 0;
 
 	// ------------------------------------------------------------------------
 	// Run the iterative method
@@ -73,7 +72,7 @@ void jacobi_mpi3D_2(int loc_Nx, int loc_Ny, int loc_Nz, int maxit, double thresh
         swap_array( &U, &Unew );
 
 		// Extract boundaries
-		double *U_ptr_1, *U_ptr_1;
+		double *U_ptr_1, *U_ptr_2;
 		if (rank == 0) {
 			// First rank needs the last updated index
 			U_ptr_1 = &U[IND_3D(loc_Nz - 2, 0, 0, I, J, K)];
@@ -108,7 +107,7 @@ void jacobi_mpi3D_2(int loc_Nx, int loc_Ny, int loc_Nz, int maxit, double thresh
 		MPI_Isend(s_buf1, N_buffer, MPI_DOUBLE, neighbour_1, 0, MPI_COMM_WORLD, &req);
 		MPI_Irecv(r_buf1, N_buffer, MPI_DOUBLE, neighbour_1, 0, MPI_COMM_WORLD, &req);
 
-		if ( rank != 0 && rank != size){
+		if ( rank != 0 && rank != (size - 1) ){
 			MPI_Isend(s_buf2, N_buffer, MPI_DOUBLE, neighbour_2, 0, MPI_COMM_WORLD, &req);
 			MPI_Irecv(r_buf2, N_buffer, MPI_DOUBLE, neighbour_2, 0, MPI_COMM_WORLD, &req);
 		}
@@ -116,7 +115,7 @@ void jacobi_mpi3D_2(int loc_Nx, int loc_Ny, int loc_Nz, int maxit, double thresh
 		// Synchronize and swap
 		MPI_Barrier(MPI_COMM_WORLD);
 		memcpy(U_ptr_1, r_buf1, N_buffer);
-		if (rank != 0 && rank != size)
+		if (rank != 0 && rank != (size - 1) )
 			memcpy(U_ptr_2, r_buf2, N_buffer);
 
 		// Remember to implement tolerance
