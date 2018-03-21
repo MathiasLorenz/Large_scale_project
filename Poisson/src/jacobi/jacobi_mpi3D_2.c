@@ -79,7 +79,7 @@ void jacobi_mpi3D_2(int loc_Nx, int loc_Ny, int loc_Nz, int maxit, double thresh
 			U_ptr_1 = &U[IND_3D(loc_Nz - 2, 0, 0, I, J, K)];
 
 			memcpy(s_buf1, U_ptr_1, N_buffer);
-		} else if (rank == size){
+		} else if (rank == (size - 1)){
 			// Last rank needs the first updated index
 			U_ptr_1 = &U[IND_3D(1, 0, 0, I, J, K)];
 
@@ -96,9 +96,9 @@ void jacobi_mpi3D_2(int loc_Nx, int loc_Ny, int loc_Nz, int maxit, double thresh
 		// Determine source and destination
 		int neighbour_1, neighbour_2;
 		if (rank == 0) {
-			neighbour_1 = rank + 1;
+			neighbour_1 = 1;
 		} else if (rank == size - 1) {
-			neighbour_1 = size - 1;
+			neighbour_1 = size - 2;
 		} else {
 			neighbour_1 = rank - 1; 
 			neighbour_2 = rank + 1;
