@@ -14,12 +14,12 @@
 // ============================================================================
 // JACOBI ITERATION
 
-void jacobi_iteration(int I, int J, int K, int rank,
+void jacobi_iteration(int I, int J, int K, int rank, int global_Nz,
 					double *U, double *F, double *Unew)
 {
 
 	// Setting up steps
-    double hi = 1.0/(I-1.0); // this is half, bad!
+    double hi = 2.0/(global_Nz-1.0);
 	double hj = 2.0/(J-1.0);
 	double hk = 2.0/(K-1.0);
     double stepi = hi*hi;

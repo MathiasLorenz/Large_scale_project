@@ -43,7 +43,7 @@ double * dmalloc_2d_l(int Nx, int Ny)
 {
 	int S = Nx*Ny;
     if (S <= 0) return NULL;
-    double * arr = malloc(S*sizeof(*arr));
+    double *arr = malloc(S*sizeof(double));
     if (arr)
         return arr;
     else
@@ -178,101 +178,86 @@ void print_jacobi3d_z_sliced(const double *U,
     int I = loc_Nz;
     int J = loc_Ny;
 	int K = loc_Nx;
-
-    printf("I'm rank %d, loc_Nx = %d, loc_Ny = %d, loc_Nz = %d, global_Nz = %d\n",
-        rank, K, J, I, global_Nz);
+	int loc_Nz_r; // Used for recieving data from processors 1..size
 
     // Get MPI communicator size
     int size;
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
+	MPI_Request req;
 
-    // If we are rank 1..end-1 post a non-blocking send of array without the last z-slide
-    if ( (rank > 0) && (rank < (size - 1)) )
+	// Handle transfer of data from processors with rank different from 0
+    if ( rank > 0 )
     {
-        // Elements to send
-        int N_buffer = loc_Nx*loc_Ny*(loc_Nz-1);
+		// Number of elements to send
+		int N_buffer = loc_Nx*loc_Ny*loc_Nz;
 
-        printf("I'm rank %d sending %d numbers.\n", rank, N_buffer);
         // Send to rank 0
-        MPI_Send(U, N_buffer, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
-    }
+		MPI_Isend(&loc_Nz, 1, MPI_INT, 0, 1, MPI_COMM_WORLD,&req);
+        MPI_Isend(U, N_buffer, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD,&req);
 
-    // If we are the last rank (size - 1) send all of the array
-    // (including last z-slide)
-    if ( rank == (size - 1) )
-    {
-        // Elements to send
-        int N_buffer = loc_Nx*loc_Ny*loc_Nz;
+    } else // If we are rank 0, collect all data and print it
+	{ 
+		// Print the global dimensions.
+		fprintf(stdout, "%d %d %d\n",loc_Nx,loc_Ny,global_Nz);
 
-        printf("I'm rank %d sending %d numbers.\n", rank, N_buffer);
-        // Send to rank 0
-        MPI_Send(U, N_buffer, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
-    }
-
-    /*
-    int N_buffer;
-    if ( (rank > 0) && (rank < (size - 1)) )
-    {
-        N_buffer = loc_Nx*loc_Ny*(loc_Nz-1);
-    } else if ( rank == (size - 1) )
-        N_buffer = loc_Nx*loc_Ny*loc_Nz;
-    }
-    */
-
-    // If we are rank 0, collect all data and print it to a file
-    if ( rank == 0 )
-    {
-        // Print rank 0
-        fprintf(stdout, "%d %d %d\n", loc_Nx, loc_Ny, global_Nz);
-        for(size_t i = 0; i < (I-1); i++) // Do not write the last slice
+        // Print rank 0 without the last slice.
+        for(size_t i = 0; i < (I-1); i++) {
             for(size_t j = 0; j < J; j++)
                 for(size_t k = 0; k < K; k++)
-                    fprintf(stdout, fmt, U[IND_3D(i,j,k,I,J,K)]);
+                    fprintf(stdout, fmt, U[IND_3D(i,j,k,I,J,K)]); }
 
-        // Allocate buffer (must be able to hold the larger array from last rank)
-        int N_buffer = loc_Nx*loc_Ny*loc_Nz;
-        printf("I'm rank %d allocating %d numbers.\n", rank, N_buffer);
-        double *r_buf = malloc(N_buffer*sizeof(double));
-        if (!r_buf) { fprintf(stderr, "Pointer is NULL\n"); return; }
-
-        printf("Hiii\n");
 
         // For rank 1..end-1 receive the data and print it
         for (int r = 1; r < (size - 1); r++)
         {
-            // Do not send last slize (because it is shared with the next process)
-            int loc_N_buffer = loc_Nx*loc_Ny*(loc_Nz - 1);
+            // Read the local dimensions for rank r.
+			MPI_Recv(&loc_Nz_r, 1, MPI_INT, r, 1,
+                MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+				
+			// Make ready for recieving the data
+            int N_buffer_r = loc_Nx*loc_Ny*loc_Nz_r;
+			double *r_buf = malloc( N_buffer_r*sizeof(double) );
+			if (!r_buf) { fprintf(stderr, "Pointer is NULL\n"); return; }
 
-            printf("Hiii2, r = %d\n", r);
-            if (!r_buf) { fprintf(stderr, "Pointer is NULL\n"); return; }
             // Get data with blocking receive
-            MPI_Recv(r_buf, loc_N_buffer, MPI_DOUBLE, r, 0,
+            MPI_Recv(r_buf, N_buffer_r, MPI_DOUBLE, r, 0,
                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             
-            printf("Hiii3\n");
-            
-            // Print to file
-            for(size_t i = 0; i < (I-1); i++) // Do not write the last slice
+            // Print from slice 1 to the second last
+            for(size_t i = 1; i < (loc_Nz_r-1); i++) {
                 for(size_t j = 0; j < J; j++)
                     for(size_t k = 0; k < K; k++)
-                        fprintf(stdout, fmt, r_buf[IND_3D(i,j,k,I,J,K)]);
+                        fprintf(stdout, fmt, r_buf[IND_3D(i,j,k,loc_Nz_r,J,K)]); }
 
+			// Free the buffer.
+        	free(r_buf);
         }
 
-        // For the last rank receive the complete array and print
-        MPI_Recv(r_buf, N_buffer, MPI_DOUBLE, size - 1, 0,
+		// Get the local size of last rank.
+		MPI_Recv(&loc_Nz_r, 1, MPI_INT, size-1, 1,
             MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-        // Print to file
-        for(size_t i = 0; i < I; i++) // Do write the last slice for last process
+		// Prepare buffer for retrieval.
+        int N_buffer_r = loc_Nx*loc_Ny*loc_Nz_r;
+		double *r_buf = malloc( N_buffer_r*sizeof(double) );
+		if (!r_buf) { fprintf(stderr, "Pointer is NULL\n"); return; }
+
+		// Recieve the data.
+        MPI_Recv(r_buf, N_buffer_r, MPI_DOUBLE, size-1, 0,
+            MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+        // Print from slice 1 to the last.
+        for(size_t i = 1; i < loc_Nz_r; i++)
+		{
             for(size_t j = 0; j < J; j++)
                 for(size_t k = 0; k < K; k++)
-                    fprintf(stdout, fmt, r_buf[IND_3D(i,j,k,I,J,K)]);
-
-        // Free buffer array
-        free(r_buf);
+                    fprintf(stdout, fmt, r_buf[IND_3D(i,j,k,loc_Nz_r+1,J,K)]);
+		}
+		printf("\n");
+		free(r_buf);
     }
 
+	// Make sure all processors are synchronized before exiting.
     MPI_Barrier(MPI_COMM_WORLD);
     return;
 }

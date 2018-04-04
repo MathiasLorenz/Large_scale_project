@@ -72,11 +72,6 @@ int main(int argc, char *argv[])
 		MPI_Finalize();
 		return EXIT_FAILURE;
 	}
-
-	// Ensure our grid is of even size.
-	if (Nx % 2 != 0) Nx++;
-	if (Ny % 2 != 0) Ny++;
-	if (Nz % 2 != 0) Nz++;
 	
 	// ------------------------------------------------------------------------
 	// Handle Enviromental values

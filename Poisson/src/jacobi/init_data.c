@@ -133,7 +133,7 @@ void init_sin_3D(double *U, double *F, double *Unew, int Nx, int Ny, int Nz)
 // SINUSOIDAL PROBLEM IN 3D
 
 void init_sin_mpi3D_1(double *U, double *F, double *Unew, 
-	int loc_Nx, int loc_Ny, int loc_Nz, int rank)
+	int loc_Nx, int loc_Ny, int loc_Nz, int rank, int global_Nz)
 {
 	if (!U || !F || !Unew) { fprintf(stderr, "Pointer is NULL.\n"); return; }
 
@@ -142,7 +142,7 @@ void init_sin_mpi3D_1(double *U, double *F, double *Unew,
 
 	// Setting up steps and variables
 	// Remember hi is incorrect. Make the computation general
-	double hi = 1.0 / (I - 1.0);
+	double hi = 2.0 / (global_Nz - 1.0);
 	double hj = 2.0 / (J - 1.0);
 	double hk = 2.0 / (K - 1.0);
 	double M_PI_sq = M_PI*M_PI;
@@ -151,7 +151,7 @@ void init_sin_mpi3D_1(double *U, double *F, double *Unew,
 	// #pragma omp parallel for private(i, j, x, y) shared(M_PI_sq, F, U, Unew)
 
 	// This is based on an offset where z is split once.
-	double z = -1.0 + hi*(loc_Nz - 1.0)*rank;
+	double z = -1.0 + hi*(loc_Nz - 2.0)*rank;
 	for (int i = 0; i < I; i++)
 	{
 		double y = -1.0;

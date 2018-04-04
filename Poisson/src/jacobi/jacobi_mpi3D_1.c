@@ -18,7 +18,7 @@ extern double MFLOP;
 // ============================================================================
 // JACOBI 3D SOLVER
 
-void jacobi_mpi3D_1(int loc_Nx, int loc_Ny, int loc_Nz, int maxit, double threshold, int rank,
+void jacobi_mpi3D_1(int loc_Nx, int loc_Ny, int loc_Nz, int maxit, double threshold, int rank, int global_Nz,
     double *U, double *F, double *Unew)
 {
 	
@@ -65,7 +65,7 @@ void jacobi_mpi3D_1(int loc_Nx, int loc_Ny, int loc_Nz, int maxit, double thresh
 		*/
 
 		// Compute the iteration of the jacobi method
-        jacobi_iteration(I, J, K, rank, U, F, Unew);
+        jacobi_iteration(I, J, K, rank, global_Nz, U, F, Unew);
 
         // Swap the arrays and check for convergence
         swap_array( &U, &Unew );
@@ -81,15 +81,13 @@ void jacobi_mpi3D_1(int loc_Nx, int loc_Ny, int loc_Nz, int maxit, double thresh
 		}
 
 		// Determine source and destination
-		int src, dst;
-		if (rank == 0) {src = 0; dst = 1;}
-		else {src = 1; dst = 0;}
+		int dst;
+		if (rank == 0) 	{ dst = 1;}
+		else 			{ dst = 0;}
 
-		// Send boundaries
+		// Send and recieve boundaries
 		MPI_Isend(s_buf, N_buffer, MPI_DOUBLE, dst, 0, MPI_COMM_WORLD, &req);
-
-		// Receive boundaries
-		MPI_Irecv(s_buf, N_buffer, MPI_DOUBLE, src, 0, MPI_COMM_WORLD, &req);
+		MPI_Irecv(r_buf, N_buffer, MPI_DOUBLE, dst, 0, MPI_COMM_WORLD, &req);
 
 		// Synchronize and swap
 		MPI_Barrier(MPI_COMM_WORLD);

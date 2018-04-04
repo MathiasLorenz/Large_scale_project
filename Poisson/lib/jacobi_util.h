@@ -2,6 +2,6 @@
 #define __JACOBI_UTIL__
 
 
-void jacobi_iteration(int I, int J, int K, int rank, 
+void jacobi_iteration(int I, int J, int K, int rank, int global_Nz,
 	double *U, double *F, double *Unew);
 #endif // __JACOBI_UTIL__

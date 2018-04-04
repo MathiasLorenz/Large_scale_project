@@ -19,7 +19,7 @@ extern double MFLOP;
 // JACOBI 3D SOLVER
 
 void jacobi_mpi3D_2(int loc_Nx, int loc_Ny, int loc_Nz, int maxit,
-	double threshold, int rank, double *U, double *F, double *Unew)
+	double threshold, int rank, int global_Nz, double *U, double *F, double *Unew)
 {
 	
 	int size;
@@ -66,30 +66,36 @@ void jacobi_mpi3D_2(int loc_Nx, int loc_Ny, int loc_Nz, int maxit,
 		*/
 
 		// Compute the iteration of the jacobi method
-        jacobi_iteration(I, J, K, rank, U, F, Unew);
+        jacobi_iteration(I, J, K, rank, global_Nz, U, F, Unew);
 
         // Swap the arrays and check for convergence
         swap_array( &U, &Unew );
 
 		// Extract boundaries
-		double *U_ptr_1, *U_ptr_2;
+		double *U_ptr_s1, *U_ptr_s2;
+		double *U_ptr_r1, *U_ptr_r2;
 		if (rank == 0) {
 			// First rank needs the last updated index
-			U_ptr_1 = &U[IND_3D(loc_Nz - 2, 0, 0, I, J, K)];
+			U_ptr_s1 = &U[IND_3D(loc_Nz - 2, 0, 0, I, J, K)];
+			U_ptr_r1 = &U[IND_3D(loc_Nz - 1, 0, 0, I, J, K)];
 
-			memcpy(s_buf1, U_ptr_1, N_buffer);
+			memcpy(s_buf1, U_ptr_s1, N_buffer*sizeof(double));
 		} else if (rank == (size - 1)){
 			// Last rank needs the first updated index
-			U_ptr_1 = &U[IND_3D(1, 0, 0, I, J, K)];
+			U_ptr_s1 = &U[IND_3D(1, 0, 0, I, J, K)];
+			U_ptr_r1 = &U[IND_3D(0, 0, 0, I, J, K)];
 
-			memcpy(s_buf1, U_ptr_1, N_buffer);
+			memcpy(s_buf1, U_ptr_s1, N_buffer*sizeof(double));
 		} else {
 			// All other ranks needs the first and last updated index
-			U_ptr_1 = &U[IND_3D(1, 0, 0, I, J, K)];
-			U_ptr_2 = &U[IND_3D(loc_Nz - 2, 0, 0, I, J, K)];
+			U_ptr_s1 = &U[IND_3D(1, 0, 0, I, J, K)];
+			U_ptr_s2 = &U[IND_3D(loc_Nz - 2, 0, 0, I, J, K)];
 
-			memcpy(s_buf1, U_ptr_1, N_buffer);
-			memcpy(s_buf2, U_ptr_2, N_buffer);
+			U_ptr_r1 = &U[IND_3D(0, 0, 0, I, J, K)];
+			U_ptr_r2 = &U[IND_3D(loc_Nz - 1, 0, 0, I, J, K)];
+
+			memcpy(s_buf1, U_ptr_s1, N_buffer*sizeof(double));
+			memcpy(s_buf2, U_ptr_s2, N_buffer*sizeof(double));
 		}
 
 		// Determine source and destination
@@ -103,6 +109,8 @@ void jacobi_mpi3D_2(int loc_Nx, int loc_Ny, int loc_Nz, int maxit,
 			neighbour_2 = rank + 1;
 		}
 
+		MPI_Barrier(MPI_COMM_WORLD);
+
 		// Send boundaries and receive boundaries
 		MPI_Isend(s_buf1, N_buffer, MPI_DOUBLE, neighbour_1, 0, MPI_COMM_WORLD, &req);
 		MPI_Irecv(r_buf1, N_buffer, MPI_DOUBLE, neighbour_1, 0, MPI_COMM_WORLD, &req);
@@ -114,10 +122,20 @@ void jacobi_mpi3D_2(int loc_Nx, int loc_Ny, int loc_Nz, int maxit,
 
 		// Synchronize and swap
 		MPI_Barrier(MPI_COMM_WORLD);
-		memcpy(U_ptr_1, r_buf1, N_buffer);
-		if (rank != 0 && rank != (size - 1) )
-			memcpy(U_ptr_2, r_buf2, N_buffer);
+		memcpy(U_ptr_r1, r_buf1, N_buffer*sizeof(double));
+		if (rank > 0 && rank < (size - 1) )
+			memcpy(U_ptr_r2, r_buf2, N_buffer*sizeof(double));
 
+/*
+	if (rank == 0){
+		printf("=========================================================\n");
+		printf("N_buffer: %d\n",N_buffer);
+		printf("U\n");
+		//array_print_3d_slice(U,loc_Nx,loc_Ny,loc_Nz,0,"%.3f ");
+		array_print_2d(U_ptr_s1,loc_Nx,loc_Ny,"%.3f ");
+		printf("=========================================================\n");
+	}
+*/
 		// Remember to implement tolerance
 		/*
         norm_diff = sqrt(norm_diff);

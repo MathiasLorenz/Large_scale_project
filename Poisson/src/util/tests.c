@@ -144,7 +144,7 @@ void test_jacobi_mpi3D_1(int Nx, int Ny, int Nz)
 
 	// Initialise the boundary values
 	if (strcmp("sin", getenv("PROBLEM_NAME")) == 0)
-		init_sin_mpi3D_1(U, F, Unew, loc_Nx, loc_Ny, loc_Nz, rank);
+		init_sin_mpi3D_1(U, F, Unew, loc_Nx, loc_Ny, loc_Nz, rank, Nz);
 	// else if (strcmp("rad",getenv("PROBLEM_NAME")) == 0)
 	//    init_rad_2D(U, F, Unew, Nx, Ny);
 	else {
@@ -158,7 +158,7 @@ void test_jacobi_mpi3D_1(int Nx, int Ny, int Nz)
 
 	// Main computation and time
 	double t = omp_get_wtime();
-	jacobi_mpi3D_1(loc_Nx, loc_Ny, loc_Nz, maxiter, tol, rank, U, F, Unew);
+	jacobi_mpi3D_1(loc_Nx, loc_Ny, loc_Nz, maxiter, tol, rank, Nz, U, F, Unew);
 
 	// Save global variables
 	TIME_SPENT = omp_get_wtime() - t;
@@ -207,7 +207,7 @@ void test_jacobi_mpi3D_2(int Nx, int Ny, int Nz)
 
 	// Initialise the boundary values
 	if (strcmp("sin", getenv("PROBLEM_NAME")) == 0)
-		init_sin_mpi3D_1(U, F, Unew, loc_Nx, loc_Ny, loc_Nz, rank);
+		init_sin_mpi3D_1(U, F, Unew, loc_Nx, loc_Ny, loc_Nz, rank, Nz);
 	// else if (strcmp("rad",getenv("PROBLEM_NAME")) == 0)
 	//    init_rad_2D(U, F, Unew, Nx, Ny);
 	else {
@@ -221,7 +221,8 @@ void test_jacobi_mpi3D_2(int Nx, int Ny, int Nz)
 
 	// Main computation and time
 	double t = omp_get_wtime();
-	jacobi_mpi3D_2(loc_Nx, loc_Ny, loc_Nz, maxiter, tol, rank, U, F, Unew);
+	jacobi_mpi3D_2(loc_Nx, loc_Ny, loc_Nz, maxiter, tol, rank, Nz, U, F, Unew);
+
 
 	// Save global variables
 	TIME_SPENT = omp_get_wtime() - t;
@@ -233,7 +234,7 @@ void test_jacobi_mpi3D_2(int Nx, int Ny, int Nz)
 	else if (strcmp("full_matrix", getenv("OUTPUT_INFO")) == 0)
 		array_print_3d(U, Nx, Ny, Nz, "%10g ");
 	else if (strcmp("full_matrix_mpi_z_slice", getenv("OUTPUT_INFO")) == 0)
-		print_jacobi3d_z_sliced(U, loc_Nx, loc_Ny, loc_Nz, Nz, rank, "%10g ");
+		print_jacobi3d_z_sliced(U, loc_Nx, loc_Ny, loc_Nz, Nz, rank, "%3g ");
 		
 
 	// Free the arrays created for the computation

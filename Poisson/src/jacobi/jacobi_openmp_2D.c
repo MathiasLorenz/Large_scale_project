@@ -22,7 +22,7 @@ void jacobi_openmp_2D(int Nx, int Ny, int maxit, double threshold,
 
 	// ------------------------------------------------------------------------
 	// Preparation
-
+ 
     if(!U || !F || !Unew) {fprintf(stderr,"Pointer is NULL.\n"); return;}
 
 	// Rewritting to C style coordinates

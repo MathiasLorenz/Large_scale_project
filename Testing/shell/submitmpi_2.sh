@@ -3,7 +3,7 @@
 # --  General options 
 
 # Naming of the job and queue name
-#BSUB -J mpi_1
+#BSUB -J mpi_2
 #BSUB -q hpc
 
 # Specify
@@ -13,7 +13,7 @@
 # -- Technical options
 
 # Ask for n cores placed on R host.
-#BSUB -n 2
+#BSUB -n 3
 #BSUB -R "span[hosts=1]"
 
 # Memory specifications. Amount we need and when to kill the
@@ -86,7 +86,7 @@ Program()
 	# Define the actual test part of the script 
 
 	# Run the program
-	mpiexec -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_1 10 10 10
+	mpiexec -n $LSB_DJOB_NUMPROC -q ./jacobiSolver.bin mpi3d_2 10 10 10
 
 	# -------------------------------------------------------------------------
 	mv -t $DPATH *.dat 
