@@ -130,7 +130,8 @@ void test_jacobi_mpi3D_1(int Nx, int Ny, int Nz)
 	int loc_Nx, loc_Ny, loc_Nz;
 	loc_Nx = Nx;
 	loc_Ny = Ny;
-	loc_Nz = Nz/2 + 1;
+	if 		(rank == 0) 					{loc_Nz = floor(Nz/2.0) + 1; }
+	else 									{loc_Nz = Nz - floor(Nz/2.0) + 1;}
 
 	// Allocation
 	double *U = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
@@ -169,6 +170,8 @@ void test_jacobi_mpi3D_1(int Nx, int Ny, int Nz)
 		array_print_3d_slice(U, Nx, Ny, Nz, Nz / 2, "%10g ");
 	else if (strcmp("full_matrix", getenv("OUTPUT_INFO")) == 0)
 		array_print_3d(U, Nx, Ny, Nz, "%10g ");
+	else if (strcmp("full_matrix_mpi_z_slice", getenv("OUTPUT_INFO")) == 0)
+		print_jacobi3d_z_sliced(U, loc_Nx, loc_Ny, loc_Nz, Nz, rank, "%10g ");
 
 	// Free the arrays created for the computation
 	free(U);
@@ -234,7 +237,7 @@ void test_jacobi_mpi3D_2(int Nx, int Ny, int Nz)
 	else if (strcmp("full_matrix", getenv("OUTPUT_INFO")) == 0)
 		array_print_3d(U, Nx, Ny, Nz, "%10g ");
 	else if (strcmp("full_matrix_mpi_z_slice", getenv("OUTPUT_INFO")) == 0)
-		print_jacobi3d_z_sliced(U, loc_Nx, loc_Ny, loc_Nz, Nz, rank, "%3g ");
+		print_jacobi3d_z_sliced(U, loc_Nx, loc_Ny, loc_Nz, Nz, rank, "%10g ");
 		
 
 	// Free the arrays created for the computation

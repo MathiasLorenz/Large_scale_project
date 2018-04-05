@@ -257,7 +257,7 @@ void print_jacobi3d_z_sliced(const double *U,
 		free(r_buf);
     }
 
-	// Make sure all processors are synchronized before exiting.
+	// Make sure all processors are synchronized before exiting.e
     MPI_Barrier(MPI_COMM_WORLD);
     return;
 }

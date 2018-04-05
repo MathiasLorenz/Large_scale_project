@@ -71,13 +71,15 @@ void jacobi_mpi3D_1(int loc_Nx, int loc_Ny, int loc_Nz, int maxit, double thresh
         swap_array( &U, &Unew );
 
 		// Extract boundaries
-		double *U_ptr;
+		double *U_ptr_s, *U_ptr_r;
 		if (rank == 0) {
-			U_ptr = &U[IND_3D(loc_Nz - 2, 0, 0, I, J, K)];
-			memcpy(s_buf, U_ptr, N_buffer);
+			U_ptr_s = &U[IND_3D(loc_Nz - 2, 0, 0, I, J, K)];
+			U_ptr_r = &U[IND_3D(loc_Nz - 1, 0, 0, I, J, K)];
+			memcpy(s_buf, U_ptr_s, N_buffer*sizeof(double));
 		} else { // rank == 1 now
-			U_ptr = &U[IND_3D(1, 0, 0, I, J, K)];
-			memcpy(s_buf, U_ptr, N_buffer);
+			U_ptr_s = &U[IND_3D(1, 0, 0, I, J, K)];
+			U_ptr_r = &U[IND_3D(0, 0, 0, I, J, K)];
+			memcpy(s_buf, U_ptr_s, N_buffer*sizeof(double));
 		}
 
 		// Determine source and destination
@@ -91,7 +93,7 @@ void jacobi_mpi3D_1(int loc_Nx, int loc_Ny, int loc_Nz, int maxit, double thresh
 
 		// Synchronize and swap
 		MPI_Barrier(MPI_COMM_WORLD);
-		memcpy(U_ptr, r_buf, N_buffer);
+		memcpy(U_ptr_r, r_buf, N_buffer*sizeof(double));
 
 		// Remember to implement tolerance
 		/*

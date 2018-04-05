@@ -126,16 +126,6 @@ void jacobi_mpi3D_2(int loc_Nx, int loc_Ny, int loc_Nz, int maxit,
 		if (rank > 0 && rank < (size - 1) )
 			memcpy(U_ptr_r2, r_buf2, N_buffer*sizeof(double));
 
-/*
-	if (rank == 0){
-		printf("=========================================================\n");
-		printf("N_buffer: %d\n",N_buffer);
-		printf("U\n");
-		//array_print_3d_slice(U,loc_Nx,loc_Ny,loc_Nz,0,"%.3f ");
-		array_print_2d(U_ptr_s1,loc_Nx,loc_Ny,"%.3f ");
-		printf("=========================================================\n");
-	}
-*/
 		// Remember to implement tolerance
 		/*
         norm_diff = sqrt(norm_diff);

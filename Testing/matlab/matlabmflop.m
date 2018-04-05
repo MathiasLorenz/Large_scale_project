@@ -1,5 +1,5 @@
 function matlabmflop(datPath,figPath)
-
+addpath(genpath('./'));
 FuncName = {'omp2d','omp3d'};
 PlotTitle= {'Performance OpenMP Jacobi in 2D',...
 			'Performance OpenMP Jacobi in 3D'};
