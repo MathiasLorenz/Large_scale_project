@@ -9,6 +9,7 @@
 #include <mpi.h>
 
 #include "tests.h"
+#include "jacobi_util.h"
 #include "tests_cuda.h"
 
 double MFLOP=0.0;
@@ -72,6 +73,11 @@ int main(int argc, char *argv[])
 		MPI_Finalize();
 		return EXIT_FAILURE;
 	}
+
+	// ------------------------------------------------------------------------
+	// Setup information structure
+	Information information;
+	write_information(&information,Nx,Ny,Nz,rank,size);
 	
 	// ------------------------------------------------------------------------
 	// Handle Enviromental values
@@ -102,15 +108,15 @@ int main(int argc, char *argv[])
 		test_jacobi_mpi3D_1(Nx, Ny, Nz);
 
 	else if (strcmp(T, "mpi3d_2") == 0)
-		test_jacobi_mpi3D_2(Nx, Ny, Nz);
+		test_jacobi_mpi3D_2(&information);
 
 	else if (strcmp(T, "cuda") == 0)
 		test_cuda(Nx, Ny, Nz);
 
 	else {
 		fprintf(stderr, 
-			"\nInvalid test name\n"
-			"   Accepts: omp2d, omp3d, mpi3d_1 or cuda\n\n");
+			"\nInvalid test name: %s\n"
+			"   Accepts: omp2d, omp3d, mpi3d_1 or cuda\n\n",T);
 		
 		MPI_Finalize();
 		return EXIT_FAILURE;
@@ -125,6 +131,7 @@ int main(int argc, char *argv[])
 		printf("Walltime: %10.4f\n", TIME_SPENT);
 	}
 
+	free_information_arrays(&information);
     MPI_Finalize();
 	return EXIT_SUCCESS;
 }

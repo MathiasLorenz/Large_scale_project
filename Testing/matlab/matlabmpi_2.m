@@ -1,9 +1,9 @@
-function matlabmpi_1(datPath,figPath)
+function matlabmpi_2(datPath,figPath)
 if nargin == 0
     datPath = '../data/';
 end
 addpath(genpath('./'));
-DataName = 'mpi_1-';
+DataName = 'mpi_2-';
 DataFiles = finddata(datPath,DataName);
 
 %% Performance plots
@@ -35,7 +35,7 @@ err = max(abs(my_sol(:) - true_sol(:)));
 
 
 %% Plot the solution with true solution
-CreateFigure([name,'_slize_0.8']);
+CreateFigure([name,'_slize']);
 subplot(121);
 surf(my_sol(:, :, round(0.80*Nz)));
 title('Approximated solution at 80% slize')
@@ -48,7 +48,7 @@ axis([0,Nx,0,Ny,-1,1])
 %% Plot the error
 
 err_mat = abs(my_sol - true_sol);
-CreateFigure([name,'_error_0.8']);
+CreateFigure([name,'_error']);
 surf(err_mat(:, :, round(0.8*Nz)))
 title('Element error for 80% slice')
 xlabel('x')
@@ -64,7 +64,7 @@ err_vec = zeros(sz);
 for i = 1:sz
     err_vec(i) = max(max(abs(my_sol(:, :, i) - true_sol(:, :, i))));
 end
-CreateFigure([name,'maximal_error']);
+CreateFigure([name,'_maximal_error']);
 plot(err_vec);
 xlabel('z slize')
 ylabel('Max error')

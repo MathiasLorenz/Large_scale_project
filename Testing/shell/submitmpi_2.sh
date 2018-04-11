@@ -13,8 +13,8 @@
 # -- Technical options
 
 # Ask for n cores placed on R host.
-#BSUB -n 3
-#BSUB -R "span[hosts=1]"
+#BSUB -n 10
+#BSUB -R "span[ptile=1]"
 
 # Memory specifications. Amount we need and when to kill the
 # program using too much memory.
@@ -47,6 +47,9 @@ echo LSB_OUTDIR: $LSB_OUTDIR
 echo LSB_DJOB_NUMPROC: $LSB_DJOB_NUMPROC
 echo LSB_MAX_NUM_PROCESSORS: $LSB_MAX_NUM_PROCESSORS
 echo LSB_HOSTS: $LSB_HOSTS
+echo LSB_MCPU_HOSTS: $LSB_MCPU_HOSTS
+echo LSB_QUEUE: $LSB_QUEUE
+
 echo --------------------------------------------------------------------------
 
 # End of LSB info
@@ -86,7 +89,14 @@ Program()
 	# Define the actual test part of the script 
 
 	# Run the program
-	mpiexec -n $LSB_DJOB_NUMPROC -q ./jacobiSolver.bin mpi3d_2 10 10 10
+	N="10 50"
+	for n in $N 
+	do
+		OUTPUT_INFO=full_matrix_mpi_z_slice \
+			mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_2 $n \
+			>> $LSB_JOBNAME-$n.dat
+
+	done
 
 	# -------------------------------------------------------------------------
 	mv -t $DPATH *.dat 

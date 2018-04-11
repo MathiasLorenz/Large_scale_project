@@ -9,12 +9,14 @@
 #include <mpi.h>
 
 #include "tests.h"
-#include "matrix_routines.h"
 #include "poisson.h"
 #include "init_data.h"
+#include "jacobi_util.h"
+#include "matrix_routines.h"
 
 extern double MEMORY;
 extern double TIME_SPENT;
+
 
 // ============================================================================
 // JACOBI 2D TEST
@@ -182,21 +184,16 @@ void test_jacobi_mpi3D_1(int Nx, int Ny, int Nz)
 // ============================================================================
 // 3D MPI TEST 2
 
-void test_jacobi_mpi3D_2(int Nx, int Ny, int Nz)
+void test_jacobi_mpi3D_2(Information *information)
 {
-	// MPI initialize
-	MPI_Comm world = MPI_COMM_WORLD;
-	int size, rank;
-	MPI_Comm_size(world, &size);
-	MPI_Comm_rank(world, &rank);
-
-	// Define the local sizes. Based on MPI sizes, split on z.
-	int loc_Nx, loc_Ny, loc_Nz;
-	loc_Nx = Nx;
-	loc_Ny = Ny;
-	if 		(rank == 0) 					{loc_Nz = floor(Nz/size) + 1; }
-	else if (0 < rank && rank < (size-1)) 	{loc_Nz = floor(Nz/size) + 2; }
-	else 									{loc_Nz = Nz - (size - 1)*floor(Nz/size) + 1;}
+	// Read the information structure
+	int rank = information->rank;
+	int Nx = information->glo_Nx;
+	int Ny = information->glo_Ny;
+	int Nz = information->glo_Nz;
+	int loc_Nx = information->loc_Nx[rank];
+	int loc_Ny = information->loc_Ny[rank];
+	int loc_Nz = information->loc_Nz[rank];
 
 	// Allocation
 	double *U = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
@@ -210,7 +207,7 @@ void test_jacobi_mpi3D_2(int Nx, int Ny, int Nz)
 
 	// Initialise the boundary values
 	if (strcmp("sin", getenv("PROBLEM_NAME")) == 0)
-		init_sin_mpi3D_1(U, F, Unew, loc_Nx, loc_Ny, loc_Nz, rank, Nz);
+		init_sin_mpi3D_2(U, F, Unew, information);
 	// else if (strcmp("rad",getenv("PROBLEM_NAME")) == 0)
 	//    init_rad_2D(U, F, Unew, Nx, Ny);
 	else {

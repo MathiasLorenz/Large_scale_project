@@ -12,6 +12,39 @@
 #include "jacobi_util.h"
 
 // ============================================================================
+// FUNCTIONS TO HANDLE THE INFORMATION STRUCTURE
+
+void write_information(Information *information, int Nx, int Ny, int Nz, int rank, int size)
+{
+	information->size = size;
+	information->rank = rank;
+	information->glo_Nx = Nx;
+	information->glo_Ny = Ny;
+	information->glo_Nz = Nz;
+	information->loc_Nx = malloc(size*sizeof(int));
+	information->loc_Ny = malloc(size*sizeof(int));
+	information->loc_Nz = malloc(size*sizeof(int));
+	int loc_Nz;
+	for (int r = 0; r < size; r++)
+	{
+		if 		(r == 0) 					{loc_Nz = floor(Nz/size) + 1; }
+		else if (0 < r && r < (size-1)) 	{loc_Nz = floor(Nz/size) + 2; }
+		else 								{loc_Nz = Nz - (size - 1)*floor(Nz/size) + 1;}
+
+		information->loc_Nx[r] = Nx;
+		information->loc_Ny[r] = Ny;
+		information->loc_Nz[r] = loc_Nz;
+	}
+}
+
+void free_information_arrays(Information *information)
+{
+	free(information->loc_Nx);
+	free(information->loc_Ny);
+	free(information->loc_Nz);
+}
+
+// ============================================================================
 // JACOBI ITERATION
 
 void jacobi_iteration(int I, int J, int K, int rank, int global_Nz,

@@ -5,7 +5,10 @@
 #include <math.h>
 
 #include "matrix_routines.h"
+#include "jacobi_util.h"
 #include "init_data.h"
+#include "tests.h"
+
 
 // ============================================================================
 // SINUSOIDAL PROBLEM IN 2D
@@ -152,6 +155,66 @@ void init_sin_mpi3D_1(double *U, double *F, double *Unew,
 
 	// This is based on an offset where z is split once.
 	double z = -1.0 + hi*(loc_Nz - 2.0)*rank;
+	for (int i = 0; i < I; i++)
+	{
+		double y = -1.0;
+		for (int j = 0; j < J; j++)
+		{
+			double x = -1.0;
+			for (int k = 0; k < K; k++)
+			{
+				F[IND_3D(i, j, k, I, J, K)] = 3.0 * M_PI_sq * 
+					sin(M_PI * x) * sin(M_PI * y) * sin(M_PI * z);
+				x += hk;
+			}
+			y += hj;
+		}
+		z += hi;
+	}
+
+	// Set U and Unew to 0
+	for (int i = 0; i < I*J*K; i++)
+	{
+		U[i] = 0.0;
+		Unew[i] = 0.0;
+	}
+}
+
+// ============================================================================
+// SINUSOIDAL PROBLEM IN 3D
+
+void init_sin_mpi3D_2(double *U, double *F, double *Unew, Information *information)
+{
+	if (!U || !F || !Unew) { fprintf(stderr, "Pointer is NULL.\n"); return; }
+
+	// Read information
+	int size = information->size;
+	int rank = information->rank;
+	int Nx = information->glo_Nx;
+	int Ny = information->glo_Ny;
+	int Nz = information->glo_Nz;
+	int loc_Nx = information->loc_Nx[rank];
+	int loc_Ny = information->loc_Ny[rank];
+	int loc_Nz = information->loc_Nz[rank];
+
+	// Rewritting to C style coordinates
+	int K = loc_Nx, J = loc_Ny, I = loc_Nz;
+
+	// Setting up steps and variables
+	// Remember hi is incorrect. Make the computation general
+	double hi = 2.0 / (Nz - 1.0);
+	double hj = 2.0 / (J - 1.0);
+	double hk = 2.0 / (K - 1.0);
+	double M_PI_sq = M_PI*M_PI;
+	
+	// Initialising arrays
+	// #pragma omp parallel for private(i, j, x, y) shared(M_PI_sq, F, U, Unew)
+
+	// This is based on an offset where z is split once.
+	double z = -1.0;
+	for (int r = 1; r <= rank; r++)
+		z += hi*(information->loc_Nz[r-1]-2.0);
+
 	for (int i = 0; i < I; i++)
 	{
 		double y = -1.0;
