@@ -120,8 +120,11 @@ void test_jacobi_3D(int Nx, int Ny, int Nz)
 // ============================================================================
 // 3D MPI TEST 1
 
-void test_jacobi_mpi3D_1(int Nx, int Ny, int Nz)
+void test_jacobi_mpi3D_1(Information *information)
 {
+	int Nx = information->global_Nx;
+	int Ny = information->global_Ny;
+	int Nz = information->global_Nz;
 	// MPI initialize
 	MPI_Comm world = MPI_COMM_WORLD;
 	int size, rank;
@@ -173,7 +176,7 @@ void test_jacobi_mpi3D_1(int Nx, int Ny, int Nz)
 	else if (strcmp("full_matrix", getenv("OUTPUT_INFO")) == 0)
 		array_print_3d(U, Nx, Ny, Nz, "%10g ");
 	else if (strcmp("full_matrix_mpi_z_slice", getenv("OUTPUT_INFO")) == 0)
-		print_jacobi3d_z_sliced(U, loc_Nx, loc_Ny, loc_Nz, Nz, rank, "%10g ");
+		print_jacobi3d_z_sliced(U, information, "%10g ");
 
 	// Free the arrays created for the computation
 	free(U);
@@ -188,9 +191,9 @@ void test_jacobi_mpi3D_2(Information *information)
 {
 	// Read the information structure
 	int rank = information->rank;
-	int Nx = information->glo_Nx;
-	int Ny = information->glo_Ny;
-	int Nz = information->glo_Nz;
+	int Nx = information->global_Nx;
+	int Ny = information->global_Ny;
+	int Nz = information->global_Nz;
 	int loc_Nx = information->loc_Nx[rank];
 	int loc_Ny = information->loc_Ny[rank];
 	int loc_Nz = information->loc_Nz[rank];
@@ -234,9 +237,9 @@ void test_jacobi_mpi3D_2(Information *information)
 	else if (strcmp("full_matrix", getenv("OUTPUT_INFO")) == 0)
 		array_print_3d(U, Nx, Ny, Nz, "%10g ");
 	else if (strcmp("full_matrix_mpi_z_slice", getenv("OUTPUT_INFO")) == 0)
-		print_jacobi3d_z_sliced(U, loc_Nx, loc_Ny, loc_Nz, Nz, rank, "%10g ");
+		print_jacobi3d_z_sliced(U, information, "%10g ");
 		
-
+	MPI_Barrier(MPI_COMM_WORLD);
 	// Free the arrays created for the computation
 	free(U);
 	free(F);

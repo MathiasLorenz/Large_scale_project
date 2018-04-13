@@ -187,12 +187,9 @@ void init_sin_mpi3D_2(double *U, double *F, double *Unew, Information *informati
 {
 	if (!U || !F || !Unew) { fprintf(stderr, "Pointer is NULL.\n"); return; }
 
-	// Read information
-	int size = information->size;
+	// Read relevant information
 	int rank = information->rank;
-	int Nx = information->glo_Nx;
-	int Ny = information->glo_Ny;
-	int Nz = information->glo_Nz;
+	int Nz = information->global_Nz;
 	int loc_Nx = information->loc_Nx[rank];
 	int loc_Ny = information->loc_Ny[rank];
 	int loc_Nz = information->loc_Nz[rank];

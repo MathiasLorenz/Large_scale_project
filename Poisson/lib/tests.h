@@ -8,7 +8,7 @@
 void test_jacobi_2D(int Nx, int Ny);
 void test_jacobi_3D(int Nx, int Ny, int Nz);
 
-void test_jacobi_mpi3D_1(int Nx, int Ny, int Nz);
+void test_jacobi_mpi3D_1(Information *information);
 void test_jacobi_mpi3D_2(Information *information);
 
 #endif // __TESTS_H

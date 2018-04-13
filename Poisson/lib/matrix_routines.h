@@ -1,6 +1,8 @@
 #ifndef __MY_MATRIX_ROUTINES__
 #define __MY_MATRIX_ROUTINES__
 
+#include "jacobi_util.h"
+
 // Macros:
 // Min
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
@@ -27,9 +29,8 @@ void array_print_3d(double *A, const int Nx, const int Ny, const int Nz,
 	const char* fmt);
 void array_print_3d_slice(double *A, const int Nx, const int Ny, const int Nz,
 	const int slice, const char* fmt);
-void print_jacobi3d_z_sliced(const double *U,
-    const int loc_Nx, const int loc_Ny, const int loc_Nz, const int global_Nz,
-    const int rank, const char* fmt);
+void print_jacobi3d_z_sliced(const double *U, Information *information, 
+	const char* fmt);
 
 // Matrix-Matrix opperations
 void matmult_nat(int m, int n, int k, double **A, double **B, double **C);

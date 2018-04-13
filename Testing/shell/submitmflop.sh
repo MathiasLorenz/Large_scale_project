@@ -31,18 +31,17 @@
 #BSUB -B		# Send notification at start
 #BSUB -N 		# Send notification at completion
 
-LSB_PROC=$(echo | grep -c '' $LSB_NODEFILE)
-# LSB_NODE=$(($LSB_PROC/$LSB_NUM_PPN))
+LSB_NODES=$(echo | grep -c '' $LSB_HOSTS)
+LSB_PROC=$(($LSB_MAX_NUM_PROCESSORS/$LSB_NODES))
 echo --------------------------------------------------------------------------
-echo 'Job: '$LSB_JOBNAME', is running on '$LSB_NODE' nodes'
+echo 'Job: '$LSB_JOBNAME', is running on '$LSB_NODES' nodes'
 echo --------------------------------------------------------------------------
 echo LSB: job identifier is $LSB_JOBID
-echo LSB: executing queue is $LSB_QUEUE
+echo LSB: execution queue is $LSB_QUEUE
 echo LSB: number of nodes is $LSB_NODE
-echo LSB: number of processors per node is $LSB_NUM_PPN
-echo LSB: total number of processors is $LSB_PROC
-echo LSB: working directory is $LSB_O_WORKDIR
-echo LSB: current home directory is $LSB_O_HOME
+echo LSB: number of processors per node is $LSB_PROC
+echo LSB: total number of processors is $LSB_MAX_NUM_PROCESSORS
+echo LSB: working directory is $LSB_OUTDIR
 echo --------------------------------------------------------------------------
 
 # End of LSB info

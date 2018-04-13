@@ -9,10 +9,10 @@ SPATH=Testing/shell
 
 # Make sure the excecutable is up to date
 module load cuda/9.1 mpi/2.1.0-gcc-6.3.0
-cd $EPATH; make; cd ../
+cd $EPATH; make realclean; make; cd ../
 
 # Define files needed by the execution in all tests
-FILE="$EPATH/jacobiSolver.bin"
+EXEC="$EPATH/jacobiSolver.bin"
 
 # Define which shell script will be executed
 if [ -z "$1" ] ; then
@@ -35,7 +35,7 @@ do
 	mkdir -p $LPATH/$test
 
 	# Clean and copy all files needed
-	cp -ft $LPATH/$test $SPATH/submit$test.sh $FILE
+	cp -ft $LPATH/$test $SPATH/submit$test.sh $EXEC
 
 	# Move to the directory submit the code and return
 	cd $LPATH/$test

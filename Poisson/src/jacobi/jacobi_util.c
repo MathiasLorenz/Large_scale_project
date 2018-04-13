@@ -18,9 +18,9 @@ void write_information(Information *information, int Nx, int Ny, int Nz, int ran
 {
 	information->size = size;
 	information->rank = rank;
-	information->glo_Nx = Nx;
-	information->glo_Ny = Ny;
-	information->glo_Nz = Nz;
+	information->global_Nx = Nx;
+	information->global_Ny = Ny;
+	information->global_Nz = Nz;
 	information->loc_Nx = malloc(size*sizeof(int));
 	information->loc_Ny = malloc(size*sizeof(int));
 	information->loc_Nz = malloc(size*sizeof(int));

@@ -137,7 +137,7 @@ void jacobi_mpi3D_2(int loc_Nx, int loc_Ny, int loc_Nz, int maxit,
 
 	// ------------------------------------------------------------------------
 	// Finalise
-
+	MPI_Barrier(MPI_COMM_WORLD);
 	free(s_buf1); free(s_buf2);
 	free(r_buf1); free(r_buf2);
 	MPI_Request_free(&req);

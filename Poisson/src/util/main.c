@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 		test_jacobi_3D(Nx, Ny, Nz);
 
 	else if (strcmp(T, "mpi3d_1") == 0)
-		test_jacobi_mpi3D_1(Nx, Ny, Nz);
+		test_jacobi_mpi3D_1(&information);
 
 	else if (strcmp(T, "mpi3d_2") == 0)
 		test_jacobi_mpi3D_2(&information);
@@ -130,7 +130,8 @@ int main(int argc, char *argv[])
 		printf("Mflops: %10.4f ", MFLOP/TIME_SPENT );
 		printf("Walltime: %10.4f\n", TIME_SPENT);
 	}
-
+	
+	MPI_Barrier(MPI_COMM_WORLD);
 	free_information_arrays(&information);
     MPI_Finalize();
 	return EXIT_SUCCESS;

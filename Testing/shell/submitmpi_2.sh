@@ -13,16 +13,16 @@
 # -- Technical options
 
 # Ask for n cores placed on R host.
-#BSUB -n 10
+#BSUB -n 13
 #BSUB -R "span[ptile=1]"
 
 # Memory specifications. Amount we need and when to kill the
 # program using too much memory.
-#BSUB -R "rusage[mem=2GB]"
-#BSUB -M 3GB
+#BSUB -R "rusage[mem=10GB]"
+#BSUB -M 10GB
 
 # Time specifications (hh:mm)
-#BSUB -W 00:10
+#BSUB -W 01:00
 
 # -- Notification options
 
@@ -31,25 +31,17 @@
 #BSUB -B		# Send notification at start
 #BSUB -N 		# Send notification at completion
 
-LSB_PROC=$(echo | grep -c '' $LSB_NODEFILE)
-# LSB_NODE=$(($LSB_PROC/$LSB_NUM_PPN))
+# LSB_NODES=$(echo | grep -c '' $LSB_HOSTS)
+# LSB_PROC=$(($LSB_MAX_NUM_PROCESSORS/$LSB_NODES))
 echo --------------------------------------------------------------------------
-echo 'Job: '$LSB_JOBNAME', is running on '$LSB_NODE' nodes'
+echo 'Job: '$LSB_JOBNAME', is running on '$LSB_NODES' nodes'
 echo --------------------------------------------------------------------------
-#echo LSB: job identifier is $LSB_JOBID
-#echo LSB: executing queue is $LSB_QUEUE
-#echo LSB: number of nodes is $LSB_NODE
-#echo LSB: number of processors per node is $LSB_NUM_PPN
-#echo LSB: total number of processors is $LSB_PROC
-#echo LSB: working directory is $LSB_O_WORKDIR
-#echo LSB: current home directory is $LSB_OUTDIR
-echo LSB_OUTDIR: $LSB_OUTDIR
-echo LSB_DJOB_NUMPROC: $LSB_DJOB_NUMPROC
-echo LSB_MAX_NUM_PROCESSORS: $LSB_MAX_NUM_PROCESSORS
-echo LSB_HOSTS: $LSB_HOSTS
-echo LSB_MCPU_HOSTS: $LSB_MCPU_HOSTS
-echo LSB_QUEUE: $LSB_QUEUE
-
+echo LSB: job identifier is $LSB_JOBID
+echo LSB: execution queue is $LSB_QUEUE
+echo LSB: number of nodes is $LSB_NODE
+echo LSB: number of processors per node is $LSB_PROC
+echo LSB: total number of processors is $LSB_MAX_NUM_PROCESSORS
+echo LSB: working directory is $LSB_OUTDIR
 echo --------------------------------------------------------------------------
 
 # End of LSB info
@@ -89,7 +81,7 @@ Program()
 	# Define the actual test part of the script 
 
 	# Run the program
-	N="10 50"
+	N="50 200"
 	for n in $N 
 	do
 		OUTPUT_INFO=full_matrix_mpi_z_slice \

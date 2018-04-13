@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <mpi.h>
+#include "jacobi_util.h"
 #include "matrix_routines.h"
 
 // ============================================================================
@@ -169,20 +170,22 @@ void array_print_3d(double *A, const int Nx, const int Ny, const int Nz,
 
 // Print 3d array sliced in the z-axis with MPI
 // All ranks send their data to rank 0, which prints to stdout
-void print_jacobi3d_z_sliced(const double *U,
-    const int loc_Nx, const int loc_Ny, const int loc_Nz, const int global_Nz,
-    const int rank, const char* fmt)
+void print_jacobi3d_z_sliced(const double *U, Information *information, const char* fmt)
 {
+	int rank = information->rank;
+	int size = information->size;
+	int loc_Nx = information->loc_Nx[rank];
+	int loc_Ny = information->loc_Ny[rank];
+	int loc_Nz = information->loc_Nz[rank];
+	int global_Nz = information->global_Nz;
+
     // Initialise
     if (!U) { fprintf(stderr, "Pointer is NULL\n"); return; }
     int I = loc_Nz;
     int J = loc_Ny;
 	int K = loc_Nx;
-	int loc_Nz_r; // Used for recieving data from processors 1..size
 
     // Get MPI communicator size
-    int size;
-	MPI_Comm_size(MPI_COMM_WORLD, &size);
 	MPI_Request req;
 
 	// Handle transfer of data from processors with rank different from 0
@@ -192,7 +195,6 @@ void print_jacobi3d_z_sliced(const double *U,
 		int N_buffer = loc_Nx*loc_Ny*loc_Nz;
 
         // Send to rank 0
-		MPI_Isend(&loc_Nz, 1, MPI_INT, 0, 1, MPI_COMM_WORLD,&req);
         MPI_Isend(U, N_buffer, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD,&req);
 
     } else // If we are rank 0, collect all data and print it
@@ -211,9 +213,8 @@ void print_jacobi3d_z_sliced(const double *U,
         for (int r = 1; r < (size - 1); r++)
         {
             // Read the local dimensions for rank r.
-			MPI_Recv(&loc_Nz_r, 1, MPI_INT, r, 1,
-                MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-				
+			int loc_Nz_r = information->loc_Nz[r];
+
 			// Make ready for recieving the data
             int N_buffer_r = loc_Nx*loc_Ny*loc_Nz_r;
 			double *r_buf = malloc( N_buffer_r*sizeof(double) );
@@ -224,18 +225,17 @@ void print_jacobi3d_z_sliced(const double *U,
                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             
             // Print from slice 1 to the second last
-            for(size_t i = 1; i < (loc_Nz_r-1); i++) {
+            for(size_t i = 1; i < (loc_Nz_r-1); i++)
                 for(size_t j = 0; j < J; j++)
                     for(size_t k = 0; k < K; k++)
-                        fprintf(stdout, fmt, r_buf[IND_3D(i,j,k,loc_Nz_r,J,K)]); }
+                        {fprintf(stdout, fmt, r_buf[IND_3D(i,j,k,loc_Nz_r,J,K)]);}
 
 			// Free the buffer.
         	free(r_buf);
         }
 
 		// Get the local size of last rank.
-		MPI_Recv(&loc_Nz_r, 1, MPI_INT, size-1, 1,
-            MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		int loc_Nz_r = information->loc_Nz[size-1];
 
 		// Prepare buffer for retrieval.
         int N_buffer_r = loc_Nx*loc_Ny*loc_Nz_r;
@@ -254,10 +254,11 @@ void print_jacobi3d_z_sliced(const double *U,
                     fprintf(stdout, fmt, r_buf[IND_3D(i,j,k,loc_Nz_r+1,J,K)]);
 		}
 		printf("\n");
+
 		free(r_buf);
     }
 
-	// Make sure all processors are synchronized before exiting.e
+	// Make sure all processors are synchronized before exiting.
     MPI_Barrier(MPI_COMM_WORLD);
     return;
 }

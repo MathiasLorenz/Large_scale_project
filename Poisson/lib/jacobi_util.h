@@ -6,9 +6,9 @@ typedef struct Information {
 	int rank;
 	int size;
 
-	int glo_Nx;
-	int glo_Ny;
-	int glo_Nz;
+	int global_Nx;
+	int global_Ny;
+	int global_Nz;
 
 	int *loc_Nx;
 	int *loc_Ny;
