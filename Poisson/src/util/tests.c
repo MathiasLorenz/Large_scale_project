@@ -232,7 +232,6 @@ void test_jacobi_mpi3D_2(Information *information)
 	double t = omp_get_wtime();
 	jacobi_mpi3D_2(loc_Nx, loc_Ny, loc_Nz, maxiter, tol, rank, Nz, U, F, Unew);
 
-
 	// Save global variables
 	TIME_SPENT = omp_get_wtime() - t;
 	MEMORY = 3.0 * Nx * Ny * Nz * 8.0 / 1024.0;
@@ -249,7 +248,7 @@ void test_jacobi_mpi3D_2(Information *information)
 		// Compute absolute error
 		double loc_abs_err = 0.0, glo_abs_err = 0.0;
 		check_true_solution(A, U, &loc_abs_err, information);
-		printf("I'm rank %d, local error: %f\n", rank, loc_abs_err);
+		//printf("I'm rank %d, local error: %f\n", rank, loc_abs_err);
 		MPI_Barrier(MPI_COMM_WORLD);
 		free(A);
 
@@ -257,7 +256,7 @@ void test_jacobi_mpi3D_2(Information *information)
 			0, MPI_COMM_WORLD);
 
 		if (rank == 0)
-			printf("Error: %.4f\n", glo_abs_err);
+			printf("Grid: %d %d %d, error: %.10f\n", Nx, Ny, Nz, glo_abs_err);
 	}
 		
 

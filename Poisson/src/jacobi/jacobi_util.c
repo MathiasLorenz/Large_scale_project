@@ -71,8 +71,8 @@ void generate_true_solution(double *A, Information *information)
 
 	// This is based on an offset where z is split once.
 	double z = -1.0;
-	for (int r = 1; r <= rank; r++)
-		z += hi*(information->loc_Nz[r-1]-2.0);
+	for (int r = 0; r < rank; r++)
+		z += hi*(information->loc_Nz[r]-2.0);
 
 	for (int i = 0; i < I; i++)
 	{
@@ -108,15 +108,13 @@ void check_true_solution(double *A, double *U, double *abs_err,
 	// Rewritting to C style coordinates
 	int K = loc_Nx, J = loc_Ny, I = loc_Nz;
 
-	// Consider not including boundary?
-	for (int i = 0; i < I; ++i)
-		for (int j = 0; j < J; ++j)
-			for (int k = 0; k < K; ++k) {
+	// Loop over all interior points
+	for (int i = 1; i < (I - 1); ++i)
+		for (int j = 1; j < (J - 1); ++j)
+			for (int k = 1; k < (K - 1); ++k) {
 				int ijk = IND_3D(i, j, k, I, J, K);
-				double u = U[ijk];
-				double a = A[ijk];
-				double err = fabs(u - a);
-				if (err > *abs_err) *abs_err = err;
+				double err = fabs(U[ijk] - A[ijk]);
+				if (err > *abs_err) *abs_err = err; // Save largest element
 			}
 }
 
