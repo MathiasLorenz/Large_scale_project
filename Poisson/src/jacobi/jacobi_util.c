@@ -14,7 +14,8 @@
 // ============================================================================
 // FUNCTIONS TO HANDLE THE INFORMATION STRUCTURE
 
-void write_information(Information *information, int Nx, int Ny, int Nz, int rank, int size)
+void write_information(Information *information, int Nx, int Ny, int Nz,
+	int rank, int size)
 {
 	information->size = size;
 	information->rank = rank;
@@ -27,9 +28,9 @@ void write_information(Information *information, int Nx, int Ny, int Nz, int ran
 	int loc_Nz;
 	for (int r = 0; r < size; r++)
 	{
-		if 		(r == 0) 					{loc_Nz = floor(Nz/size) + 1; }
-		else if (0 < r && r < (size-1)) 	{loc_Nz = floor(Nz/size) + 2; }
-		else 								{loc_Nz = Nz - (size - 1)*floor(Nz/size) + 1;}
+		if 		(r == 0) 				{loc_Nz = floor(Nz/size) + 1; }
+		else if (0 < r && r < (size-1)) {loc_Nz = floor(Nz/size) + 2; }
+		else 							{loc_Nz = Nz - (size - 1)*floor(Nz/size) + 1;}
 
 		information->loc_Nx[r] = Nx;
 		information->loc_Ny[r] = Ny;
@@ -45,12 +46,86 @@ void free_information_arrays(Information *information)
 }
 
 // ============================================================================
+// FUNCTION FOR GENERATING AND CHECKING SOLUTION AGAINST TRUE SOLUTION
+void generate_true_solution(double *A, Information *information)
+{
+	if (!A || !information) { fprintf(stderr, "Pointer is NULL.\n"); return; }
+
+	// Read information
+	int size = information->size;
+	int rank = information->rank;
+	int Nx = information->glo_Nx;
+	int Ny = information->glo_Ny;
+	int Nz = information->glo_Nz;
+	int loc_Nx = information->loc_Nx[rank];
+	int loc_Ny = information->loc_Ny[rank];
+	int loc_Nz = information->loc_Nz[rank];
+
+	// Rewritting to C style coordinates
+	int K = loc_Nx, J = loc_Ny, I = loc_Nz;
+
+	// Setting up steps and variables 
+	double hi = 2.0 / (Nz - 1.0); // Global Nz is intended
+	double hj = 2.0 / (J - 1.0);
+	double hk = 2.0 / (K - 1.0);
+
+	// This is based on an offset where z is split once.
+	double z = -1.0;
+	for (int r = 0; r < rank; r++)
+		z += hi*(information->loc_Nz[r]-2.0);
+
+	for (int i = 0; i < I; i++)
+	{
+		double y = -1.0;
+		for (int j = 0; j < J; j++)
+		{
+			double x = -1.0;
+			for (int k = 0; k < K; k++)
+			{
+				A[IND_3D(i, j, k, I, J, K)] =
+					sin(M_PI * x) * sin(M_PI * y) * sin(M_PI * z);
+				x += hk;
+			}
+			y += hj;
+		}
+		z += hi;
+	}
+}
+
+// Compute absolute error
+void check_true_solution(double *A, double *U, double *abs_err,
+	Information *information)
+{
+	if (!A || !U || !abs_err || !information)
+	{ fprintf(stderr, "Pointer is NULL.\n"); return; }
+	*abs_err = 0.0;
+
+	// Extract problem dimensions
+	int rank = information->rank;
+	int loc_Nx = information->loc_Nx[rank];
+	int loc_Ny = information->loc_Ny[rank];
+	int loc_Nz = information->loc_Nz[rank];
+	// Rewritting to C style coordinates
+	int K = loc_Nx, J = loc_Ny, I = loc_Nz;
+
+	// Loop over all interior points
+	for (int i = 1; i < (I - 1); ++i)
+		for (int j = 1; j < (J - 1); ++j)
+			for (int k = 1; k < (K - 1); ++k) {
+				int ijk = IND_3D(i, j, k, I, J, K);
+				double err = fabs(U[ijk] - A[ijk]);
+				if (err > *abs_err) *abs_err = err; // Save largest element
+			}
+}
+
+
+
+// ============================================================================
 // JACOBI ITERATION
 
 void jacobi_iteration(int I, int J, int K, int rank, int global_Nz,
 					double *U, double *F, double *Unew)
 {
-
 	// Setting up steps
     double hi = 2.0/(global_Nz-1.0);
 	double hj = 2.0/(J-1.0);

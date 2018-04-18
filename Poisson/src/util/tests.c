@@ -199,13 +199,22 @@ void test_jacobi_mpi3D_2(Information *information)
 	int loc_Nz = information->loc_Nz[rank];
 
 	// Allocation
-	double *U = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
-	double *F = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
-	double *Unew = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
+	double *U, *F, *Unew, *A;
+	U = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
+	F = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
+	Unew = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
 	if (!U || !F || !Unew) {
 		// Consider fail cases if one thread ies and the others do not
-		fprintf(stderr, "Error in malloc, Pointer is NULL.\n");
+		fprintf(stderr, "Error in malloc, pointer is NULL.\n");
 		return;
+	}
+	
+	// Array for true solution if requested
+	if (strcmp("error", getenv("OUTPUT_INFO")) == 0)
+	{
+		A = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
+		if (!A) { fprintf(stderr, "Error in malloc, pointer is NULL.\n"); return; }
+		generate_true_solution(A, information);
 	}
 
 	// Initialise the boundary values
@@ -226,7 +235,6 @@ void test_jacobi_mpi3D_2(Information *information)
 	double t = omp_get_wtime();
 	jacobi_mpi3D_2(loc_Nx, loc_Ny, loc_Nz, maxiter, tol, rank, Nz, U, F, Unew);
 
-
 	// Save global variables
 	TIME_SPENT = omp_get_wtime() - t;
 	MEMORY = 3.0 * Nx * Ny * Nz * 8.0 / 1024.0;
@@ -238,10 +246,26 @@ void test_jacobi_mpi3D_2(Information *information)
 		array_print_3d(U, Nx, Ny, Nz, "%10g ");
 	else if (strcmp("full_matrix_mpi_z_slice", getenv("OUTPUT_INFO")) == 0)
 		print_jacobi3d_z_sliced(U, information, "%10g ");
+	else if (strcmp("error", getenv("OUTPUT_INFO")) == 0)
+	{
+		// Compute absolute error
+		double loc_abs_err = 0.0, glo_abs_err = 0.0;
+		check_true_solution(A, U, &loc_abs_err, information);
+		//printf("I'm rank %d, local error: %f\n", rank, loc_abs_err);
+		MPI_Barrier(MPI_COMM_WORLD);
+		free(A);
+
+		MPI_Reduce(&loc_abs_err, &glo_abs_err, 1, MPI_DOUBLE, MPI_MAX,
+			0, MPI_COMM_WORLD);
+
+		if (rank == 0)
+			printf("Grid: %d %d %d, error: %.10f\n", Nx, Ny, Nz, glo_abs_err);
+	}
 		
 	MPI_Barrier(MPI_COMM_WORLD);
 	// Free the arrays created for the computation
 	free(U);
 	free(F);
 	free(Unew);
+	
 }

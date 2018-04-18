@@ -40,6 +40,9 @@ void swap_double(double *A, double *B);
 void swap_array (double **A, double **B);
 void swap_matrix(double ***A, double ***B);
 
+// Max and min functions
+int max_array_int(int *array, int size);
+
 // Norms and other measures
 double frobenius_difference(double **A, double **B, int N_total);
 double frobenius_norm(double **A, int N_total);

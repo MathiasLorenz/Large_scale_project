@@ -84,9 +84,8 @@ Program()
 	N="50 200"
 	for n in $N 
 	do
-		OUTPUT_INFO=full_matrix_mpi_z_slice \
-			mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_2 $n \
-			>> $LSB_JOBNAME-$n.dat
+		# OUTPUT_INFO=full_matrix_mpi_z_slice
+		mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_2 $n >> $LSB_JOBNAME-$n.dat
 
 	done
 

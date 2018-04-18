@@ -198,7 +198,6 @@ void init_sin_mpi3D_2(double *U, double *F, double *Unew, Information *informati
 	int K = loc_Nx, J = loc_Ny, I = loc_Nz;
 
 	// Setting up steps and variables
-	// Remember hi is incorrect. Make the computation general
 	double hi = 2.0 / (Nz - 1.0);
 	double hj = 2.0 / (J - 1.0);
 	double hk = 2.0 / (K - 1.0);

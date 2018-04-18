@@ -188,6 +188,12 @@ void print_jacobi3d_z_sliced(const double *U, Information *information, const ch
     // Get MPI communicator size
 	MPI_Request req;
 
+
+	// Make ready for recieving the data
+	int N_buffer_r = loc_Nx*loc_Ny*max_array_int(information->loc_Nz, size);
+	double *r_buf = malloc( N_buffer_r*sizeof(double) );
+	if (!r_buf) { fprintf(stderr, "Pointer is NULL\n"); return; }
+
 	// Handle transfer of data from processors with rank different from 0
     if ( rank > 0 )
     {
@@ -215,32 +221,20 @@ void print_jacobi3d_z_sliced(const double *U, Information *information, const ch
             // Read the local dimensions for rank r.
 			int loc_Nz_r = information->loc_Nz[r];
 
-			// Make ready for recieving the data
-            int N_buffer_r = loc_Nx*loc_Ny*loc_Nz_r;
-			double *r_buf = malloc( N_buffer_r*sizeof(double) );
-			if (!r_buf) { fprintf(stderr, "Pointer is NULL\n"); return; }
-
             // Get data with blocking receive
             MPI_Recv(r_buf, N_buffer_r, MPI_DOUBLE, r, 0,
                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             
             // Print from slice 1 to the second last
-            for(size_t i = 1; i < (loc_Nz_r-1); i++)
+            for(size_t i = 1; i < (loc_Nz_r-1); i++) {
                 for(size_t j = 0; j < J; j++)
                     for(size_t k = 0; k < K; k++)
-                        {fprintf(stdout, fmt, r_buf[IND_3D(i,j,k,loc_Nz_r,J,K)]);}
+                        fprintf(stdout, fmt, r_buf[IND_3D(i,j,k,loc_Nz_r,J,K)]);}
 
-			// Free the buffer.
-        	free(r_buf);
         }
 
 		// Get the local size of last rank.
 		int loc_Nz_r = information->loc_Nz[size-1];
-
-		// Prepare buffer for retrieval.
-        int N_buffer_r = loc_Nx*loc_Ny*loc_Nz_r;
-		double *r_buf = malloc( N_buffer_r*sizeof(double) );
-		if (!r_buf) { fprintf(stderr, "Pointer is NULL\n"); return; }
 
 		// Recieve the data.
         MPI_Recv(r_buf, N_buffer_r, MPI_DOUBLE, size-1, 0,
@@ -254,12 +248,13 @@ void print_jacobi3d_z_sliced(const double *U, Information *information, const ch
                     fprintf(stdout, fmt, r_buf[IND_3D(i,j,k,loc_Nz_r+1,J,K)]);
 		}
 		printf("\n");
-
-		free(r_buf);
     }
 
 	// Make sure all processors are synchronized before exiting.
     MPI_Barrier(MPI_COMM_WORLD);
+
+	// Free the buffer.
+	free(r_buf);
     return;
 }
 
@@ -320,6 +315,17 @@ void swap_double(double *A, double *B)
     temp = *A;
     *A = *B;
     *B = temp;
+}
+
+// ============================================================================
+// MAX AND MIN FUNCTIONS
+
+int max_array_int(int *array, int size)
+{
+	int old = array[0];
+	for (int i = 1; i < size; i++)
+		if (old < array[i]) old = array[i];
+	return old;
 }
 
 // ============================================================================
