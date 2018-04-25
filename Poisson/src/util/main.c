@@ -20,7 +20,6 @@ double TIME_SPENT=0.0;
 // MAIN FUNCTION
 int main(int argc, char *argv[])
 {
-	
 	// ------------------------------------------------------------------------
 	// Handle input and help.
 	if (argc == 1){
@@ -76,6 +75,7 @@ int main(int argc, char *argv[])
 
 	// ------------------------------------------------------------------------
 	// Setup information structure
+	
 	Information information;
 	write_information(&information,Nx,Ny,Nz,rank,size);
 	
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 	
 	// ------------------------------------------------------------------------
 	// Make the call for the desired test
-	
+
 	if (strcmp(T, "omp2d") == 0)
 		test_jacobi_2D(Nx, Ny);
 
@@ -117,11 +117,9 @@ int main(int argc, char *argv[])
 		fprintf(stderr, 
 			"\nInvalid test name: %s\n"
 			"   Accepts: omp2d, omp3d, mpi3d_1 or cuda\n\n",T);
-		
 		MPI_Finalize();
 		return EXIT_FAILURE;
 	}
-
 	// ------------------------------------------------------------------------
 	// Handling the printing of statistics and data.
 	

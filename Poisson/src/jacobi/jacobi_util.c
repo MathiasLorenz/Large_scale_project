@@ -54,9 +54,9 @@ void generate_true_solution(double *A, Information *information)
 	// Read information
 	int size = information->size;
 	int rank = information->rank;
-	int Nx = information->glo_Nx;
-	int Ny = information->glo_Ny;
-	int Nz = information->glo_Nz;
+	int Nx = information->global_Nx;
+	int Ny = information->global_Ny;
+	int Nz = information->global_Nz;
 	int loc_Nx = information->loc_Nx[rank];
 	int loc_Ny = information->loc_Ny[rank];
 	int loc_Nz = information->loc_Nz[rank];

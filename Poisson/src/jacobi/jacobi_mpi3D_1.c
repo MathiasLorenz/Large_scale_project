@@ -109,7 +109,6 @@ void jacobi_mpi3D_1(int loc_Nx, int loc_Ny, int loc_Nz, int maxit, double thresh
 
 	free(s_buf);
 	free(r_buf);
-	MPI_Request_free(&req);
 	
 	MFLOP = 1e-6*(19.0*I*J*K + 4.0)*iter;
 

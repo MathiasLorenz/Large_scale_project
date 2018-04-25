@@ -97,7 +97,7 @@ void jacobi_mpi3D_2(int loc_Nx, int loc_Ny, int loc_Nz, int maxit,
 			memcpy(s_buf1, U_ptr_s1, N_buffer*sizeof(double));
 			memcpy(s_buf2, U_ptr_s2, N_buffer*sizeof(double));
 		}
-
+		
 		// Determine source and destination
 		int neighbour_1, neighbour_2;
 		if (rank == 0) {
@@ -113,12 +113,15 @@ void jacobi_mpi3D_2(int loc_Nx, int loc_Ny, int loc_Nz, int maxit,
 
 		// Send boundaries and receive boundaries
 		MPI_Isend(s_buf1, N_buffer, MPI_DOUBLE, neighbour_1, 0, MPI_COMM_WORLD, &req);
-		MPI_Irecv(r_buf1, N_buffer, MPI_DOUBLE, neighbour_1, 0, MPI_COMM_WORLD, &req);
-
-		if ( rank != 0 && rank != (size - 1) ){
+		if ( rank != 0 && rank != (size - 1) )
 			MPI_Isend(s_buf2, N_buffer, MPI_DOUBLE, neighbour_2, 0, MPI_COMM_WORLD, &req);
-			MPI_Irecv(r_buf2, N_buffer, MPI_DOUBLE, neighbour_2, 0, MPI_COMM_WORLD, &req);
-		}
+
+
+		MPI_Recv(r_buf1, N_buffer, MPI_DOUBLE, neighbour_1, 0, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+		if ( rank != 0 && rank != (size - 1) )
+			MPI_Recv(r_buf2, N_buffer, MPI_DOUBLE, neighbour_2, 0, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+
+		//MPI_Wait(req,MPI_STATUS_IGNORE);
 
 		// Synchronize and swap
 		MPI_Barrier(MPI_COMM_WORLD);
@@ -140,7 +143,6 @@ void jacobi_mpi3D_2(int loc_Nx, int loc_Ny, int loc_Nz, int maxit,
 	MPI_Barrier(MPI_COMM_WORLD);
 	free(s_buf1); free(s_buf2);
 	free(r_buf1); free(r_buf2);
-	MPI_Request_free(&req);
 	
 	MFLOP = 1e-6*(19.0*I*J*K + 4.0)*iter;
 

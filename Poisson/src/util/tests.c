@@ -199,7 +199,7 @@ void test_jacobi_mpi3D_2(Information *information)
 	int loc_Nz = information->loc_Nz[rank];
 
 	// Allocation
-	double *U, *F, *Unew, *A;
+	double *U, *F, *Unew, *A = NULL;
 	U = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
 	F = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
 	Unew = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
@@ -230,11 +230,13 @@ void test_jacobi_mpi3D_2(Information *information)
 	// Handle the environmental variables
 	int maxiter = atoi(getenv("MAX_ITER"));
 	double tol = atof(getenv("TOLERANCE"));
-
+	
 	// Main computation and time
 	double t = omp_get_wtime();
+	
 	jacobi_mpi3D_2(loc_Nx, loc_Ny, loc_Nz, maxiter, tol, rank, Nz, U, F, Unew);
 
+	MPI_Barrier(MPI_COMM_WORLD);	
 	// Save global variables
 	TIME_SPENT = omp_get_wtime() - t;
 	MEMORY = 3.0 * Nx * Ny * Nz * 8.0 / 1024.0;
@@ -253,19 +255,13 @@ void test_jacobi_mpi3D_2(Information *information)
 		check_true_solution(A, U, &loc_abs_err, information);
 		//printf("I'm rank %d, local error: %f\n", rank, loc_abs_err);
 		MPI_Barrier(MPI_COMM_WORLD);
-		free(A);
-
 		MPI_Reduce(&loc_abs_err, &glo_abs_err, 1, MPI_DOUBLE, MPI_MAX,
 			0, MPI_COMM_WORLD);
-
 		if (rank == 0)
 			printf("Grid: %d %d %d, error: %.10f\n", Nx, Ny, Nz, glo_abs_err);
 	}
-		
+
 	MPI_Barrier(MPI_COMM_WORLD);
 	// Free the arrays created for the computation
-	free(U);
-	free(F);
-	free(Unew);
-	
+	free(U); free(F); free(A); free(Unew);		
 }
