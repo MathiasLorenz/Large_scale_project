@@ -2,13 +2,16 @@ README for jacobiSolver
 -------------------------------------------------------------------------------
 The Jacobi solver have been implemented into the jacobiSolver executable.
 
-Default call to the function will be
+Default call to the function will be as bellow, please be adviced mpiexec or 
+mpirun must be used for all mpi versions.
 	> ./jacobiSolver METHOD NX NY NZ
 
 where:
-	METHOD	: jseq, jomp, gsseq.
+	METHOD	: omp2d, omp3d, mpi3d_1, mpi3d_2.
 		omp2d	: Is the Jacobi method using OpenMP for a 2D problem.
 		omp3d	: Is the Jacobi method using OpenMP for a 3D problem.
+		mpi3d_1	: Is the Jacobi method using MPI with a single split along Z.
+		mpi3d_2	: Is the Jacobi method using MPI with multiple split along Z.
 		cuda	: A dummy test used to debug the nvcc compiler.
 
 	NX NY NZ : Integer numbers.
@@ -32,36 +35,43 @@ OpenMP: All default OpenMP controls such as setting number of threads
 		are present and jomp have been implemented such that the schedule
 		can be set during Runtime using OMP_SCHEDULE.
 
-Extra environmental variables: ( > ./jacobiSolver ... ENV_NAME=value )
-	PROBLEM_NAME: [default: rad]
+Extra environmental variables: ( > ENV_NAME=value ./jacobiSolver ...)
+	PROBLEM_NAME: [default: sin]
 		Defines the problem that should to be solved.
 
 		sin : 	The well defined example where the Boundary condition and
 				source is defined as:
-					f(x,y) = 2*pi^2*sin(pi*x)*sin(pi*y)
-					u(x,y) = 0, for (x,y) on boundary.
-		rad :	The radiator problem with Boundary and source is defined as:
-					f(x,y) = 200 for x in [ 0, 1/3 ] and y in [ -2/3, -1/3 ]
-					f(x,y) = 0 otherwise.
-					u(x,1) = 20, u(x ,-1) =  0,
-					u(1,y) = 20, u(-1, y) = 20.
+				(2D version):
+					f(x,y)   = 2*pi^2*sin(pi*x)*sin(pi*y)
+					u(x,y)   = 0, for (x,y) on boundary.
+				(3D version):
+					f(x,y,z) = 3*pi^2*sin(pi*x)*sin(pi*y)*sin(pi*z)
+					u(x,y,z) = 0, for (x,y,z) on boundary.
 
 	OUTPUT_INFO: [default: timing]
 		Defines the output type.
 
-		matrix: Defines that the result matrix should be printed as the
-				output.
-		timing: Defines that the output should be the timing info. Giving
-				the memory footprint (kB), Mflops and Walltime for the main loop.
+		matrix_slize: 
+			Defines that the result matrix should be printed as the
+			output. This will print the slize at the center of z for,
+			3 dimensional problems.
+		matrix_full:
+			Defines that the result matrix should be printed as the
+			output for the full 3 dimensional problem. The format of 
+			the output will be:
+				Nx Ny Nz
+				U(0,0,0) U(0,0,1) ....
+		error:
+			Prints an output of the dimension sizes in terms of number of
+			gridpoints in each and the maximal absolute difference between 
+			the analytical solution and the solution calculated in the program.
+		timing:
+			Defines that the output should be the timing info. Giving
+			the memory footprint (kB), Mflops and Walltime for the main loop.
 
 	TOLERANCE:	[default: 1e-6]
-		Sets the tolerance for the methods. The methods will terminate 
-		depending on the method:
-
-		omp2d :	When the change norm_F(U_new - U_old) falls below the
-				tolerance. The norm used is Frobenius norm.
-		omp3d : When the change norm_F(U_new - U_old) falls below the
-				tolerance. The norm used is Frobenius norm.
+		Sets the tolerance for the program to terminate when the maximal 
+		absolute error falls under this number.
 
 	USE_TOLERANCE: [default: on] 
 		Defines if the tolerance should be used or not.

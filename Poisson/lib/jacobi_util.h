@@ -3,14 +3,17 @@
 
 
 typedef struct Information {
+	// MPI information of size and local rank.
 	int rank;
 	int size;
 
+	// Global dimensions of the problem
 	int global_Nx;
 	int global_Ny;
 	int global_Nz;
 
-	int *loc_Nx;
+	// Arrays holding the local number of gridpoints for each rank.
+	int *loc_Nx;	
 	int *loc_Ny;
 	int *loc_Nz;
 } Information;
