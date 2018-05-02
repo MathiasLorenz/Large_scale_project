@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
 		test_jacobi_mpi3D_2(&information);
 
 	else if (strcmp(T, "cuda") == 0)
-		test_cuda(Nx, Ny, Nz);
+		test_cuda_1(&information);
 
 	else {
 		fprintf(stderr, 

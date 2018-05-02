@@ -3,10 +3,15 @@
 
 #include "jacobi_util.h"
 
+// Makes sure that linker can understand the code
+#ifdef __cplusplus
+extern "C"{
+#endif //__cplusplus
+
 // Macros:
 // Min
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
+//#define MIN(a, b) ((a) < (b) ? (a) : (b))
+//#define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 // Macro for accessing 2D array A with linear indexing
 // This is called with first the Matrix then the array and finally the element.
@@ -46,5 +51,11 @@ int max_array_int(int *array, int size);
 // Norms and other measures
 double frobenius_difference(double **A, double **B, int N_total);
 double frobenius_norm(double **A, int N_total);
+
+
+
+#ifdef __cplusplus
+} // Extern "C"
+#endif //__cplusplus
 
 #endif // __MY_MATRIX_ROUTINES__

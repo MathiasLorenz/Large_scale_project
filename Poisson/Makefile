@@ -41,8 +41,8 @@ EXEC    = jacobiSolver.bin
 # - Source files
 UOBJS   = main tests init_data matrix_routines
 JOBJS   = jacobi_openmp_2D jacobi_openmp_3D jacobi_mpi3D_1 jacobi_mpi3D_2 jacobi_util
-CUUOBJS = 
-CUJOBJS = tests_cuda cuda_routines
+CUUOBJS = tests_cuda cuda_routines
+CUJOBJS = jacobi_cuda_1 jacobi_util_cuda
 
 # - Directories
 SRCDIR	= src
@@ -99,10 +99,24 @@ depend :
 # -- Compile dependecies
 # DO NOT DELETE
 
-src/jacobi/jacobi_openmp_2D.o: lib/matrix_routines.h lib/poisson.h
-src/jacobi/jacobi_openmp_3D.o: lib/matrix_routines.h lib/poisson.h
-src/util/main.o: lib/tests.h lib/tests_cuda.h
-src/util/tests.o: lib/tests.h lib/matrix_routines.h lib/poisson.h
-src/util/tests.o: lib/init_data.h
-src/util/init_data.o: lib/matrix_routines.h lib/init_data.h
-src/util/matrix_routines.o: lib/matrix_routines.h
+src/jacobi/jacobi_openmp_2D.o: lib/matrix_routines.h lib/jacobi_util.h
+src/jacobi/jacobi_openmp_2D.o: lib/poisson.h
+src/jacobi/jacobi_openmp_3D.o: lib/matrix_routines.h lib/jacobi_util.h
+src/jacobi/jacobi_openmp_3D.o: lib/poisson.h
+src/jacobi/jacobi_mpi3D_1.o: lib/matrix_routines.h lib/jacobi_util.h
+src/jacobi/jacobi_mpi3D_1.o: lib/poisson.h
+src/jacobi/jacobi_mpi3D_2.o: lib/matrix_routines.h lib/jacobi_util.h
+src/jacobi/jacobi_mpi3D_2.o: lib/poisson.h
+src/jacobi/jacobi_util.o: lib/matrix_routines.h lib/jacobi_util.h
+src/jacobi/jacobi_cuda_1.o: lib/poisson_cuda.h lib/matrix_routines.h
+src/jacobi/jacobi_cuda_1.o: lib/jacobi_util.h lib/cuda_routines.h
+src/jacobi/jacobi_cuda_1.o: lib/jacobi_util_cuda.h
+src/jacobi/jacobi_util_cuda.o: lib/matrix_routines.h lib/jacobi_util.h
+src/jacobi/jacobi_util_cuda.o: lib/cuda_routines.h
+src/util/main.o: lib/tests.h lib/jacobi_util.h lib/tests_cuda.h
+src/util/tests.o: lib/tests.h lib/jacobi_util.h lib/poisson.h lib/init_data.h
+src/util/tests.o: lib/matrix_routines.h
+src/util/matrix_routines.o: lib/jacobi_util.h lib/matrix_routines.h
+src/util/tests_cuda.o: lib/init_data.h lib/jacobi_util.h lib/tests_cuda.h
+src/util/tests_cuda.o: lib/poisson_cuda.h lib/matrix_routines.h
+src/util/tests_cuda.o: lib/cuda_routines.h

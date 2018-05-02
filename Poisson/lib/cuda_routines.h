@@ -3,8 +3,5 @@
 
 // Define routines that run on the GPU or communicates with the GPU
 //
-__global__ void cu_test();
-
-
 
 #endif

@@ -1,6 +1,10 @@
 #ifndef __JACOBI_UTIL__
 #define __JACOBI_UTIL__
 
+// Makes sure that linker can understand the code
+#ifdef __cplusplus
+extern "C"{
+#endif //__cplusplus
 
 typedef struct Information {
 	// MPI information of size and local rank.
@@ -25,5 +29,9 @@ void jacobi_iteration(int I, int J, int K, int rank, int global_Nz,
 void generate_true_solution(double *A, Information *information);
 void check_true_solution(double *A, double *U, double *norm_diff,
 	Information *information);
+
+#ifdef __cplusplus
+} // Extern "C"
+#endif //__cplusplus
 
 #endif // __JACOBI_UTIL__
