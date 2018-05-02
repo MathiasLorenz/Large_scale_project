@@ -1,7 +1,8 @@
 % Script to load in 3D solution, calculate the error and plotcl
 clc, clear, close all
+addpath 'functions'
 
-fname = '../data/mpitesting.dat';
+fname = '../../Poisson/200grid.txt';
 
 my_sol = read3DMatrixFromFile(fname);
 [Nx,Ny,Nz] = size(my_sol);
@@ -54,7 +55,11 @@ axis([0,Nx,0,Ny,-1,1])
 
 err_mat = abs(my_sol - true_sol);
 CreateFigure('Error at 70%');
-surf(err_mat(:, :, round(1*Nz)))
+surf(err_mat(:, :, round(0.34*Nz)))
+
+%% 
+close all
+
 
 %% Plot the error through the z dimension
 

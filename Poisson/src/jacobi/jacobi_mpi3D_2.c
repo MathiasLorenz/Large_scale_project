@@ -18,12 +18,19 @@ extern double MFLOP;
 // ============================================================================
 // JACOBI 3D SOLVER
 
-void jacobi_mpi3D_2(int loc_Nx, int loc_Ny, int loc_Nz, int maxit,
-	double threshold, int rank, int global_Nz, double *U, double *F, double *Unew)
+void jacobi_mpi3D_2(Information *information, int maxit,
+	double threshold, double *U, double *F, double *Unew)
 {
+	// Read the information structure
+	int rank = information->rank;
+	int size = information->size;
+	int Nx = information->global_Nx;
+	int Ny = information->global_Ny;
+	int Nz = information->global_Nz;
+	int loc_Nx = information->loc_Nx[rank];
+	int loc_Ny = information->loc_Ny[rank];
+	int loc_Nz = information->loc_Nz[rank];
 	
-	int size;
-	MPI_Comm_size(MPI_COMM_WORLD, &size);
 	MPI_Request req;
 
 	// ------------------------------------------------------------------------
@@ -66,7 +73,7 @@ void jacobi_mpi3D_2(int loc_Nx, int loc_Ny, int loc_Nz, int maxit,
 		*/
 
 		// Compute the iteration of the jacobi method
-        jacobi_iteration(I, J, K, rank, global_Nz, U, F, Unew);
+        jacobi_iteration(I, J, K, rank, Nz, U, F, Unew);
 
         // Swap the arrays and check for convergence
         swap_array( &U, &Unew );

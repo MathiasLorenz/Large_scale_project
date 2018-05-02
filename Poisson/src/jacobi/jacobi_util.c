@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <math.h>
 #include <omp.h>
+#include <mpi.h>
 
 #include "matrix_routines.h"
 #include "jacobi_util.h"
@@ -25,6 +26,9 @@ void write_information(Information *information, int Nx, int Ny, int Nz,
 	information->loc_Nx = malloc(size*sizeof(int));
 	information->loc_Ny = malloc(size*sizeof(int));
 	information->loc_Nz = malloc(size*sizeof(int));
+	if (!information->loc_Nx || !information->loc_Ny || !information->loc_Nz)
+	{ fprintf(stderr, "Error in malloc, pointer is NULL.\n"); return; }
+
 	int loc_Nz;
 	for (int r = 0; r < size; r++)
 	{
@@ -92,9 +96,8 @@ void generate_true_solution(double *A, Information *information)
 	}
 }
 
-// Compute absolute error
-void check_true_solution(double *A, double *U, double *abs_err,
-	Information *information)
+// Compute max absolute error
+void compute_max_error(Information *information, double *A, double *U, double *abs_err)
 {
 	if (!A || !U || !abs_err || !information)
 	{ fprintf(stderr, "Pointer is NULL.\n"); return; }
@@ -117,7 +120,6 @@ void check_true_solution(double *A, double *U, double *abs_err,
 				if (err > *abs_err) *abs_err = err; // Save largest element
 			}
 }
-
 
 
 // ============================================================================
@@ -156,17 +158,27 @@ void jacobi_iteration(int I, int J, int K, int rank, int global_Nz,
 
 				// Collect terms
 				Unew[ijk] = f6 * (ui + uj + uk);
-
-				// Compute the stop criterion
-				// Remember to implement tolerance
-				/*
-				double u = U[IND_3D(i, j, k, I, J, K)];
-				double unew = Unew[IND_3D(i, j, k, I, J, K)];
-				norm_diff  += (u - unew)*(u - unew);
-				*/
 			}
 		}
 	}
 }
 // END OF FILE
 // ============================================================================
+
+// Function to compute global error on solution. 
+void compute_global_error(Information *information, double *A, double *U)
+{
+	int Nx = information->global_Nx;
+	int Ny = information->global_Nx;
+	int Nz = information->global_Nx;
+	int rank = information->rank;
+	double global_error = 0.0, local_error = 0.0;
+
+	compute_max_error(information, A, U, &local_error);
+	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_Reduce(&local_error, &global_error, 1, MPI_DOUBLE, MPI_MAX,
+		0, MPI_COMM_WORLD);
+	
+	if (rank == 0)
+		printf("Grid: %d %d %d, error: %.7e\n", Nx, Ny, Nz, global_error);
+}

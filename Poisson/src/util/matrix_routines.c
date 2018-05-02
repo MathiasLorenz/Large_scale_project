@@ -188,7 +188,6 @@ void print_jacobi3d_z_sliced(const double *U, Information *information, const ch
     // Get MPI communicator size
 	MPI_Request req;
 
-
 	// Make ready for recieving the data
 	int N_buffer_r = loc_Nx*loc_Ny*max_array_int(information->loc_Nz, size);
 	double *r_buf = malloc( N_buffer_r*sizeof(double) );

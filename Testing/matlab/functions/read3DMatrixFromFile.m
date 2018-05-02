@@ -1,4 +1,4 @@
-function output_matrix = read3DMatrixFromFile(file)
+function [output_matrix, error] = read3DMatrixFromFile(file)
 % Function to read in 3D matrix from file.
 % The file must in the first line have 3 integers with Nx Ny Nz specified.
 % The next line contains space seperated values of the matrix.
@@ -10,9 +10,9 @@ if fid == -1
 end
 
 % Read in header
-C = textscan(fid, '%d %d %d', 1);
+C = textscan(fid, '%d %d %d %f', 1);
 C = double(cell2mat(C));
-Nx = C(1); Ny = C(2); Nz = C(3);
+Nx = C(1); Ny = C(2); Nz = C(3); error = C(4);
 total_elem = Nx*Ny*Nz;
 
 % Read the matrix

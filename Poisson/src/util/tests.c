@@ -58,7 +58,7 @@ void test_jacobi_2D(int Nx, int Ny)
 	MEMORY = 3.0 * Nx * Ny * 8.0 / 1024.0;
 
 	// Print the needed information
-	if (strcmp("matrix", getenv("OUTPUT_INFO")) == 0)
+	if (strcmp("matrix_full", getenv("OUTPUT_INFO")) == 0)
 		array_print_2d(U, Nx, Ny, "%10g ");
 
 	// Free the arrays created for the computation
@@ -106,9 +106,9 @@ void test_jacobi_3D(int Nx, int Ny, int Nz)
 	MEMORY = 3.0 * Nx * Ny * Nz * 8.0 / 1024.0;
 
 	// Print the needed information
-	if (strcmp("matrix", getenv("OUTPUT_INFO")) == 0)
+	if (strcmp("matrix_slice", getenv("OUTPUT_INFO")) == 0)
 		array_print_3d_slice(U, Nx, Ny, Nz, Nz / 2, "%10g ");
-	else if (strcmp("full_matrix", getenv("OUTPUT_INFO")) == 0)
+	else if (strcmp("matrix_full", getenv("OUTPUT_INFO")) == 0)
 		array_print_3d(U, Nx, Ny, Nz, "%10g ");
 
 	// Free the arrays created for the computation
@@ -171,11 +171,9 @@ void test_jacobi_mpi3D_1(Information *information)
 	MEMORY = 3.0 * Nx * Ny * Nz * 8.0 / 1024.0;
 
 	// Print the needed information
-	if (strcmp("matrix", getenv("OUTPUT_INFO")) == 0)
+	if (strcmp("matrix_slice", getenv("OUTPUT_INFO")) == 0)
 		array_print_3d_slice(U, Nx, Ny, Nz, Nz / 2, "%10g ");
-	else if (strcmp("full_matrix", getenv("OUTPUT_INFO")) == 0)
-		array_print_3d(U, Nx, Ny, Nz, "%10g ");
-	else if (strcmp("full_matrix_mpi_z_slice", getenv("OUTPUT_INFO")) == 0)
+	else if (strcmp("matrix_full", getenv("OUTPUT_INFO")) == 0)
 		print_jacobi3d_z_sliced(U, information, "%10g ");
 
 	// Free the arrays created for the computation
@@ -217,11 +215,9 @@ void test_jacobi_mpi3D_2(Information *information)
 		generate_true_solution(A, information);
 	}
 
-	// Initialise the boundary values
+	// Initialise the problem
 	if (strcmp("sin", getenv("PROBLEM_NAME")) == 0)
 		init_sin_mpi3D_2(U, F, Unew, information);
-	// else if (strcmp("rad",getenv("PROBLEM_NAME")) == 0)
-	//    init_rad_2D(U, F, Unew, Nx, Ny);
 	else {
 		fprintf(stderr, "Problem type is not supported.\n");
 		return;
@@ -234,7 +230,7 @@ void test_jacobi_mpi3D_2(Information *information)
 	// Main computation and time
 	double t = omp_get_wtime();
 	
-	jacobi_mpi3D_2(loc_Nx, loc_Ny, loc_Nz, maxiter, tol, rank, Nz, U, F, Unew);
+	jacobi_mpi3D_2(information, maxiter, tol, U, F, Unew);
 
 	MPI_Barrier(MPI_COMM_WORLD);	
 	// Save global variables
@@ -242,24 +238,13 @@ void test_jacobi_mpi3D_2(Information *information)
 	MEMORY = 3.0 * Nx * Ny * Nz * 8.0 / 1024.0;
 
 	// Print the needed information
-	if (strcmp("matrix", getenv("OUTPUT_INFO")) == 0)
+	if (strcmp("matrix_slice", getenv("OUTPUT_INFO")) == 0)
 		array_print_3d_slice(U, Nx, Ny, Nz, Nz / 2, "%10g ");
-	else if (strcmp("full_matrix", getenv("OUTPUT_INFO")) == 0)
-		array_print_3d(U, Nx, Ny, Nz, "%10g ");
-	else if (strcmp("full_matrix_mpi_z_slice", getenv("OUTPUT_INFO")) == 0)
+	else if (strcmp("matrix_full", getenv("OUTPUT_INFO")) == 0)
 		print_jacobi3d_z_sliced(U, information, "%10g ");
 	else if (strcmp("error", getenv("OUTPUT_INFO")) == 0)
-	{
-		// Compute absolute error
-		double loc_abs_err = 0.0, glo_abs_err = 0.0;
-		check_true_solution(A, U, &loc_abs_err, information);
-		//printf("I'm rank %d, local error: %f\n", rank, loc_abs_err);
-		MPI_Barrier(MPI_COMM_WORLD);
-		MPI_Reduce(&loc_abs_err, &glo_abs_err, 1, MPI_DOUBLE, MPI_MAX,
-			0, MPI_COMM_WORLD);
-		if (rank == 0)
-			printf("Grid: %d %d %d, error: %.10f\n", Nx, Ny, Nz, glo_abs_err);
-	}
+		compute_global_error(information, A, U);
+		
 
 	MPI_Barrier(MPI_COMM_WORLD);
 	// Free the arrays created for the computation
