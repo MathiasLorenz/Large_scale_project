@@ -65,28 +65,19 @@ void test_cuda_1(Information *information)
 
 	// Main computation and time
 	double t = omp_get_wtime();
-	jacobi_cuda_1(Nx,Ny,Nz,maxiter,tol,U,F,Unew);
+	jacobi_cuda_1(information,maxiter,tol,U,F,Unew);
 
 	// Save global variables
 	TIME_SPENT = omp_get_wtime() - t;
 	MEMORY = 3.0 * Nx * Ny * Nz * 8.0 / 1024.0;
 
 	// Print the needed information
-	if (strcmp("matrix", getenv("OUTPUT_INFO")) == 0)
+	if (strcmp("matrix_slice", getenv("OUTPUT_INFO")) == 0)
 		array_print_3d_slice(U, Nx, Ny, Nz, Nz / 2, "%10g ");
-	else if (strcmp("full_matrix", getenv("OUTPUT_INFO")) == 0)
+	else if (strcmp("matrix_full", getenv("OUTPUT_INFO")) == 0)
 		array_print_3d(U, Nx, Ny, Nz, "%10g ");
-	else if (strcmp("full_matrix_mpi_z_slice", getenv("OUTPUT_INFO")) == 0)
-		print_jacobi3d_z_sliced(U, information, "%10g ");
 	else if (strcmp("error", getenv("OUTPUT_INFO")) == 0)
-	{
-		// Compute absolute error
-		double abs_err = 0.0;
-		check_true_solution(A, U, &abs_err, information);
-		//printf("I'm rank %d, local error: %f\n", rank, loc_abs_err);
-		if (rank == 0)
-			printf("Grid: %d %d %d, error: %.10f\n", Nx, Ny, Nz, abs_err);
-	}
+		compute_global_error(information, A, U);
 
 	// Free the arrays created for the computation
 	free(U); free(F); free(A); free(Unew);	

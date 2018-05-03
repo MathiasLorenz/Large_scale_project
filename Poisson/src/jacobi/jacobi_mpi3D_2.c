@@ -73,7 +73,7 @@ void jacobi_mpi3D_2(Information *information, int maxit,
 		*/
 
 		// Compute the iteration of the jacobi method
-        jacobi_iteration(I, J, K, rank, Nz, U, F, Unew);
+        jacobi_iteration(information, U, F, Unew);
 
         // Swap the arrays and check for convergence
         swap_array( &U, &Unew );

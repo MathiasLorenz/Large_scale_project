@@ -20,7 +20,7 @@ CUOPT 	=-O3
 CUOPTS	=
 CUWARN	=-Wall
 CULIBS	=-lcudart -L/appl/cuda/9.1/lib64
-CUARCH	=-arch=sm_30
+CUARCH	=-arch=sm_70
 CUPARA	=
 
 # - CU Library setup

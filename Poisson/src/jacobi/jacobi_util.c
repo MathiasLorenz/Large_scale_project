@@ -125,13 +125,24 @@ void compute_max_error(Information *information, double *A, double *U, double *a
 // ============================================================================
 // JACOBI ITERATION
 
-void jacobi_iteration(int I, int J, int K, int rank, int global_Nz,
+void jacobi_iteration(Information *information,
 					double *U, double *F, double *Unew)
 {
+	int rank = information->rank;
+	int Nx = information->global_Nx;
+	int Ny = information->global_Ny;
+	int Nz = information->global_Nz;
+	int loc_Nx = information->loc_Nx[rank];
+	int loc_Ny = information->loc_Ny[rank];
+	int loc_Nz = information->loc_Nz[rank];
+
+    int I, J, K;
+	I = loc_Nz; J = loc_Ny; K = loc_Nx;
+
 	// Setting up steps
-    double hi = 2.0/(global_Nz-1.0);
-	double hj = 2.0/(J-1.0);
-	double hk = 2.0/(K-1.0);
+    double hi = 2.0/(Nz-1.0);
+	double hj = 2.0/(Ny-1.0);
+	double hk = 2.0/(Nx-1.0);
     double stepi = hi*hi;
 	double stepj = hj*hj;
 	double stepk = hk*hk;

@@ -1,3 +1,6 @@
+// ============================================================================
+// INCLUDES
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <cuda.h>
@@ -11,16 +14,61 @@
 
 extern double MFLOP;
 
-void jacobi_cuda_1(int Nx, int Ny, int Nz, int maxit, double threshold, double *U, double *F, double *Unew)
+// ============================================================================
+// JACOBI 3D SOLVER USING CUDA
+
+void jacobi_cuda_1(Information *information, int maxit,
+	double threshold, double *U, double *F, double *Unew)
 {
-    if(!U || !F || !Unew) {
-		fprintf(stderr,"Pointer is NULL.\n");
-		return;
-	}
+	// Check for errors in the input
+	if(!U || !F || !Unew) { fprintf(stderr,"Pointer is NULL.\n"); return; }
+
+	// ========================================================================
+	// Preparation
+
+	// Firstly lets define the information structure on the device
+	Information *information_cuda;
+	checkCudaErrors(cudaMalloc( (void**)&information_cuda, sizeof(Information) ));
+	copy_information_cuda(information_cuda,information);
+
+	// Read the information structure
+	int rank = information->rank;
+	// int Nx = information->global_Nx;
+	// int Ny = information->global_Ny;
+	// int Nz = information->global_Nz;
+	int loc_Nx = information->loc_Nx[rank];
+	int loc_Ny = information->loc_Ny[rank];
+	int loc_Nz = information->loc_Nz[rank];
 
 	// Rewritting to C style coordinates
     int I, J, K;
-	I = Nz; J = Ny; K = Nx;
+	I = loc_Nz; J = loc_Ny; K = loc_Nx;
+
+	// ------------------------------------------------------------------------
+	// Now define the arrays which hold the problem on the device
+	int arraySizes = I*J*K*sizeof(double);
+	double *U_cuda, *F_cuda, *Unew_cuda;
+
+	checkCudaErrors(cudaMalloc((void**)&U_cuda,    arraySizes));
+	checkCudaErrors(cudaMalloc((void**)&F_cuda,    arraySizes));
+	checkCudaErrors(cudaMalloc((void**)&Unew_cuda, arraySizes));
+
+	// Copy data to the GPU
+	checkCudaErrors(cudaMemcpy(U_cuda   , U   , arraySizes, cudaMemcpyHostToDevice));
+	checkCudaErrors(cudaMemcpy(F_cuda   , F   , arraySizes, cudaMemcpyHostToDevice));
+	checkCudaErrors(cudaMemcpy(Unew_cuda, Unew, arraySizes, cudaMemcpyHostToDevice));
+	
+	// ------------------------------------------------------------------------
+	// Setup blocks for the GPU
+	dim3 BlockSize = dim3(128,128,128);
+	dim3 BlockAmount = dim3( I/BlockSize.x + 1, J/BlockSize.y + 1, K/BlockSize.z + 1 );
+
+	printf("BS.x: %3d, BS.y: %3d, BS.z: %3d\n",BlockSize.x,BlockSize.y,BlockSize.z);
+	printf("BA.x: %3d, BA.y: %3d, BA.z: %3d\n",BlockAmount.x,BlockAmount.y,BlockAmount.z);
+
+	// ------------------------------------------------------------------------
+	// Prepare stop criterion
+	int iter = 0;
 
 	// Remember to implement tolerance
 	/*
@@ -30,11 +78,8 @@ void jacobi_cuda_1(int Nx, int Ny, int Nz, int maxit, double threshold, double *
 	
 	if (strcmp("on",getenv("USE_TOLERANCE")) == 0) { use_tol = true; }
 	*/
-	
-	// Prepare stop criterion
-	int iter = 0;
 
-	// ------------------------------------------------------------------------
+	// ========================================================================
 	// Run the iterative method
     for(iter = 0; iter < maxit ; iter++){
 		// Remember to implement tolerance
@@ -43,14 +88,22 @@ void jacobi_cuda_1(int Nx, int Ny, int Nz, int maxit, double threshold, double *
 		*/
 
 		// Compute the iteration of the jacobi method
-        
-		jacobi_cuda_iteration<<<1,1>>>(I, J, K, U, F, Unew);
+		jacobi_cuda_iteration<<<BlockAmount,BlockSize>>>(information_cuda, U_cuda, F_cuda, Unew_cuda);
+		
 		checkCudaErrors(cudaDeviceSynchronize());
 
         // Swap the arrays and check for convergence
-        swap_array( &U, &Unew );
+        swap_array( &U_cuda, &Unew_cuda );
 
+	
 
+		// Compute the stop criterion
+		// Remember to implement tolerance
+		/*
+		double u = U_cuda[IND_3D(i, j, k, I, J, K)];
+		double unew = Unew_cuda[IND_3D(i, j, k, I, J, K)];
+		norm_diff  += (u - unew)*(u - unew);
+		*/
 		// Remember to implement tolerance
 		/*
         norm_diff = sqrt(norm_diff);
@@ -60,8 +113,13 @@ void jacobi_cuda_1(int Nx, int Ny, int Nz, int maxit, double threshold, double *
 		*/
     }
 
-	// ------------------------------------------------------------------------
+	// ========================================================================
 	// Finalise
+	// Copy data from the GPU
+	checkCudaErrors(cudaMemcpy(U   , U_cuda   , arraySizes, cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(F   , F_cuda   , arraySizes, cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(Unew, Unew_cuda, arraySizes, cudaMemcpyDeviceToHost));
+	
 	
 	MFLOP = 1e-6*(19.0*I*J*K + 4.0)*iter;
 
@@ -76,6 +134,16 @@ void jacobi_cuda_1(int Nx, int Ny, int Nz, int maxit, double threshold, double *
         else
             fprintf(stdout, "Exited because iter = maxit\n");
 		*/
-    }
+	}
+	
 
+
+	// ------------------------------------------------------------------------
+	// Free the arrays
+	cudaFree(U_cuda);
+	cudaFree(F_cuda);
+	cudaFree(Unew_cuda);
+	free_information_arrays_cuda(information_cuda); cudaFree(information_cuda);
 }
+// END OF FILE
+// ============================================================================

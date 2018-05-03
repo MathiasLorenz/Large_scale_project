@@ -164,7 +164,7 @@ void test_jacobi_mpi3D_1(Information *information)
 
 	// Main computation and time
 	double t = omp_get_wtime();
-	jacobi_mpi3D_1(loc_Nx, loc_Ny, loc_Nz, maxiter, tol, rank, Nz, U, F, Unew);
+	jacobi_mpi3D_1(information, maxiter, tol, U, F, Unew);
 
 	// Save global variables
 	TIME_SPENT = omp_get_wtime() - t;
