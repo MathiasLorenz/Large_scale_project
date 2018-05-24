@@ -24,6 +24,9 @@
 # Time specifications (hh:mm)
 #BSUB -W 01:00
 
+# GPU options
+#BSUB -gpu "num=1:mode=exclusive_process"
+
 # -- Notification options
 
 # Set the email to recieve to and when to recieve it

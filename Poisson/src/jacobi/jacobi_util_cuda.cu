@@ -82,7 +82,7 @@ __global__ void jacobi_cuda_iteration(Information *information_cuda,
 	int j = threadIdx.x + blockDim.x*blockIdx.x;
 	int i = threadIdx.y + blockDim.y*blockIdx.y;
 	int k = threadIdx.z + blockDim.z*blockIdx.z;
-	
+
 	// Read the needed data from the information structure
 	int rank = information_cuda->rank;
 	int Nx = information_cuda->global_Nx;
@@ -125,7 +125,7 @@ __global__ void jacobi_cuda_iteration(Information *information_cuda,
 			+ f3 * stepk * F_cuda[ijk];
 
 		// Collect terms
-		Unew_cuda[ijk] = f6 * (ui + uj + uk) + 10;
+		Unew_cuda[ijk] = f6 * (ui + uj + uk);
 	}
 }
 

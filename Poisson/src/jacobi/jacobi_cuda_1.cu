@@ -95,7 +95,6 @@ void jacobi_cuda_1(Information *information, int maxit,
         // Swap the arrays and check for convergence
         swap_array( &U_cuda, &Unew_cuda );
 
-	
 
 		// Compute the stop criterion
 		// Remember to implement tolerance
@@ -143,8 +142,8 @@ void jacobi_cuda_1(Information *information, int maxit,
 	cudaFree(U_cuda);
 	cudaFree(F_cuda);
 	cudaFree(Unew_cuda);
-	cudaFree(information_cuda);
 	free_information_arrays_cuda<<<1,1>>>(information_cuda);
+	cudaFree(information_cuda);
 }
 // END OF FILE
 // ============================================================================
