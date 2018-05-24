@@ -29,17 +29,25 @@ void write_information(Information *information, int Nx, int Ny, int Nz,
 	if (!information->loc_Nx || !information->loc_Ny || !information->loc_Nz)
 	{ fprintf(stderr, "Error in malloc, pointer is NULL.\n"); return; }
 
-	int loc_Nz;
-	for (int r = 0; r < size; r++)
+	if (size == 1)
 	{
-		if 		(r == 0) 				{loc_Nz = floor(Nz/size) + 1; }
-		else if (0 < r && r < (size-1)) {loc_Nz = floor(Nz/size) + 2; }
-		else 							{loc_Nz = Nz - (size - 1)*floor(Nz/size) + 1;}
+		information->loc_Nx[0] = Nx;
+		information->loc_Ny[0] = Ny;
+		information->loc_Nz[0] = Nz;
+	} else {
+		int loc_Nz;
+		for (int r = 0; r < size; r++)
+		{
+			if 		(r == 0) 				{loc_Nz = floor(Nz/size) + 1; }
+			else if (0 < r && r < (size-1)) {loc_Nz = floor(Nz/size) + 2; }
+			else 							{loc_Nz = Nz - (size - 1)*floor(Nz/size) + 1;}
 
-		information->loc_Nx[r] = Nx;
-		information->loc_Ny[r] = Ny;
-		information->loc_Nz[r] = loc_Nz;
+			information->loc_Nx[r] = Nx;
+			information->loc_Ny[r] = Ny;
+			information->loc_Nz[r] = loc_Nz;
+		}
 	}
+
 }
 
 void free_information_arrays(Information *information)

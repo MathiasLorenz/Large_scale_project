@@ -20,6 +20,7 @@ extern double MFLOP;
 void jacobi_cuda_1(Information *information, int maxit,
 	double threshold, double *U, double *F, double *Unew)
 {
+	cudaSetDevice(0);
 	// Check for errors in the input
 	if(!U || !F || !Unew) { fprintf(stderr,"Pointer is NULL.\n"); return; }
 
@@ -54,17 +55,19 @@ void jacobi_cuda_1(Information *information, int maxit,
 	checkCudaErrors(cudaMalloc((void**)&Unew_cuda, arraySizes));
 
 	// Copy data to the GPU
-	checkCudaErrors(cudaMemcpy(U_cuda   , U   , arraySizes, cudaMemcpyHostToDevice));
-	checkCudaErrors(cudaMemcpy(F_cuda   , F   , arraySizes, cudaMemcpyHostToDevice));
-	checkCudaErrors(cudaMemcpy(Unew_cuda, Unew, arraySizes, cudaMemcpyHostToDevice));
+	checkCudaErrors(cudaMemcpyAsync(U_cuda   , U   , arraySizes, cudaMemcpyHostToDevice));
+	checkCudaErrors(cudaMemcpyAsync(F_cuda   , F   , arraySizes, cudaMemcpyHostToDevice));
+	checkCudaErrors(cudaMemcpyAsync(Unew_cuda, Unew, arraySizes, cudaMemcpyHostToDevice));
+	
+	checkCudaErrors(cudaDeviceSynchronize());
 	
 	// ------------------------------------------------------------------------
 	// Setup blocks for the GPU
-	dim3 BlockSize = dim3(128,128,128);
+	dim3 BlockSize = dim3(32,32,32);
 	dim3 BlockAmount = dim3( I/BlockSize.x + 1, J/BlockSize.y + 1, K/BlockSize.z + 1 );
 
-	printf("BS.x: %3d, BS.y: %3d, BS.z: %3d\n",BlockSize.x,BlockSize.y,BlockSize.z);
-	printf("BA.x: %3d, BA.y: %3d, BA.z: %3d\n",BlockAmount.x,BlockAmount.y,BlockAmount.z);
+	//printf("BS.x: %3d, BS.y: %3d, BS.z: %3d\n",BlockSize.x,BlockSize.y,BlockSize.z);
+	//printf("BA.x: %3d, BA.y: %3d, BA.z: %3d\n",BlockAmount.x,BlockAmount.y,BlockAmount.z);
 
 	// ------------------------------------------------------------------------
 	// Prepare stop criterion
@@ -88,7 +91,7 @@ void jacobi_cuda_1(Information *information, int maxit,
 		*/
 
 		// Compute the iteration of the jacobi method
-		jacobi_cuda_iteration<<<BlockAmount,BlockSize>>>(information_cuda, U_cuda, F_cuda, Unew_cuda);
+		jacobi_cuda_iteration<<<BlockSize,BlockAmount>>>(information_cuda, U_cuda, F_cuda, Unew_cuda);
 		
 		checkCudaErrors(cudaDeviceSynchronize());
 
@@ -143,7 +146,7 @@ void jacobi_cuda_1(Information *information, int maxit,
 	cudaFree(U_cuda);
 	cudaFree(F_cuda);
 	cudaFree(Unew_cuda);
-	free_information_arrays_cuda(information_cuda); cudaFree(information_cuda);
+	//free_information_arrays_cuda(information_cuda); cudaFree(information_cuda);
 }
 // END OF FILE
 // ============================================================================

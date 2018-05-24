@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
 	else {
 		fprintf(stderr, 
 			"\nInvalid test name: %s\n"
-			"   Accepts: omp2d, omp3d, mpi3d_1, mpi3d_2 or cuda\n\n",T);
+			"   Accepts: omp2d, omp3d, mpi3d_1, mpi3d_2 or cuda_1\n\n",T);
 		MPI_Finalize();
 		return EXIT_FAILURE;
 	}

@@ -4,6 +4,6 @@
 #include "jacobi_util.h"
 
 // Define routines that run on the GPU or communicates with the GPU
-//
+//	
 
 #endif
