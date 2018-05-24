@@ -21,6 +21,14 @@ void copy_information_cuda(Information *information_cuda, Information *informati
 	// Allocate the temporary information structure
 	Information Temp;
 
+	// Simple Structure Elements
+	Temp.size = information->size;
+	Temp.rank = information->rank;
+	Temp.global_Nx = information->global_Nx;
+	Temp.global_Ny = information->global_Ny;
+	Temp.global_Nz = information->global_Nz;
+
+	// Allocate and copy the Arrays
 	checkCudaErrors(cudaMalloc( (void**) &Temp.loc_Nx, size*sizeof(int)));
 	checkCudaErrors(cudaMalloc( (void**) &Temp.loc_Ny, size*sizeof(int)));
 	checkCudaErrors(cudaMalloc( (void**) &Temp.loc_Nz, size*sizeof(int)));
@@ -43,17 +51,10 @@ void copy_information_cuda(Information *information_cuda, Information *informati
 		information->size*sizeof(int), 
 		cudaMemcpyHostToDevice
 	));
-	
-
-	// Simple Structure Elements
-	Temp.size = information->size;
-	Temp.rank = information->rank;
-	Temp.global_Nx = information->global_Nx;
-	Temp.global_Ny = information->global_Ny;
-	Temp.global_Nz = information->global_Nz;
 
 	checkCudaErrors(cudaDeviceSynchronize());
 
+	// Copy over the information structure
 	checkCudaErrors(cudaMemcpy(
 		information_cuda, 
 		&Temp,
@@ -64,11 +65,11 @@ void copy_information_cuda(Information *information_cuda, Information *informati
 	checkCudaErrors(cudaDeviceSynchronize());
 }
 
-void free_information_arrays_cuda(Information *information_cuda)
+__global__ void free_information_arrays_cuda(Information *information_cuda)
 {
-	cudaFree(information_cuda->loc_Nx);
-	cudaFree(information_cuda->loc_Ny);
-	cudaFree(information_cuda->loc_Nz);
+	free(information_cuda->loc_Nx);
+	free(information_cuda->loc_Ny);
+	free(information_cuda->loc_Nz);
 }
 
 // ============================================================================

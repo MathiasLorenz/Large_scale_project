@@ -34,9 +34,6 @@ void jacobi_cuda_1(Information *information, int maxit,
 
 	// Read the information structure
 	int rank = information->rank;
-	// int Nx = information->global_Nx;
-	// int Ny = information->global_Ny;
-	// int Nz = information->global_Nz;
 	int loc_Nx = information->loc_Nx[rank];
 	int loc_Ny = information->loc_Ny[rank];
 	int loc_Nz = information->loc_Nz[rank];
@@ -146,7 +143,8 @@ void jacobi_cuda_1(Information *information, int maxit,
 	cudaFree(U_cuda);
 	cudaFree(F_cuda);
 	cudaFree(Unew_cuda);
-	//free_information_arrays_cuda(information_cuda); cudaFree(information_cuda);
+	cudaFree(information_cuda);
+	free_information_arrays_cuda<<<1,1>>>(information_cuda);
 }
 // END OF FILE
 // ============================================================================
