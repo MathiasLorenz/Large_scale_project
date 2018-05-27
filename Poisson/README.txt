@@ -12,7 +12,8 @@ where:
 		omp3d	: Is the Jacobi method using OpenMP for a 3D problem.
 		mpi3d_1	: Is the Jacobi method using MPI with a single split along Z.
 		mpi3d_2	: Is the Jacobi method using MPI with multiple split along Z.
-		cuda	: A dummy test used to debug the nvcc compiler.
+		cuda_1	: First implementation using cuda for a single GPU.
+		mixed_1	: First implementation using both MPI and CUDA. Very naive.
 
 	NX NY NZ : Integer numbers.
 		The number of points in the problem, fx. 7 by 7. Nz is the size in the 

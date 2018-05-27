@@ -3,7 +3,7 @@
 # --  General options 
 
 # Naming of the job and queue name
-#BSUB -J cuda_1
+#BSUB -J performance
 #BSUB -q gpuv100
 
 # Specify
@@ -13,7 +13,7 @@
 # -- Technical options
 
 # Ask for n cores placed on R host.
-#BSUB -n 1
+#BSUB -n 6
 #BSUB -R "span[ptile=1]"
 
 # Memory specifications. Amount we need and when to kill the
@@ -81,11 +81,54 @@ Program()
 	# -------------------------------------------------------------------------
 	# Define the actual test part of the script 
 
-	# Run the program
-	N="50 200"
+	# Run the programs
+	N="8 16"
+	C="2"
+	#N="8 16 32 64 128 254 512 1024"
+	#C="2 3 4 5 6"
+
+	Test="mpi3d_1"
+	dat=_$Test.dat
 	for n in $N 
 	do
-		OUTPUT_INFO=matrix_full ./jacobiSolver.bin cuda_1 $n >> $LSB_JOBNAME-$n.dat
+		mpiexec -q -n 2 ./jacobiSolver.bin $Test $n >> $LSB_JOBNAME-$dat
+	done
+
+	Test="mpi3d_2"
+	for c in $C
+	do
+		dat=$c-$Test.dat
+		for n in $N 
+		do
+			mpiexec -q -n $c ./jacobiSolver.bin $Test $n >> $LSB_JOBNAME-$dat
+		done
+	done
+
+	Test="cuda_1"
+	dat=_$Test.dat
+	for n in $N 
+	do
+		./jacobiSolver.bin $Test $n >> $LSB_JOBNAME-$dat
+	done
+
+	Test="mixed_1"
+	for c in $C
+	do
+		dat=$c-$Test.dat
+		for n in $N 
+		do
+			mpiexec -q -n $c ./jacobiSolver.bin $Test $n >> $LSB_JOBNAME-$dat
+		done
+	done
+
+	Test="mixed_2"
+	for c in $C
+	do
+		dat=$c-$Test.dat
+		for n in $N 
+		do
+			mpiexec -q -n $c ./jacobiSolver.bin $Test $n >> $LSB_JOBNAME-$dat
+		done
 	done
 
 	# -------------------------------------------------------------------------
@@ -100,7 +143,7 @@ Visualize()
 {
 	echo ' '
 	echo Visualizing
-	matlab -r "addpath(genpath('../../'));matlab3Dplots('$LSB_JOBNAME','$DPATH/','$FIGS');exit;"
+	#matlab -r "addpath(genpath('../../'));matlab3Dplots('$LSB_JOBNAME','$DPATH/','$FIGS');exit;"
 }
 
 # End of Visualize

@@ -1,9 +1,12 @@
-function matlabmpi_2(datPath,figPath)
-if nargin == 0
+function matlab3Dplots(DataName,datPath,figPath)
+if ~exist('datPath','var') || isempty(datPath)
     datPath = '../data/';
 end
+if ~exist('DataName','var') || isempty(DataName)
+    disp('No data specified');
+    return;
+end
 addpath(genpath('./'));
-DataName = 'mpi_2-';
 DataFiles = finddata(datPath,DataName);
 
 %% Performance plots
@@ -13,8 +16,8 @@ for i = 1:length(DataFiles)
     M = read3DMatrixFromFile(FileName);
     testMatrix(M,DataFiles{i}(1:end-4));
 end
-if nargin ~= 0
-ExportFigures([],figPath);
+if exist('figPath','var') && ~isempty(figPath)
+    ExportFigures([],figPath);
 end
 end
 

@@ -64,7 +64,6 @@ void generate_true_solution(double *A, Information *information)
 	if (!A || !information) { fprintf(stderr, "Pointer is NULL.\n"); return; }
 
 	// Read information
-	int size = information->size;
 	int rank = information->rank;
 	int Nx = information->global_Nx;
 	int Ny = information->global_Ny;
@@ -77,9 +76,9 @@ void generate_true_solution(double *A, Information *information)
 	int K = loc_Nx, J = loc_Ny, I = loc_Nz;
 
 	// Setting up steps and variables 
-	double hi = 2.0 / (Nz - 1.0); // Global Nz is intended
-	double hj = 2.0 / (J - 1.0);
-	double hk = 2.0 / (K - 1.0);
+	double hi = 2.0 / (Nz - 1.0);
+	double hj = 2.0 / (Ny - 1.0);
+	double hk = 2.0 / (Nx - 1.0);
 
 	// This is based on an offset where z is split once.
 	double z = -1.0;

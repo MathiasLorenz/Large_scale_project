@@ -9,14 +9,14 @@ SPATH=Testing/shell
 
 # Make sure the excecutable is up to date
 module load cuda/9.1 mpi/2.1.0-gcc-6.3.0
-cd $EPATH; make realclean; make; cd ../
+cd $EPATH; make realclean; make -s; cd ../
 
 # Define files needed by the execution in all tests
 EXEC="$EPATH/jacobiSolver.bin"
 
 # Define which shell script will be executed
 if [ -z "$1" ] ; then
-	TEST="mflop"
+	TEST="mpi_1 mpi_2 cuda_1 mixed_1"
 else 
 	TEST="$@"
 fi

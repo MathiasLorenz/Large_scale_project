@@ -135,7 +135,6 @@ void array_print_3d_slice(double *A, const int Nx, const int Ny, const int Nz,
 		fprintf(stderr, "Slice is not contained in the data\n"); 
 		return; 
 	}
-    int I = Nz;
     int J = Ny;
 	int K = Nx;
 

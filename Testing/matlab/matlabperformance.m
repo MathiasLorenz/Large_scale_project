@@ -1,9 +1,12 @@
-function matlabmpi_1(datPath,figPath)
-if nargin == 0
+function matlabperformance(datPath,figPath)
+if ~exist('datPath','var') || isempty(datPath)
     datPath = '../data/';
 end
+if ~exist('DataName','var') || isempty(DataName)
+    disp('No data specified');
+    return;
+end
 addpath(genpath('./'));
-DataName = 'mpi_1-';
 DataFiles = finddata(datPath,DataName);
 
 %% Performance plots
@@ -13,8 +16,8 @@ for i = 1:length(DataFiles)
     M = read3DMatrixFromFile(FileName);
     testMatrix(M,DataFiles{i}(1:end-4));
 end
-if nargin ~= 0
-ExportFigures([],figPath);
+if exist('figPath','var') && ~isempty(figPath)
+    ExportFigures([],figPath);
 end
 end
 
@@ -35,7 +38,7 @@ err = max(abs(my_sol(:) - true_sol(:)));
 
 
 %% Plot the solution with true solution
-CreateFigure([name,'_slize_0.8']);
+CreateFigure([name,'_slize']);
 subplot(121);
 surf(my_sol(:, :, round(0.80*Nz)));
 title('Approximated solution at 80% slize')
@@ -48,7 +51,7 @@ axis([0,Nx,0,Ny,-1,1])
 %% Plot the error
 
 err_mat = abs(my_sol - true_sol);
-CreateFigure([name,'_error_0.8']);
+CreateFigure([name,'_error']);
 surf(err_mat(:, :, round(0.8*Nz)))
 title('Element error for 80% slice')
 xlabel('x')
@@ -64,7 +67,7 @@ err_vec = zeros(sz);
 for i = 1:sz
     err_vec(i) = max(max(abs(my_sol(:, :, i) - true_sol(:, :, i))));
 end
-CreateFigure([name,'maximal_error']);
+CreateFigure([name,'_maximal_error']);
 plot(err_vec);
 xlabel('z slize')
 ylabel('Max error')

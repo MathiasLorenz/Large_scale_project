@@ -23,10 +23,6 @@ void jacobi_mpi3D_1(Information *information, int maxit,
 {
 	// Read the information structure
 	int rank = information->rank;
-	int size = information->size;
-	int Nx = information->global_Nx;
-	int Ny = information->global_Ny;
-	int Nz = information->global_Nz;
 	int loc_Nx = information->loc_Nx[rank];
 	int loc_Ny = information->loc_Ny[rank];
 	int loc_Nz = information->loc_Nz[rank];

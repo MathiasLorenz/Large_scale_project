@@ -113,10 +113,15 @@ int main(int argc, char *argv[])
 	else if (strcmp(T, "cuda_1") == 0)
 		test_cuda_1(&information);
 
+	else if (strcmp(T, "mixed_1") == 0)
+		test_jacobi_mixed_1(&information);
+	else if (strcmp(T, "mixed_2") == 0)
+		test_jacobi_mixed_2(&information);
+
 	else {
 		fprintf(stderr, 
 			"\nInvalid test name: %s\n"
-			"   Accepts: omp2d, omp3d, mpi3d_1, mpi3d_2 or cuda_1\n\n",T);
+			"   Accepts: omp2d, omp3d, mpi3d_1, mpi3d_2, cuda_1, mixed_1\n\n",T);
 		MPI_Finalize();
 		return EXIT_FAILURE;
 	}

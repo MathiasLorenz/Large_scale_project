@@ -16,6 +16,9 @@ void test_jacobi_3D(int Nx, int Ny, int Nz);
 void test_jacobi_mpi3D_1(Information *information);
 void test_jacobi_mpi3D_2(Information *information);
 
+void test_jacobi_mixed_1(Information *information);
+void test_jacobi_mixed_2(Information *information);
+
 
 #ifdef __cplusplus
 } // Extern "C"

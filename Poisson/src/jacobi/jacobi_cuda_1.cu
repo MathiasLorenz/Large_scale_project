@@ -142,8 +142,7 @@ void jacobi_cuda_1(Information *information, int maxit,
 	cudaFree(U_cuda);
 	cudaFree(F_cuda);
 	cudaFree(Unew_cuda);
-	free_information_arrays_cuda<<<1,1>>>(information_cuda);
-	cudaFree(information_cuda);
+	free_information_cuda(information_cuda);
 }
 // END OF FILE
 // ============================================================================

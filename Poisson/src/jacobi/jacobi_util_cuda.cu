@@ -4,6 +4,8 @@
 #include <cuda_runtime.h>
 #include <helper_cuda.h>
 
+#include "jacobi_util.h"
+#include "jacobi_util_cuda.h"
 #include "matrix_routines.h"
 #include "cuda_routines.h"
 
@@ -65,6 +67,11 @@ void copy_information_cuda(Information *information_cuda, Information *informati
 	checkCudaErrors(cudaDeviceSynchronize());
 }
 
+void free_information_cuda(Information *information_cuda){
+	free_information_arrays_cuda<<<1,1>>>(information_cuda);
+	cudaFree(information_cuda);
+}
+
 __global__ void free_information_arrays_cuda(Information *information_cuda)
 {
 	free(information_cuda->loc_Nx);
@@ -74,7 +81,17 @@ __global__ void free_information_arrays_cuda(Information *information_cuda)
 
 // ============================================================================
 // CUDA VERSION OF THE ITTERATIVE CORE
+void jacobi_iteration_cuda(Information *information, Information *information_cuda,
+	double *U_cuda, double *F_cuda, double *Unew_cuda)
+{
+	int K = information->global_Nx;
+	int J = information->global_Ny;
+	int I = information->global_Nz;
 
+	dim3 BlockSize = dim3(32,32,32);
+	dim3 BlockAmount = dim3( I/BlockSize.x + 1, J/BlockSize.y + 1, K/BlockSize.z + 1 );
+	jacobi_cuda_iteration<<<BlockSize,BlockAmount>>>(information_cuda, U_cuda, F_cuda, Unew_cuda);
+}
 __global__ void jacobi_cuda_iteration(Information *information_cuda,
 	double *U_cuda, double *F_cuda, double *Unew_cuda)
 {

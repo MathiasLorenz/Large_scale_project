@@ -31,8 +31,6 @@
 #BSUB -B		# Send notification at start
 #BSUB -N 		# Send notification at completion
 
-# LSB_NODES=$(echo | grep -c '' $LSB_HOSTS)
-# LSB_PROC=$(($LSB_MAX_NUM_PROCESSORS/$LSB_NODES))
 echo --------------------------------------------------------------------------
 echo 'Job: '$LSB_JOBNAME', is running on '$LSB_NODES' nodes'
 echo --------------------------------------------------------------------------
@@ -84,7 +82,7 @@ Program()
 	N="50 200"
 	for n in $N 
 	do
-		OUTPUT_INFO=full_matrix_mpi_z_slice mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_2 $n >> $LSB_JOBNAME-$n.dat
+		OUTPUT_INFO=matrix_full mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_2 $n >> $LSB_JOBNAME-$n.dat
 
 	done
 
@@ -100,7 +98,7 @@ Visualize()
 {
 	echo ' '
 	echo Visualizing
-	matlab -r "addpath(genpath('../../'));matlab$LSB_JOBNAME('$DPATH/','$FIGS');exit;"
+	matlab -r "addpath(genpath('../../'));matlab3Dplots('$LSB_JOBNAME','$DPATH/','$FIGS');exit;"
 }
 
 # End of Visualize
