@@ -12,17 +12,26 @@ void jacobi_openmp_2D(int Nx, int Ny, int maxit, double threshold,
         double *u, double *f, double *tmp);
 void jacobi_openmp_3D(int Nx, int Ny, int Nz, int maxit, double threshold,
         double *u, double *f, double *tmp);
+
 void jacobi_mpi3D_1(Information *information, int maxit, double threshold,
     double *U, double *F, double *Unew);
 void jacobi_mpi3D_2(Information *information, int maxit, double threshold,
     double *U, double *F, double *Unew);
+
+void jacobi_cuda_1(Information *information, int maxit, double threshold, 
+	double *U, double *F, double *Unew);
+
 void jacobi_mixed_1(Information *information, int maxit, double threshold,
     double *U, double *F, double *Unew);
 void jacobi_mixed_2(Information *information, int maxit, double threshold,
     double *U, double *F, double *Unew);
 
+
 #ifdef __cplusplus
 } // Extern "C"
 #endif //__cplusplus
+
+// 
+
 
 #endif // __POISSON_H

@@ -7,7 +7,7 @@
 #include <cuda_runtime.h>
 #include <helper_cuda.h>
 
-#include "poisson_cuda.h"
+#include "poisson.h"
 #include "matrix_routines.h"
 #include "cuda_routines.h"
 #include "jacobi_util_cuda.h"

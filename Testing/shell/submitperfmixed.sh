@@ -3,7 +3,7 @@
 # --  General options 
 
 # Naming of the job and queue name
-#BSUB -J performance
+#BSUB -J perfmixed
 #BSUB -q gpuv100
 
 # Specify
@@ -13,7 +13,7 @@
 # -- Technical options
 
 # Ask for n cores placed on R host.
-#BSUB -n 6
+#BSUB -n 4
 #BSUB -R "span[ptile=1]"
 
 # Memory specifications. Amount we need and when to kill the
@@ -22,7 +22,7 @@
 #BSUB -M 20GB
 
 # Time specifications (hh:mm)
-#BSUB -W 12:00
+#BSUB -W 04:00
 
 # GPU options
 #BSUB -gpu "num=1:mode=exclusive_process"
@@ -83,51 +83,15 @@ Program()
 
 	# Run the programs (Max array size for GPU: 874)
 	#N="8 16"
-	#C="2"
-	N="8 16 32 64 128 254 512"
-	C="2 3 4 5 6"
+	N="32 64 128 254 512"
 
-	Test="mpi3d_1"
-	dat=$Test.dat
-	for n in $N 
+	TEST="mixed_1 mixed_2"
+	for t in $TEST
 	do
-		mpiexec -q -n 2 ./jacobiSolver.bin $Test $n >> $LSB_JOBNAME-$dat
-	done
-
-	Test="mpi3d_2"
-	for c in $C
-	do
-		dat=$c-$Test.dat
+		dat=$t.dat
 		for n in $N 
 		do
-			mpiexec -q -n $c ./jacobiSolver.bin $Test $n >> $LSB_JOBNAME-$dat
-		done
-	done
-
-	Test="cuda_1"
-	dat=$Test.dat
-	for n in $N 
-	do
-		./jacobiSolver.bin $Test $n >> $LSB_JOBNAME-$dat
-	done
-
-	Test="mixed_1"
-	for c in $C
-	do
-		dat=$c-$Test.dat
-		for n in $N 
-		do
-			mpiexec -q -n $c ./jacobiSolver.bin $Test $n >> $LSB_JOBNAME-$dat
-		done
-	done
-
-	Test="mixed_2"
-	for c in $C
-	do
-		dat=$c-$Test.dat
-		for n in $N 
-		do
-			mpiexec -q -n $c ./jacobiSolver.bin $Test $n >> $LSB_JOBNAME-$dat
+			mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin $t $n >> $LSB_JOBNAME-$dat
 		done
 	done
 
@@ -143,7 +107,7 @@ Visualize()
 {
 	echo ' '
 	echo Visualizing
-	#matlab -r "addpath(genpath('../../'));matlab3Dplots('$LSB_JOBNAME','$DPATH/','$FIGS');exit;"
+	matlab -r "addpath(genpath('../../'));matlabperformance('$LSB_JOBNAME','$DPATH/','$FIGS');exit;"
 }
 
 # End of Visualize

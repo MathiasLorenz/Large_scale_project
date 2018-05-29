@@ -10,7 +10,6 @@
 
 #include "tests.h"
 #include "jacobi_util.h"
-#include "tests_cuda.h"
 
 double MFLOP=0.0;
 double MEMORY=0.0;

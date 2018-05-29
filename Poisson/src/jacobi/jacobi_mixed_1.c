@@ -63,6 +63,10 @@ void jacobi_mixed_1(Information *information, int maxit,
 	cuda_malloc((void**)&F_cuda,    arraySizes);
 	cuda_malloc((void**)&Unew_cuda, arraySizes);
 	
+	// Copy over F and Unew to the device
+	copy_to_device(F,   arraySizes,F_cuda   );
+	copy_to_device(Unew,arraySizes,Unew_cuda);
+
 	// Remember to implement tolerance
 	/*
     // Prepare stop criterion
@@ -82,17 +86,16 @@ void jacobi_mixed_1(Information *information, int maxit,
 		/*
         norm_diff = 0.0;
 		*/
+		// Copy over the result of the last itteration
 		copy_to_device(U,   arraySizes,U_cuda   );
-		copy_to_device(F,   arraySizes,F_cuda   );
-		copy_to_device(Unew,arraySizes,Unew_cuda);
 		cuda_synchronize();
-		// Compute the iteration of the jacobi method
+
+		// Compute the iteration of the jacobi method on the GPU
         jacobi_iteration_cuda(
 			information, information_cuda, U_cuda, F_cuda, Unew_cuda
 		);
 
-		copy_from_device(U,   arraySizes,U_cuda   );
-		copy_from_device(F,   arraySizes,F_cuda   );
+		// Copy back the result to the CPU
 		copy_from_device(Unew,arraySizes,Unew_cuda);
 		cuda_synchronize();
 		
@@ -176,7 +179,11 @@ void jacobi_mixed_1(Information *information, int maxit,
 	cuda_free(Unew_cuda);
 	free_information_cuda(information_cuda);
 	
-	MFLOP = 1e-6*(19.0*I*J*K + 4.0)*iter;
+	// Flop Counts:
+	// jacobi_iteration_cuda: (I*J*K*iter)
+	//		Constants: 	11
+	// 		Update:		15
+	MFLOP += 1e-6*(26.0*I*J*K)*iter;
 
 	// Print the information requested
     if (strcmp("matrix",getenv("OUTPUT_INFO")) == 0){

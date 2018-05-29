@@ -112,17 +112,20 @@ src/jacobi/jacobi_util.o: lib/matrix_routines.h lib/jacobi_util.h
 src/jacobi/jacobi_mixed_1.o: lib/matrix_routines.h lib/jacobi_util.h
 src/jacobi/jacobi_mixed_1.o: lib/poisson.h lib/cuda_routines.h
 src/jacobi/jacobi_mixed_1.o: lib/jacobi_util_cuda.h
-src/jacobi/jacobi_cuda_1.o: lib/poisson_cuda.h lib/jacobi_util.h
+src/jacobi/jacobi_mixed_2.o: lib/matrix_routines.h lib/jacobi_util.h
+src/jacobi/jacobi_mixed_2.o: lib/poisson.h lib/cuda_routines.h
+src/jacobi/jacobi_mixed_2.o: lib/jacobi_util_cuda.h
+src/jacobi/jacobi_cuda_1.o: lib/poisson.h lib/jacobi_util.h
 src/jacobi/jacobi_cuda_1.o: lib/matrix_routines.h lib/cuda_routines.h
 src/jacobi/jacobi_cuda_1.o: lib/jacobi_util_cuda.h
-src/jacobi/jacobi_util_cuda.o: lib/matrix_routines.h lib/jacobi_util.h
-src/jacobi/jacobi_util_cuda.o: lib/cuda_routines.h
-src/util/main.o: lib/tests.h lib/jacobi_util.h lib/tests_cuda.h
+src/jacobi/jacobi_util_cuda.o: lib/jacobi_util.h lib/jacobi_util_cuda.h
+src/jacobi/jacobi_util_cuda.o: lib/matrix_routines.h lib/cuda_routines.h
+src/util/main.o: lib/tests.h lib/jacobi_util.h
 src/util/tests.o: lib/tests.h lib/jacobi_util.h lib/poisson.h lib/init_data.h
 src/util/tests.o: lib/matrix_routines.h
 src/util/matrix_routines.o: lib/jacobi_util.h lib/matrix_routines.h
-src/util/tests_cuda.o: lib/init_data.h lib/jacobi_util.h lib/tests_cuda.h
-src/util/tests_cuda.o: lib/poisson_cuda.h lib/matrix_routines.h
+src/util/tests_cuda.o: lib/init_data.h lib/jacobi_util.h lib/tests.h
+src/util/tests_cuda.o: lib/poisson.h lib/matrix_routines.h
 src/util/tests_cuda.o: lib/cuda_routines.h
 src/util/cuda_routines.o: lib/matrix_routines.h lib/jacobi_util.h
 src/util/cuda_routines.o: lib/cuda_routines.h

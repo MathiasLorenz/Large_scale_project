@@ -9,6 +9,7 @@
 #include "init_data.h"
 #include "tests.h"
 
+extern double MFLOP;
 
 // ============================================================================
 // SINUSOIDAL PROBLEM IN 2D
@@ -49,6 +50,12 @@ void init_sin_2D(double *U, double *F, double *Unew, int Nx, int Ny)
 		U[i] = 0.0;
 		Unew[i] = 0.0;
 	}
+
+	// Flop Counts:
+	//	Constants: 	5
+	//  Sin:		2 * XXXX
+	// 	Update:		7
+	MFLOP += 1e-6*(5.0 + 7.0*I*J);
 }
 
 // ============================================================================

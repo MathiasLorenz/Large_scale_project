@@ -1,16 +1,14 @@
-function memoryVflops(FileName,PlotName,PlotTitle,FuncName,CPU)
+function memoryVflops(FileName,PlotName,PlotTitle,FuncName)
 
 %% Handle input
-if ~exist('CPU','var')
-    CPU = 'XeonE5-2660';
+if ~exist('FuncName','var')
+    FuncName = 'Dummy';
 end
 
 %% Get and shape the data.
 [data] = loadTXT(FileName);
-memory = reshape(data(:,1),length(FuncName),...
-    size(data,1)/length(FuncName))';
-flops  = reshape(data(:,2),length(FuncName),...
-    size(data,1)/length(FuncName))';
+memory = data(:,1)';
+flops  = data(:,2)';
 
 
 %% Fetch the plot if it exists
@@ -19,21 +17,25 @@ if isempty(F)
     F = figure();
 else
     figure(F);
-    clf;
 end
 
 %% Name the plot and set title and size
 F.Name = PlotName;
-F.Position = [300,100,1200,600];
 title(PlotTitle,'FontSize',14)
 
 %% Do the plots
 hold on
-for i = 1:size(memory,2)
-    plot(log2(memory(:,i)),flops(:,i),'-d')
-end
+P = plot(log2(memory),flops,'-d');
 hold off
-legend(FuncName,'FontSize',12)
+
+%% Handle the legend
+CurrentLegend = get(findobj(F,'Type','Legend'),'String');
+if isempty(CurrentLegend)
+    CurrentLegend = FuncName;
+else
+    CurrentLegend{end} = FuncName;
+end
+legend(CurrentLegend);
 
 %% Handle the axes and the ticks
 n = max(2 , floor(min(log2(memory(:,1)))));
@@ -43,6 +45,7 @@ grid on
 A = gca;
 A.XLim(1) = n;
 A.YLim(1) = 0;
+A.YLim(2) = max(max(flops),A.YLim(2))*1.1;
 A.XTick = floor(n);
 while A.XTick(end) < A.XLim(2)
     n = n+1;
@@ -51,12 +54,15 @@ end
 for n = 1:length(A.XTick)
     if floor(2^A.XTick(n)) < 1024
         A.XTickLabel{n} = sprintf('%d kB',floor(2^A.XTick(n)));
-    else
+    elseif (floor(2^A.XTick(n)) > 1024) && (floor(2^A.XTick(n)) < 1024^2)
         A.XTickLabel{n} = sprintf('%d MB',floor(2^A.XTick(n)/1024));
+    else
+        A.XTickLabel{n} = sprintf('%d GB',floor(2^A.XTick(n)/1024^2));
     end
 end
 
 %% Insert Cache lines
+%{
 switch CPU
     case 'XeonE5-2660'
         L1 = 32;
@@ -80,3 +86,4 @@ text(L1p+0.4*(L2p-L1p),Yp,'L2 Cache')
 text(L2p+0.4*(L3p-L2p),Yp,'L3 Cache')
 text(L3p+0.4*(A.XLim(2)-L3p),Yp,'RAM')
 hold off
+%}

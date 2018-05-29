@@ -1,74 +1,66 @@
-function matlabperformance(datPath,figPath)
+function matlabperformance(DataName,datPath,figPath)
+%MATLABPERFORMANCE
+%  This function is designed to output a number of performance plots
+%  (Memory-MFLOP plot). The inputs for the function is listed bellow.
+%  __________________________________________________________________
+%  DataName:
+%       Base name of the files containing the data. Should be the same as
+%       the jobname for LSF based jobs.
+%       The data is assumed to have the name: 
+%           DataName-Method.dat
+%           DataName-N-Method.dat
+%       Where Method is the part which will be used for the label. N defines how 
+%       many cores were used for the computation. Use N if relevant,
+%       otherwise ignore it.
+%
+%  datPath:
+%       Path to where the data is located.
+%
+%  figPath:
+%       Path to where figures should be exported to. If this is empty or
+%       not defined then no figures are exported.
+%
+%  See also GROOT, PRINT.
+
+close all
+if ~exist('DataName','var') || isempty(DataName)
+    DataName = 'perfmixed';
+end
+
+
 if ~exist('datPath','var') || isempty(datPath)
     datPath = '../data/';
-end
-if ~exist('DataName','var') || isempty(DataName)
-    disp('No data specified');
-    return;
 end
 addpath(genpath('./'));
 DataFiles = finddata(datPath,DataName);
 
 %% Performance plots
 
+CreateFigure('Performance');
 for i = 1:length(DataFiles)
 	FileName = [datPath,DataFiles{i}];
-    M = read3DMatrixFromFile(FileName);
-    testMatrix(M,DataFiles{i}(1:end-4));
+    memoryVflops(FileName,DataName,'Performance',getFuncName(FileName));
 end
 if exist('figPath','var') && ~isempty(figPath)
     ExportFigures([],figPath);
 end
 end
 
+function FuncName = getFuncName(FileName)
+k = strfind(FileName,'-');
 
-
-function testMatrix(my_sol,name)
-
-[Nx,Ny,Nz] = size(my_sol);
-gvx = linspace(-1, 1, Nx);
-gvy = linspace(-1, 1, Ny);
-gvz = linspace(-1, 1, Nz);
-[X, Y, Z] = meshgrid(gvx, gvy, gvz);
-
-true_sol = sin(pi*X).*sin(pi*Y).*sin(pi*Z);
-
-%% Calculate max error
-err = max(abs(my_sol(:) - true_sol(:)));
-
-
-%% Plot the solution with true solution
-CreateFigure([name,'_slize']);
-subplot(121);
-surf(my_sol(:, :, round(0.80*Nz)));
-title('Approximated solution at 80% slize')
-axis([0,Nx,0,Ny,-1,1])
-subplot(122);
-surf(true_sol(:, :, round(0.80*Nz)));
-title('Real solution at 80% slize')
-axis([0,Nx,0,Ny,-1,1])
-
-%% Plot the error
-
-err_mat = abs(my_sol - true_sol);
-CreateFigure([name,'_error']);
-surf(err_mat(:, :, round(0.8*Nz)))
-title('Element error for 80% slice')
-xlabel('x')
-ylabel('y')
-zlabel('Error')
-
-%% Plot the error through the z dimension
-
-err_mat = abs(my_sol - true_sol);
-sz = size(err_mat, 3);
-err_vec = zeros(sz);
-
-for i = 1:sz
-    err_vec(i) = max(max(abs(my_sol(:, :, i) - true_sol(:, :, i))));
+if size(k,2) > 1
+    Cores = FileName(k(1)+1 :k(2)-1);
+    FuncName = FileName(k(2)+1:end-4);
+    
+    FuncName = [FuncName,' (n: ',Cores,')'];
+else
+	FuncName = FileName(k(1)+1:end-4);
 end
-CreateFigure([name,'_maximal_error']);
-plot(err_vec);
-xlabel('z slize')
-ylabel('Max error')
+
+spaces = strfind(FuncName,'_');
+FuncName(spaces) = ' ';
+
+
+
 end
