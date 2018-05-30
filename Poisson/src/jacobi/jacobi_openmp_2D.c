@@ -92,7 +92,7 @@ void jacobi_openmp_2D(int Nx, int Ny, int maxit, double threshold,
 	//		Simple:		14
 	//	Norm
 	// 		sqrt:		1
-	MFLOP += 1e-6*( (4.0 + 2.0*4.0 ) + ( 1.0*6.0 + 14.0*Nx*Ny*Nz )*iter );
+	MFLOP += 1e-6*( (4.0 + 2.0*4.0 ) + ( 1.0*6.0 + 14.0*Nx*Ny )*iter );
 
     if (strcmp("matrix",getenv("OUTPUT_INFO")) == 0){
         // Print exit cause
