@@ -120,7 +120,11 @@ void jacobi_cuda_1(Information *information, int maxit,
 	checkCudaErrors(cudaMemcpy(Unew, Unew_cuda, arraySizes, cudaMemcpyDeviceToHost));
 	
 	
-	MFLOP = 1e-6*(19.0*I*J*K + 4.0)*iter;
+	// Flop Counts:
+	// jacobi_iteration_cuda: (iter)
+	// 		Simple: 	21
+	//		Divisions: 	5
+	MFLOP += 1e-6*(21.0 + 5.0*4.0 )*iter*Nx*Ny*Nz;
 
 	// Print the information requested
     if (strcmp("matrix",getenv("OUTPUT_INFO")) == 0){

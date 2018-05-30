@@ -303,6 +303,7 @@ void test_cuda_1(Information *information)
 	jacobi_cuda_1(information,maxiter,tol,U,F,Unew);
 
 	// Save global variables
+	
 	TIME_SPENT = omp_get_wtime() - t;
 	MEMORY = 3.0 * Nx * Ny * Nz * 8.0 / 1024.0;
 

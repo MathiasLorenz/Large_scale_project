@@ -9,7 +9,15 @@ SPATH=Testing/shell
 
 # Make sure the excecutable is up to date
 module load cuda/9.1 mpi/2.1.0-gcc-6.3.0
-cd $EPATH; make realclean; make -s; cd ../
+cd $EPATH; make realclean; make -s; 
+if [ -f jacobiSolver.bin ]
+then 
+	cd ../
+else
+	echo "ERROR:"
+	echo "	jacobiSolver.bin not found. Aborting tests."
+	exit
+fi
 
 # Define files needed by the execution in all tests
 EXEC="$EPATH/jacobiSolver.bin"

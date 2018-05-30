@@ -84,7 +84,15 @@ void jacobi_openmp_2D(int Nx, int Ny, int maxit, double threshold,
 	// ------------------------------------------------------------------------
 	// Finalise
 	
-	MFLOP = 1e-6*(14.0*I*J + 4.0)*iter;
+	// Flop Counts:
+	//	Constants: 
+	//		Simple:		4
+	//		Divisions:	2
+	// 	Update:
+	//		Simple:		14
+	//	Norm
+	// 		sqrt:		1
+	MFLOP += 1e-6*( (4.0 + 2.0*4.0 ) + ( 1.0*6.0 + 14.0*Nx*Ny*Nz )*iter );
 
     if (strcmp("matrix",getenv("OUTPUT_INFO")) == 0){
         // Print exit cause

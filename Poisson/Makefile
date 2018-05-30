@@ -42,7 +42,7 @@ EXEC    = jacobiSolver.bin
 UOBJS   = main tests init_data matrix_routines
 JOBJS   = jacobi_openmp_2D jacobi_openmp_3D jacobi_mpi3D_1 jacobi_mpi3D_2 jacobi_util 
 JOBJS  += jacobi_mixed_1 jacobi_mixed_2
-CUUOBJS = tests_cuda cuda_routines
+CUUOBJS = cuda_routines
 CUJOBJS = jacobi_cuda_1 jacobi_util_cuda
 
 # - Directories
@@ -124,8 +124,5 @@ src/util/main.o: lib/tests.h lib/jacobi_util.h
 src/util/tests.o: lib/tests.h lib/jacobi_util.h lib/poisson.h lib/init_data.h
 src/util/tests.o: lib/matrix_routines.h
 src/util/matrix_routines.o: lib/jacobi_util.h lib/matrix_routines.h
-src/util/tests_cuda.o: lib/init_data.h lib/jacobi_util.h lib/tests.h
-src/util/tests_cuda.o: lib/poisson.h lib/matrix_routines.h
-src/util/tests_cuda.o: lib/cuda_routines.h
 src/util/cuda_routines.o: lib/matrix_routines.h lib/jacobi_util.h
 src/util/cuda_routines.o: lib/cuda_routines.h

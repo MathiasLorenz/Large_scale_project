@@ -50,12 +50,6 @@ void init_sin_2D(double *U, double *F, double *Unew, int Nx, int Ny)
 		U[i] = 0.0;
 		Unew[i] = 0.0;
 	}
-
-	// Flop Counts:
-	//	Constants: 	5
-	//  Sin:		2 * XXXX
-	// 	Update:		7
-	MFLOP += 1e-6*(5.0 + 7.0*I*J);
 }
 
 // ============================================================================
@@ -131,6 +125,7 @@ void init_sin_3D(double *U, double *F, double *Unew, int Nx, int Ny, int Nz)
 		z += hi;
 	}
 
+
 	// Set U and Unew to 0
 	for (int i = 0; i < I*J*K; i++)
 	{
@@ -140,7 +135,7 @@ void init_sin_3D(double *U, double *F, double *Unew, int Nx, int Ny, int Nz)
 }
 
 // ============================================================================
-// SINUSOIDAL PROBLEM IN 3D
+// SINUSOIDAL PROBLEM IN 3D USING MPI
 
 void init_sin_mpi3D_1(double *U, double *F, double *Unew, 
 	int loc_Nx, int loc_Ny, int loc_Nz, int rank, int global_Nz)
@@ -188,7 +183,7 @@ void init_sin_mpi3D_1(double *U, double *F, double *Unew,
 }
 
 // ============================================================================
-// SINUSOIDAL PROBLEM IN 3D
+// SINUSOIDAL PROBLEM IN 3D USING MPI
 
 void init_sin_mpi3D_2(double *U, double *F, double *Unew, Information *information)
 {

@@ -46,6 +46,7 @@ A = gca;
 A.XLim(1) = n;
 A.YLim(1) = 0;
 A.YLim(2) = max(max(flops),A.YLim(2))*1.1;
+A.YScale  = 'log';
 A.XTick = floor(n);
 while A.XTick(end) < A.XLim(2)
     n = n+1;
@@ -54,7 +55,7 @@ end
 for n = 1:length(A.XTick)
     if floor(2^A.XTick(n)) < 1024
         A.XTickLabel{n} = sprintf('%d kB',floor(2^A.XTick(n)));
-    elseif (floor(2^A.XTick(n)) > 1024) && (floor(2^A.XTick(n)) < 1024^2)
+    elseif (floor(2^A.XTick(n)) >= 1024) && (floor(2^A.XTick(n)) < 1024^2)
         A.XTickLabel{n} = sprintf('%d MB',floor(2^A.XTick(n)/1024));
     else
         A.XTickLabel{n} = sprintf('%d GB',floor(2^A.XTick(n)/1024^2));

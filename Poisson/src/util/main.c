@@ -99,13 +99,11 @@ int main(int argc, char *argv[])
 
 	if (strcmp(T, "omp2d") == 0)
 		test_jacobi_2D(Nx, Ny);
-
 	else if (strcmp(T, "omp3d") == 0)
 		test_jacobi_3D(Nx, Ny, Nz);
 
 	else if (strcmp(T, "mpi3d_1") == 0)
 		test_jacobi_mpi3D_1(&information);
-
 	else if (strcmp(T, "mpi3d_2") == 0)
 		test_jacobi_mpi3D_2(&information);
 
@@ -126,6 +124,12 @@ int main(int argc, char *argv[])
 	}
 	// ------------------------------------------------------------------------
 	// Handling the printing of statistics and data.
+	
+	// Flop Counts Initialize:
+	//	Constants: 	7
+	//  Sin:		3 * 15
+	// 	Update:		10
+	MFLOP += 1e-6*(7.0 + ( 3.0*15.0 + 10.0 )*Nx*Ny*Nz);
 	
 	if (strcmp("timing",getenv("OUTPUT_INFO")) == 0 && rank == 0){
 		printf("Memory: %10.4f ", MEMORY);

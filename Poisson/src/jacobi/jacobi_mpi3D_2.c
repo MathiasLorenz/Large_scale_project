@@ -148,7 +148,14 @@ void jacobi_mpi3D_2(Information *information, int maxit,
 	free(s_buf1); free(s_buf2);
 	free(r_buf1); free(r_buf2);
 	
-	MFLOP = 1e-6*(19.0*I*J*K + 4.0)*iter;
+	// Flop Counts:
+	// jacobi_iteration: (iter)
+	//		Constants: 
+	//			Simple:		6
+	//			Divisions:	5
+	// 		Update:
+	//			Simple:		15
+	MFLOP += 1e-6*( (6.0 + 5.0*4.0 ) + 15.0*Nx*Ny*Nz)*iter;
 
 	// Print the information requested
     if (strcmp("matrix",getenv("OUTPUT_INFO")) == 0){

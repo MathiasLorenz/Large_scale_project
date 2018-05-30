@@ -27,6 +27,9 @@ void jacobi_mixed_2(Information *information, int maxit,
 	// Read the information structure
 	int rank = information->rank;
 	int size = information->size;
+	int Nx 	 = information->global_Nx;
+	int Ny 	 = information->global_Ny;
+	int Nz 	 = information->global_Nz;
 	int loc_Nx = information->loc_Nx[rank];
 	int loc_Ny = information->loc_Ny[rank];
 	int loc_Nz = information->loc_Nz[rank];
@@ -92,8 +95,9 @@ void jacobi_mixed_2(Information *information, int maxit,
         jacobi_iteration_cuda(
 			information, information_cuda, U_cuda, F_cuda, Unew_cuda
 		);
-		
-        // Swap the arrays and check for convergence
+
+        // Swap the arrays
+		cuda_synchronize();
         swap_array( &U_cuda, &Unew_cuda );
 
 		// Extract boundaries
@@ -181,7 +185,11 @@ void jacobi_mixed_2(Information *information, int maxit,
 	cuda_free(Unew_cuda);
 	free_information_cuda(information_cuda);
 	
-	MFLOP = 1e-6*(19.0*I*J*K + 4.0)*iter;
+	// Flop Counts:
+	// jacobi_iteration_cuda: (iter)
+	// 		Simple: 	21
+	//		Divisions: 	5
+	MFLOP += 1e-6*(21.0 + 5.0*4.0 )*iter*Nx*Ny*Nz;
 
 	// Print the information requested
     if (strcmp("matrix",getenv("OUTPUT_INFO")) == 0){
