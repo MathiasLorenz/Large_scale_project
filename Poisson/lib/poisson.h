@@ -17,6 +17,8 @@ void jacobi_mpi3D_1(Information *information, int maxit, double threshold,
     double *U, double *F, double *Unew);
 void jacobi_mpi3D_2(Information *information, int maxit, double threshold,
     double *U, double *F, double *Unew);
+void jacobi_mpi3D_3(Information *information, int maxit, double threshold,
+    double *U, double *F, double *Unew);
 
 void jacobi_cuda_1(Information *information, int maxit, double threshold, 
 	double *U, double *F, double *Unew);

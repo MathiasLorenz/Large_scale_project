@@ -82,7 +82,6 @@ void test_jacobi_3D(Information *information, char const *solver)
 	int loc_Ny = information->loc_Ny[rank];
 	int loc_Nz = information->loc_Nz[rank];
 
-	printf("SIZE: %d\n",size);
 	// Allocation
 	double *U, *F, *Unew, *A = NULL;
 	U = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
@@ -129,6 +128,8 @@ void test_jacobi_3D(Information *information, char const *solver)
 		jacobi_mpi3D_1(information, maxiter, tol, U, F, Unew);
 	else if (strcmp(solver, "mpi3d_2") == 0)
 		jacobi_mpi3D_2(information, maxiter, tol, U, F, Unew);
+	else if (strcmp(solver, "mpi3d_3") == 0)
+		jacobi_mpi3D_3(information, maxiter, tol, U, F, Unew);
 
 	else if (strcmp(solver, "cuda_1") == 0)
 		jacobi_cuda_1(information,maxiter,tol,U,F,Unew);
