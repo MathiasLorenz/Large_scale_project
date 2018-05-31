@@ -11,8 +11,7 @@ extern "C"{
 #endif //__cplusplus
 
 void test_jacobi_2D(int Nx, int Ny);
-void test_jacobi	(Information *information, char const *solver);
-void test_jacobi_mpi(Information *information, char const *solver);
+void test_jacobi_3D(Information *information, char const *solver);
 
 #ifdef __cplusplus
 } // Extern "C"

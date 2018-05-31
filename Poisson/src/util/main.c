@@ -100,23 +100,28 @@ int main(int argc, char *argv[])
 	if (strcmp(T, "omp2d") == 0)
 		test_jacobi_2D(Nx, Ny);
 	else if (
-		strcmp(T, "omp3d") == 0 || 
-		strcmp(T, "cuda_1") == 0)
-		test_jacobi(&information,T);
-	
-	else if (
+		strcmp(T, "omp3d") == 0   ||
+
 		strcmp(T, "mpi3d_1") == 0 || 
 		strcmp(T, "mpi3d_2") == 0 ||
 		strcmp(T, "mpi3d_3") == 0 || 
 		
+		strcmp(T, "cuda_1") == 0  ||
+
 		strcmp(T, "mixed_1") == 0 || 
 		strcmp(T, "mixed_2") == 0)
-		test_jacobi_mpi(&information, T);
+		test_jacobi_3D(&information,T);
 
 	else {
 		fprintf(stderr, 
 			"\nInvalid test name: %s\n"
-			"   Accepts: omp2d, omp3d, mpi3d_1, mpi3d_2, cuda_1, mixed_1\n\n",T);
+			"   Accepts: "
+			"omp2d, omp3d, "
+			"mpi3d_1, mpi3d_2, mpi3d_3 "
+			"cuda_1, "
+			"mixed_1, mixed_2"
+			".\n\n"
+			,T);
 		MPI_Finalize();
 		return EXIT_FAILURE;
 	}
