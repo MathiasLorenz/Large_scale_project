@@ -21,6 +21,8 @@ void test_cuda_1(Information *information);
 void test_jacobi_mixed_1(Information *information);
 void test_jacobi_mixed_2(Information *information);
 
+void test_jacobi_mpi(Information *information, char const *solver);
+
 
 #ifdef __cplusplus
 } // Extern "C"

@@ -252,6 +252,75 @@ void test_jacobi_mpi3D_2(Information *information)
 }
 
 // ============================================================================
+// 3D MPI TEST 3
+
+void test_jacobi_mpi3D_3(Information *information)
+{
+	// Read the information structure
+	int rank = information->rank;
+	int Nx = information->global_Nx;
+	int Ny = information->global_Ny;
+	int Nz = information->global_Nz;
+	int loc_Nx = information->loc_Nx[rank];
+	int loc_Ny = information->loc_Ny[rank];
+	int loc_Nz = information->loc_Nz[rank];
+
+	// Allocation
+	double *U, *F, *Unew, *A = NULL;
+	U = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
+	F = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
+	Unew = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
+	if (!U || !F || !Unew) {
+		// Consider fail cases if one thread ies and the others do not
+		fprintf(stderr, "Error in malloc, pointer is NULL.\n");
+		return;
+	}
+	
+	// Array for true solution if requested
+	if (strcmp("error", getenv("OUTPUT_INFO")) == 0)
+	{
+		A = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
+		if (!A) { fprintf(stderr, "Error in malloc, pointer is NULL.\n"); return; }
+		generate_true_solution(A, information);
+	}
+
+	// Initialise the problem
+	if (strcmp("sin", getenv("PROBLEM_NAME")) == 0)
+		init_sin_mpi3D_2(U, F, Unew, information);
+	else {
+		fprintf(stderr, "Problem type is not supported.\n");
+		return;
+	}
+
+	// Handle the environmental variables
+	int maxiter = atoi(getenv("MAX_ITER"));
+	double tol = atof(getenv("TOLERANCE"));
+	
+	// Main computation and time
+	double t = omp_get_wtime();
+	
+	jacobi_mpi3D_3(information, maxiter, tol, U, F, Unew);
+
+	MPI_Barrier(MPI_COMM_WORLD);	
+	// Save global variables
+	TIME_SPENT = omp_get_wtime() - t;
+	MEMORY = 3.0 * Nx * Ny * Nz * 8.0 / 1024.0;
+
+	// Print the needed information
+	if (strcmp("matrix_slice", getenv("OUTPUT_INFO")) == 0)
+		array_print_3d_slice(U, Nx, Ny, Nz, Nz / 2, "%10g ");
+	else if (strcmp("matrix_full", getenv("OUTPUT_INFO")) == 0)
+		print_jacobi3d_z_sliced(U, information, "%10g ");
+	else if (strcmp("error", getenv("OUTPUT_INFO")) == 0)
+		compute_global_error(information, A, U);
+		
+
+	MPI_Barrier(MPI_COMM_WORLD);
+	// Free the arrays created for the computation
+	free(U); free(F); free(A); free(Unew);		
+}
+
+// ============================================================================
 // CUDA TEST
 
 void test_cuda_1(Information *information)
@@ -286,7 +355,7 @@ void test_cuda_1(Information *information)
 
 	// Initialise the boundary values
 	if (strcmp("sin", getenv("PROBLEM_NAME")) == 0)
-	init_sin_3D(U, F, Unew, Nx, Ny, Nz);
+		init_sin_3D(U, F, Unew, Nx, Ny, Nz);
 	// else if (strcmp("rad",getenv("PROBLEM_NAME")) == 0)
 	//    init_rad_2D(U, F, Unew, Nx, Ny);
 	else {
@@ -456,3 +525,90 @@ void test_jacobi_mixed_2(Information *information)
 	// Free the arrays created for the computation
 	free(U); free(F); free(A); free(Unew);		
 }
+
+
+// ============================================================================
+// MIXED TEST 2
+/*
+void test_jacobi_mpi(Information *information, char const *solver)
+{
+	// Read the information structure
+	int rank = information->rank;
+	int Nx = information->global_Nx;
+	int Ny = information->global_Ny;
+	int Nz = information->global_Nz;
+	int loc_Nx = information->loc_Nx[rank];
+	int loc_Ny = information->loc_Ny[rank];
+	int loc_Nz = information->loc_Nz[rank];
+
+	// Allocation
+	double *U, *F, *Unew, *A = NULL;
+	U = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
+	F = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
+	Unew = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
+	if (!U || !F || !Unew) {
+		// Consider fail cases if one thread ies and the others do not
+		fprintf(stderr, "Error in malloc, pointer is NULL.\n");
+		return;
+	}
+	
+	// Array for true solution if requested
+	if (strcmp("error", getenv("OUTPUT_INFO")) == 0)
+	{
+		A = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
+		if (!A) { fprintf(stderr, "Error in malloc, pointer is NULL.\n"); return; }
+		generate_true_solution(A, information);
+	}
+
+	// Initialise the problem
+	if (strcmp("sin", getenv("PROBLEM_NAME")) == 0)
+		init_sin_mpi3D_2(U, F, Unew, information);
+	else {
+		fprintf(stderr, "Problem type is not supported.\n");
+		return;
+	}
+
+	// Handle the environmental variables
+	int maxiter = atoi(getenv("MAX_ITER"));
+	double tol = atof(getenv("TOLERANCE"));
+	
+	// Main computation and time
+	double t = omp_get_wtime();
+	
+	else if (strcmp(solver, "mpi3d_1") == 0)
+		jacobi_mpi3D_1(information, maxiter, tol, U, F, Unew);
+	else if (strcmp(solver, "mpi3d_2") == 0)
+		jacobi_mpi3D_2(information, maxiter, tol, U, F, Unew);
+
+	else if (strcmp(solver, "mixed_1") == 0)
+		jacobi_mixed_1(information, maxiter, tol, U, F, Unew);
+	else if (strcmp(solver, "mixed_2") == 0)
+		jacobi_mixed_2(information, maxiter, tol, U, F, Unew);
+
+	else {
+		fprintf(stderr, 
+			"\nInvalid test name: %s\n"
+			"   Accepts: omp2d, omp3d, mpi3d_1, mpi3d_2, cuda_1, mixed_1\n\n",T);
+		MPI_Finalize();
+		return EXIT_FAILURE;
+	}
+
+	MPI_Barrier(MPI_COMM_WORLD);
+	// Save global variables
+	TIME_SPENT = omp_get_wtime() - t;
+	MEMORY = 3.0 * Nx * Ny * Nz * 8.0 / 1024.0;
+
+	// Print the needed information
+	if (strcmp("matrix_slice", getenv("OUTPUT_INFO")) == 0)
+		array_print_3d_slice(U, Nx, Ny, Nz, Nz / 2, "%10g ");
+	else if (strcmp("matrix_full", getenv("OUTPUT_INFO")) == 0)
+		print_jacobi3d_z_sliced(U, information, "%10g ");
+	else if (strcmp("error", getenv("OUTPUT_INFO")) == 0)
+		compute_global_error(information, A, U);
+		
+
+	MPI_Barrier(MPI_COMM_WORLD);
+	// Free the arrays created for the computation
+	free(U); free(F); free(A); free(Unew);		
+}
+*/

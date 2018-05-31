@@ -20,7 +20,7 @@ function matlabperformance(DataName,datPath,figPath)
 %       Path to where figures should be exported to. If this is empty or
 %       not defined then no figures are exported.
 %
-%  See also GROOT, PRINT.
+%  See also MEMORYVFLOPS.
 
 close all
 if ~exist('DataName','var') || isempty(DataName)

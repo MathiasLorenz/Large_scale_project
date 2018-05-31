@@ -13,8 +13,8 @@
 # -- Technical options
 
 # Ask for n cores placed on R host.
-#BSUB -n 4
-#BSUB -R "span[ptile=1]"
+#BSUB -n 10
+#BSUB -R "span[ptile=2]"
 
 # Memory specifications. Amount we need and when to kill the
 # program using too much memory.
@@ -22,7 +22,7 @@
 #BSUB -M 20GB
 
 # Time specifications (hh:mm)
-#BSUB -W 04:00
+#BSUB -W 00:03
 
 # GPU options
 #BSUB -gpu "num=1:mode=exclusive_process"
@@ -35,12 +35,10 @@
 #BSUB -N 		# Send notification at completion
 
 echo --------------------------------------------------------------------------
-echo 'Job: '$LSB_JOBNAME', is running on '$LSB_NODES' nodes'
+echo 'Job: '$LSB_JOBNAME', is running on '$LSB_DJOB_NUMPROC' cores.'
 echo --------------------------------------------------------------------------
 echo LSB: job identifier is $LSB_JOBID
 echo LSB: execution queue is $LSB_QUEUE
-echo LSB: number of nodes is $LSB_NODE
-echo LSB: number of processors per node is $LSB_PROC
 echo LSB: total number of processors is $LSB_MAX_NUM_PROCESSORS
 echo LSB: working directory is $LSB_OUTDIR
 echo --------------------------------------------------------------------------
@@ -67,6 +65,9 @@ Prepare()
 	
 	# Define modules
 	module load cuda/9.1 mpi/2.1.0-gcc-6.3.0
+
+	nvidia-smi
+	/appl/cuda/9.1/samples/bin/x86_64/linux/release/deviceQuery
 }
 
 # End of Preparation
@@ -77,13 +78,14 @@ Program()
 {
 	echo ' '
 	echo Running computations
-	
+
+	start=`date +%s`
 	# -------------------------------------------------------------------------
 	# Define the actual test part of the script 
 
 	# Run the programs (Max array size for GPU: 874)
-	#N="8 16"
-	N="32 64 128 254 512"
+	N="8 16"
+	#N="32 64 128 254 512"
 
 	TEST="mixed_1 mixed_2"
 	for t in $TEST
@@ -91,11 +93,16 @@ Program()
 		dat=$t.dat
 		for n in $N 
 		do
+			echo "Test: $t, N: $n"
 			mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin $t $n >> $LSB_JOBNAME-$dat
 		done
 	done
 
 	# -------------------------------------------------------------------------
+	end=`date +%s`
+
+	runtime=$((end-start))
+	echo "Time spent on computations: $runtime"
 	mv -t $DPATH *.dat 
 }
 

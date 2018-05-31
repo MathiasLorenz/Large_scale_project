@@ -7,17 +7,19 @@ mpirun must be used for all mpi versions.
 	> ./jacobiSolver METHOD NX NY NZ
 
 where:
-	METHOD	: omp2d, omp3d, mpi3d_1, mpi3d_2.
+	METHOD :
 		omp2d	: Is the Jacobi method using OpenMP for a 2D problem.
 		omp3d	: Is the Jacobi method using OpenMP for a 3D problem.
 		mpi3d_1	: Is the Jacobi method using MPI with a single split along Z.
 		mpi3d_2	: Is the Jacobi method using MPI with multiple split along Z.
 		cuda_1	: First implementation using cuda for a single GPU.
 		mixed_1	: First implementation using both MPI and CUDA. Very naive.
+		mixed_2	: Second implementation using both MPI and CUDA. Copies only 
+				  needed data.
 
 	NX NY NZ : Integer numbers.
 		The number of points in the problem, fx. 7 by 7. Nz is the size in the 
-		3rd dimension.
+		3rd dimension. NY and NZ can be omitted for cubic domains.
 			B B B B B B B
 			B X X X X X B
 			B X X X X X B
@@ -65,7 +67,7 @@ Extra environmental variables: ( > ENV_NAME=value ./jacobiSolver ...)
 		error:
 			Prints an output of the dimension sizes in terms of number of
 			gridpoints in each and the maximal absolute difference between 
-			the analytical solution and the solution calculated in the program.
+			the analytical solution and the solution calculated in the program.	
 		timing:
 			Defines that the output should be the timing info. Giving
 			the memory footprint (kB), Mflops and Walltime for the main loop.

@@ -106,6 +106,8 @@ int main(int argc, char *argv[])
 		test_jacobi_mpi3D_1(&information);
 	else if (strcmp(T, "mpi3d_2") == 0)
 		test_jacobi_mpi3D_2(&information);
+	else if (strcmp(T, "mpi3d_3") == 0)
+		test_jacobi_mpi3D_3(&information);
 
 	else if (strcmp(T, "cuda_1") == 0)
 		test_cuda_1(&information);

@@ -59,8 +59,6 @@ void jacobi_cuda_1(Information *information, int maxit,
 	checkCudaErrors(cudaMemcpyAsync(F_cuda   , F   , arraySizes, cudaMemcpyHostToDevice));
 	checkCudaErrors(cudaMemcpyAsync(Unew_cuda, Unew, arraySizes, cudaMemcpyHostToDevice));
 	
-	checkCudaErrors(cudaDeviceSynchronize());
-	
 	// ------------------------------------------------------------------------
 	// Setup blocks for the GPU
 	dim3 BlockSize = dim3(32,32,32);
@@ -84,6 +82,7 @@ void jacobi_cuda_1(Information *information, int maxit,
 
 	// ========================================================================
 	// Run the iterative method
+	checkCudaErrors(cudaDeviceSynchronize());
     for(iter = 0; iter < maxit ; iter++){
 		// Remember to implement tolerance
 		/*
@@ -119,9 +118,6 @@ void jacobi_cuda_1(Information *information, int maxit,
 	// Finalise
 	// Copy data from the GPU
 	checkCudaErrors(cudaMemcpy(U   , U_cuda   , arraySizes, cudaMemcpyDeviceToHost));
-	checkCudaErrors(cudaMemcpy(F   , F_cuda   , arraySizes, cudaMemcpyDeviceToHost));
-	checkCudaErrors(cudaMemcpy(Unew, Unew_cuda, arraySizes, cudaMemcpyDeviceToHost));
-	
 	
 	// Flop Counts:
 	// jacobi_iteration_cuda: (iter)
