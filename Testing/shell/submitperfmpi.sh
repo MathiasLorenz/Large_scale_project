@@ -3,7 +3,7 @@
 # --  General options 
 
 # Naming of the job and queue name
-#BSUB -J performance
+#BSUB -J perfmpi
 #BSUB -q gpuv100
 
 # Specify
@@ -85,8 +85,7 @@ Program()
 	#N="8 16"
 	N="32 64 128 254 512"
 
-	# Run the MPI based tests
-	TEST="mpi3d_3 mixed_2"
+	TEST="mpi3d_1 mpi3d_2 mpi3d_3"
 	for t in $TEST
 	do
 		dat=$t.dat
@@ -94,18 +93,6 @@ Program()
 		do
 			echo "Test: $t, N: $n"
 			mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin $t $n >> $LSB_JOBNAME-$dat
-		done
-	done
-
-	# Run the non MPI based tests
-	TEST="omp3d cuda_1"
-	for t in $TEST
-	do
-		dat=$t.dat
-		for n in $N 
-		do
-			echo "Test: $t, N: $n"
-			./jacobiSolver.bin $t $n >> $LSB_JOBNAME-$dat
 		done
 	done
 

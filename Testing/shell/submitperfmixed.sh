@@ -13,8 +13,8 @@
 # -- Technical options
 
 # Ask for n cores placed on R host.
-#BSUB -n 10
-#BSUB -R "span[ptile=2]"
+#BSUB -n 6
+#BSUB -R "span[ptile=1]"
 
 # Memory specifications. Amount we need and when to kill the
 # program using too much memory.
@@ -22,7 +22,7 @@
 #BSUB -M 20GB
 
 # Time specifications (hh:mm)
-#BSUB -W 00:03
+#BSUB -W 01:00
 
 # GPU options
 #BSUB -gpu "num=1:mode=exclusive_process"
@@ -66,8 +66,6 @@ Prepare()
 	# Define modules
 	module load cuda/9.1 mpi/2.1.0-gcc-6.3.0
 
-	nvidia-smi
-	/appl/cuda/9.1/samples/bin/x86_64/linux/release/deviceQuery
 }
 
 # End of Preparation
@@ -84,8 +82,8 @@ Program()
 	# Define the actual test part of the script 
 
 	# Run the programs (Max array size for GPU: 874)
-	N="8 16"
-	#N="32 64 128 254 512"
+	#N="8 16"
+	N="32 64 128 254 512"
 
 	TEST="mixed_1 mixed_2"
 	for t in $TEST
