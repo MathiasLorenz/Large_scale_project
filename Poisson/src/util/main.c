@@ -96,26 +96,22 @@ int main(int argc, char *argv[])
 	
 	// ------------------------------------------------------------------------
 	// Make the call for the desired test
-
+	
 	if (strcmp(T, "omp2d") == 0)
 		test_jacobi_2D(Nx, Ny);
-	else if (strcmp(T, "omp3d") == 0)
-		test_jacobi_3D(Nx, Ny, Nz);
-
-	else if (strcmp(T, "mpi3d_1") == 0)
-		test_jacobi_mpi3D_1(&information);
-	else if (strcmp(T, "mpi3d_2") == 0)
-		test_jacobi_mpi3D_2(&information);
-	else if (strcmp(T, "mpi3d_3") == 0)
-		test_jacobi_mpi3D_3(&information);
-
-	else if (strcmp(T, "cuda_1") == 0)
-		test_cuda_1(&information);
-
-	else if (strcmp(T, "mixed_1") == 0)
-		test_jacobi_mixed_1(&information);
-	else if (strcmp(T, "mixed_2") == 0)
-		test_jacobi_mixed_2(&information);
+	else if (
+		strcmp(T, "omp3d") == 0 || 
+		strcmp(T, "cuda_1") == 0)
+		test_jacobi(&information,T);
+	
+	else if (
+		strcmp(T, "mpi3d_1") == 0 || 
+		strcmp(T, "mpi3d_2") == 0 ||
+		strcmp(T, "mpi3d_3") == 0 || 
+		
+		strcmp(T, "mixed_1") == 0 || 
+		strcmp(T, "mixed_2") == 0)
+		test_jacobi_mpi(&information, T);
 
 	else {
 		fprintf(stderr, 
