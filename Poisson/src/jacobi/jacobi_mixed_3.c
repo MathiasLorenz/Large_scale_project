@@ -45,10 +45,12 @@ void jacobi_mixed_3(Information *information, int maxit,
 	// ------------------------------------------------------------------------
 	// Preparation
 	// Send and receive buffers for MPI
-	double *s_buf1 = dmalloc_2d_l(loc_Nx, loc_Ny); // Buffer 1 to send with MPI
-	double *r_buf1 = dmalloc_2d_l(loc_Nx, loc_Ny); // Buffer 1 to send with MPI
-	double *s_buf2 = dmalloc_2d_l(loc_Nx, loc_Ny); // Buffer 2 to send with MPI
-	double *r_buf2 = dmalloc_2d_l(loc_Nx, loc_Ny); // Buffer 2 to send with MPI
+	int loc_size = loc_Nx*loc_Ny*sizeof(double);
+	double *s_buf1, *r_buf1, *s_buf2, *r_buf2;
+	cuda_malloc_host((void**)&s_buf1, loc_size); // Buffer 1 to send with MPI
+	cuda_malloc_host((void**)&r_buf1, loc_size); // Buffer 1 to receive with MPI
+	cuda_malloc_host((void**)&s_buf2, loc_size); // Buffer 2 to send with MPI
+	cuda_malloc_host((void**)&r_buf2, loc_size); // Buffer 2 to receive with MPI
     if(!U || !F || !Unew || !s_buf1 || !r_buf1 || !s_buf2 || !r_buf2) {
 		fprintf(stderr,"Pointer is NULL.\n");
 		return;
@@ -181,8 +183,8 @@ void jacobi_mixed_3(Information *information, int maxit,
 	cuda_synchronize();
 
 	// Free the arrays
-	free(s_buf1); free(s_buf2);
-	free(r_buf1); free(r_buf2);
+	cuda_host_free(s_buf1); cuda_host_free(s_buf2);
+	cuda_host_free(r_buf1); cuda_host_free(r_buf2);
 	cuda_free(U_cuda   );
 	cuda_free(F_cuda   );
 	cuda_free(Unew_cuda);

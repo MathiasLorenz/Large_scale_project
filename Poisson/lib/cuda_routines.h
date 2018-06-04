@@ -10,7 +10,9 @@ extern "C"{
 // ALLOCATE AND DEALLOCATE DATA ON THE DEVICE
 
 void cuda_malloc(void **device_array, int N);
+void cuda_malloc_host(void **host_array, int N);
 void cuda_free(double *device_array);
+void cuda_host_free(double *host_array);
 
 // ============================================================================
 // COPY DATA TO AND FROM DEVICE

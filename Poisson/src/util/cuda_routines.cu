@@ -11,20 +11,33 @@
 // ============================================================================
 // ALLOCATE AND DEALLOCATE DATA ON THE DEVICE
 
-void cuda_malloc(void** device_array, int N){
-	checkCudaErrors(cudaMalloc( device_array ,N));
+void cuda_malloc(void **device_array, int N_bytes)
+{
+	checkCudaErrors(cudaMalloc(device_array , N_bytes));
 }
-void cuda_free(double *device_array){
+void cuda_malloc_host(void **host_array, int N_bytes)
+{
+	checkCudaErrors(cudaMallocHost(host_array, N_bytes));
+}
+
+void cuda_free(double *device_array)
+{
 	checkCudaErrors(cudaFree(device_array));
+}
+void cuda_host_free(double *host_array)
+{
+	checkCudaErrors(cudaFreeHost(host_array));
 }
 
 // ============================================================================
 // COPY DATA TO AND FROM DEVICE
 
-void copy_to_device(double *host, int N, double *device){
+void copy_to_device(double *host, int N, double *device)
+{
 	checkCudaErrors(cudaMemcpyAsync(device, host, N, cudaMemcpyHostToDevice));
 }
-void copy_from_device(double *host, int N, double *device){
+void copy_from_device(double *host, int N, double *device)
+{
 	checkCudaErrors(cudaMemcpyAsync(host, device, N, cudaMemcpyDeviceToHost));
 }
 

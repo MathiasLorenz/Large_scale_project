@@ -83,12 +83,12 @@ Program()
 	# Define the actual test part of the script 
 
 	# Run the program
-	N="200"
-	#N="10 20 50 100 200"
+	#N="200"
+	N="10 20 50 100 200"
 	for n in $N 
 	do
-		#OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_1 $n >> $LSB_JOBNAME-$n.dat
-		OUTPUT_INFO=matrix_full mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_3 $n >> $LSB_JOBNAME-$n.dat
+		#OUTPUT_INFO=matrix_full mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_3 $n >> $LSB_JOBNAME-$n.dat
+		OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_3 $n
 	done
 
 	# -------------------------------------------------------------------------

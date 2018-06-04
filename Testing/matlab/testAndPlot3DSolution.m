@@ -2,7 +2,7 @@
 clc, clear, close all
 addpath 'functions'
 
-fname = '../data/mixed_3_test-200.dat';
+fname = '../data/mixed_3_test-50.dat';
 
 my_sol = read3DMatrixFromFile(fname);
 [Nx,Ny,Nz] = size(my_sol);
@@ -73,10 +73,19 @@ plot(err_vec);
 %% Plot error at max error
 
 [~, max_err_idx] = max(err_vec);
-CreateFigure('Solution at max error');
+titlestring = sprintf('Error at index %d.', max_err_idx);
+CreateFigure(titlestring);
 subplot(121);
 surf(my_sol(:, :, max_err_idx));
-axis([0,Nx,0,Ny,-1,1])
+%axis([0,Nx,0,Ny,-1,1])
 subplot(122);
 surf(true_sol(:, :, max_err_idx));
-axis([0,Nx,0,Ny,-1,1])
+%axis([0,Nx,0,Ny,-1,1])
+
+%% Plot the error againnnnn
+
+err_mat = abs(my_sol - true_sol);
+idx = 9;
+titlestring = sprintf('Error at index %d.', idx);
+CreateFigure(titlestring);
+surf(err_mat(:, :, idx))
