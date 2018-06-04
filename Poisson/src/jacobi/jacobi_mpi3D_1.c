@@ -45,8 +45,8 @@ void jacobi_mpi3D_1(Information *information, int maxit,
 	int N_buffer = loc_Nx*loc_Ny;
 
 	// Rewritting to C style coordinates
-    int I, J, K;
-	I = loc_Nz; J = loc_Ny; K = loc_Nx;
+    int J, K;
+	J = loc_Ny; K = loc_Nx;
 
 	// Remember to implement tolerance
 	/*
