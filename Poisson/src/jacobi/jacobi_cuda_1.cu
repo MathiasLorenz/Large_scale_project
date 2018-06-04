@@ -90,7 +90,7 @@ void jacobi_cuda_1(Information *information, int maxit,
 		*/
 
 		// Compute the iteration of the jacobi method
-		jacobi_cuda_iteration<<<BlockSize,BlockAmount>>>(information_cuda, U_cuda, F_cuda, Unew_cuda);
+		jacobi_iteration_kernel<<<BlockSize,BlockAmount>>>(information_cuda, U_cuda, F_cuda, Unew_cuda);
 		
 		checkCudaErrors(cudaDeviceSynchronize());
 
