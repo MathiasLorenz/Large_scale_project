@@ -3,8 +3,8 @@
 # --  General options 
 
 # Naming of the job and queue name
-#BSUB -J performance
-#BSUB -q gpuv100
+#BSUB -J mpi_3
+#BSUB -q hpc
 
 # Specify
 #BSUB -oo Output.out 
@@ -13,19 +13,16 @@
 # -- Technical options
 
 # Ask for n cores placed on R host.
-#BSUB -n 2
-#BSUB -R "span[ptile=2]"
+#BSUB -n 13
+#BSUB -R "span[ptile=1]"
 
 # Memory specifications. Amount we need and when to kill the
 # program using too much memory.
-#BSUB -R "rusage[mem=20GB]"
-#BSUB -M 20GB
+#BSUB -R "rusage[mem=10GB]"
+#BSUB -M 10GB
 
 # Time specifications (hh:mm)
 #BSUB -W 01:00
-
-# GPU options
-#BSUB -gpu "num=1:mode=exclusive_process"
 
 # -- Notification options
 
@@ -65,7 +62,6 @@ Prepare()
 	
 	# Define modules
 	module load cuda/9.1 mpi/2.1.0-gcc-6.3.0
-
 }
 
 # End of Preparation
@@ -76,44 +72,26 @@ Program()
 {
 	echo ' '
 	echo Running computations
-
-	start=`date +%s`
+	
 	# -------------------------------------------------------------------------
 	# Define the actual test part of the script 
 
-	# Run the programs (Max array size for GPU: 874)
-	#N="8 16"
-	N="32 64 128 254 512"
-
-	# Run the MPI based tests
-	TEST="mpi3d_3 mixed_2"
-	for t in $TEST
+	# Run the program
+	N="50 200"
+	for n in $N 
 	do
-		dat=$t.dat
-		for n in $N 
-		do
-			echo "Test: $t, N: $n"
-			mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin $t $n >> $LSB_JOBNAME-$dat
-		done
-	done
+		>&2 echo "$n MPI3d_1:"
+		OUTPUT_INFO=matrix_full mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_1 $n >> $LSB_JOBNAME-$n.dat
 
-	# Run the non MPI based tests
-	TEST="omp3d cuda_1"
-	for t in $TEST
-	do
-		dat=$t.dat
-		for n in $N 
-		do
-			echo "Test: $t, N: $n"
-			./jacobiSolver.bin $t $n >> $LSB_JOBNAME-$dat
-		done
+		>&2 echo "$n MPI3d_2:"
+		OUTPUT_INFO=matrix_full mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_2 $n >> $LSB_JOBNAME-$n.dat
+
+		>&2 echo "$n MPI3d_3:"
+		OUTPUT_INFO=matrix_full mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_3 $n >> $LSB_JOBNAME-$n.dat
+
 	done
 
 	# -------------------------------------------------------------------------
-	end=`date +%s`
-
-	runtime=$((end-start))
-	echo "Time spent on computations: $runtime"
 	mv -t $DPATH *.dat 
 }
 
@@ -125,7 +103,7 @@ Visualize()
 {
 	echo ' '
 	echo Visualizing
-	matlab -r "addpath(genpath('../../'));matlabperformance('$LSB_JOBNAME','$DPATH/','$FIGS');exit;"
+	matlab -r "addpath(genpath('../../'));matlab3Dplots('$LSB_JOBNAME','$DPATH/','$FIGS');exit;"
 }
 
 # End of Visualize

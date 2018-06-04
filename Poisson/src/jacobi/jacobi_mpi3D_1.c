@@ -102,10 +102,12 @@ void jacobi_mpi3D_1(Information *information, int maxit,
 
 		// Remember to implement tolerance
 		/*
-        norm_diff = sqrt(norm_diff);
 
         if (use_tol && (norm_diff < threshold))
+		{
+			norm_diff = sqrt(norm_diff);
             break;
+		}
 		*/
     }
 
