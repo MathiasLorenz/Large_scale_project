@@ -3,8 +3,8 @@
 # --  General options 
 
 # Naming of the job and queue name
-#BSUB -J profile
-#BSUB -q gpum2050
+#BSUB -J coresu
+#BSUB -q gpuv100
 
 # Specify
 #BSUB -oo Output.out 
@@ -13,8 +13,8 @@
 # -- Technical options
 
 # Ask for n cores placed on R host.
-#BSUB -n 3
-#BSUB -R "span[ptile=1]"
+#BSUB -n 6
+#BSUB -R "span[ptile=2]"
 
 # Memory specifications. Amount we need and when to kill the
 # program using too much memory.
@@ -22,7 +22,7 @@
 #BSUB -M 20GB
 
 # Time specifications (hh:mm)
-#BSUB -W 00:10
+#BSUB -W 01:00
 
 # GPU options
 #BSUB -gpu "num=1:mode=exclusive_process"
@@ -66,7 +66,6 @@ Prepare()
 	# Define modules
 	module load cuda/9.1 mpi/2.1.0-gcc-6.3.0
 
-	/appl/cuda/9.1/samples/bin/x86_64/linux/release/deviceQuery >> $LSB_JOBNAME.gpu
 }
 
 # End of Preparation
@@ -83,19 +82,39 @@ Program()
 	# Define the actual test part of the script 
 
 	# Run the programs (Max array size for GPU: 874)
+	N="256"
+	#N="512"
 
-	mpiexec -q -n $LSB_DJOB_NUMPROC nvprof \
-		--output-profile profile.%q{OMPI_COMM_WORLD_RANK} \
-		--process-name "rank %q{OMPI_COMM_WORLD_RANK}" \
-		--context-name "rank %q{OMPI_COMM_WORLD_RANK}" \
-		./jacobiSolver.bin mixed_2 100
+	# Run the MPI based tests
+	TEST="mpi3d_3 mixed_2"
+	for t in $TEST
+	do
+		dat=$t.dat
+		for n in $N
+		do
+			echo "Test: $t, N: $n"
+			mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin $t $n >> $LSB_JOBNAME-$dat
+		done
+	done
+
+	# Run the non MPI based tests
+	TEST="omp3d cuda_1"
+	for t in $TEST
+	do
+		dat=$t.dat
+		for n in $N 
+		do
+			echo "Test: $t, N: $n"
+			./jacobiSolver.bin $t $n >> $LSB_JOBNAME-$dat
+		done
+	done
 
 	# -------------------------------------------------------------------------
 	end=`date +%s`
 
 	runtime=$((end-start))
 	echo "Time spent on computations: $runtime"
-	#mv -t $DPATH *.dat 
+	mv -t $DPATH *.dat 
 }
 
 # End of Program
@@ -106,7 +125,7 @@ Visualize()
 {
 	echo ' '
 	echo Visualizing
-	#matlab -r "addpath(genpath('../../'));matlabperformance('$LSB_JOBNAME','$DPATH/','$FIGS');exit;"
+	matlab -r "addpath(genpath('../../'));matlabspeedup('$LSB_JOBNAME','omp3d','$DPATH/','$FIGS');exit;"
 }
 
 # End of Visualize

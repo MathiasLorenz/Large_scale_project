@@ -1,5 +1,5 @@
-function matlabperformance(DataName,datPath,figPath)
-%MATLABPERFORMANCE
+function matlabspeedup(DataName,BaseName,datPath,figPath)
+%MATLABSPEEDUP
 %  This function is designed to output a number of performance plots
 %  (Memory-MFLOP plot). The inputs for the function is listed bellow.
 %  __________________________________________________________________
@@ -24,7 +24,10 @@ function matlabperformance(DataName,datPath,figPath)
 
 close all
 if ~exist('DataName','var') || isempty(DataName)
-    DataName = 'perfmixed';
+    DataName = 'coresu';
+end
+if ~exist('BaseName','var') || isempty(BaseName)
+    BaseName = 'omp3d';
 end
 
 
@@ -35,11 +38,13 @@ addpath(genpath('./'));
 DataFiles = finddata(datPath,DataName);
 
 %% Performance plots
-
+FileName = cell(length(DataFiles),1);
+FuncName = cell(length(DataFiles),1);
 for i = 1:length(DataFiles)
-	FileName = [datPath,DataFiles{i}];
-    memoryVflops(FileName,DataName,'Performance',getFuncName(FileName));
+	FileName{i} = [datPath,DataFiles{i}];
+    FuncName{i} = getFuncName(FileName{i});
 end
+corePerformance(FileName,BaseName,DataName,'Speedup',FuncName);
 if exist('figPath','var') && ~isempty(figPath)
     ExportFigures([],figPath);
 end
