@@ -27,6 +27,8 @@ void jacobi_mixed_1(Information *information, int maxit, double threshold,
     double *U, double *F, double *Unew);
 void jacobi_mixed_2(Information *information, int maxit, double threshold,
     double *U, double *F, double *Unew);
+void jacobi_mixed_3(Information *information, int maxit, double threshold,
+    double *U, double *F, double *Unew);
 
 
 #ifdef __cplusplus

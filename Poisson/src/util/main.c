@@ -109,7 +109,8 @@ int main(int argc, char *argv[])
 		strcmp(T, "cuda_1") == 0  ||
 
 		strcmp(T, "mixed_1") == 0 || 
-		strcmp(T, "mixed_2") == 0)
+		strcmp(T, "mixed_2") == 0 ||
+		strcmp(T, "mixed_3") == 0)
 		test_jacobi_3D(&information,T);
 
 	else {

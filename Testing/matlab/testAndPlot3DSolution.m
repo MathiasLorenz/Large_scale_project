@@ -2,7 +2,7 @@
 clc, clear, close all
 addpath 'functions'
 
-fname = '../../Poisson/200grid.txt';
+fname = '../data/mixed_3_test-200.dat';
 
 my_sol = read3DMatrixFromFile(fname);
 [Nx,Ny,Nz] = size(my_sol);
@@ -55,20 +55,28 @@ axis([0,Nx,0,Ny,-1,1])
 
 err_mat = abs(my_sol - true_sol);
 CreateFigure('Error at 70%');
-surf(err_mat(:, :, round(0.34*Nz)))
-
-%% 
-close all
+surf(err_mat(:, :, round(0.7*Nz)))
 
 
 %% Plot the error through the z dimension
 
 err_mat = abs(my_sol - true_sol);
 sz = size(err_mat, 3);
-err_vec = zeros(sz);
+err_vec = zeros(sz,1);
 
 for i = 1:sz
     err_vec(i) = max(max(abs(my_sol(:, :, i) - true_sol(:, :, i))));
 end
 CreateFigure('Error at through z');
 plot(err_vec);
+
+%% Plot error at max error
+
+[~, max_err_idx] = max(err_vec);
+CreateFigure('Solution at max error');
+subplot(121);
+surf(my_sol(:, :, max_err_idx));
+axis([0,Nx,0,Ny,-1,1])
+subplot(122);
+surf(true_sol(:, :, max_err_idx));
+axis([0,Nx,0,Ny,-1,1])
