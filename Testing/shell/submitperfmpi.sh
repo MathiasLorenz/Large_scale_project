@@ -82,7 +82,17 @@ Program()
 	#N="8 16"
 	N="32 64 128 254 512"
 
-	TEST="mpi3d_1 mpi3d_2 mpi3d_3"
+	TEST="mpi3d_1"
+	for t in $TEST
+	do
+		dat=$t.dat
+		for n in $N 
+		do
+			echo "Test: $t, N: $n"
+			mpiexec -q -n 2 ./jacobiSolver.bin $t $n >> $LSB_JOBNAME-$dat
+		done
+	done
+	TEST="mpi3d_2 mpi3d_3"
 	for t in $TEST
 	do
 		dat=$t.dat

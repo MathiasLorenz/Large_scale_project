@@ -83,7 +83,7 @@ Program()
 	N="50 200"
 	for n in $N 
 	do
-		OUTPUT_INFO=matrix_full mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_1 $n >> $LSB_JOBNAME-$n.dat
+		OUTPUT_INFO=matrix_full mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_2 $n >> $LSB_JOBNAME-$n.dat
 	done
 
 	# -------------------------------------------------------------------------

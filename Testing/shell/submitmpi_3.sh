@@ -80,13 +80,6 @@ Program()
 	N="50 200"
 	for n in $N 
 	do
-		>&2 echo "$n MPI3d_1:"
-		OUTPUT_INFO=matrix_full mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_1 $n >> $LSB_JOBNAME-$n.dat
-
-		>&2 echo "$n MPI3d_2:"
-		OUTPUT_INFO=matrix_full mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_2 $n >> $LSB_JOBNAME-$n.dat
-
-		>&2 echo "$n MPI3d_3:"
 		OUTPUT_INFO=matrix_full mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_3 $n >> $LSB_JOBNAME-$n.dat
 
 	done

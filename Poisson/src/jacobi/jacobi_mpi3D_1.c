@@ -94,7 +94,7 @@ void jacobi_mpi3D_1(Information *information, int maxit,
 
 		// Send and recieve boundaries
 		MPI_Isend(s_buf, N_buffer, MPI_DOUBLE, dst, 0, MPI_COMM_WORLD, &req);
-		MPI_Irecv(r_buf, N_buffer, MPI_DOUBLE, dst, 0, MPI_COMM_WORLD, &req);
+		MPI_Recv(r_buf, N_buffer, MPI_DOUBLE, dst, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
 		// Synchronize and swap
 		MPI_Barrier(MPI_COMM_WORLD);
@@ -113,7 +113,7 @@ void jacobi_mpi3D_1(Information *information, int maxit,
 
 	// ------------------------------------------------------------------------
 	// Finalise
-
+	MPI_Barrier(MPI_COMM_WORLD);
 	free(s_buf);
 	free(r_buf);
 	
