@@ -7,7 +7,7 @@ CU	= nvcc
 
 # - C Flags
 OPTIM   =-O3
-WARN    =-Wall
+WARN    =-Wall -Wno-maybe-uninitialized
 LIBS    =-std=gnu99
 CHIP    =
 PARA    =-fopenmp
@@ -18,7 +18,7 @@ CFLAGS  = $(OPTIM) $(WARN) $(LIBS) $(CHIP) $(PARA)
 # - CU Flags
 CUOPT 	=-O3
 CUOPTS	=
-CUWARN	=-Wall
+CUWARN	=
 CULIBS	=-lcudart -L/appl/cuda/9.1/lib64
 CUARCH	=-arch=sm_70
 CUPARA	=

@@ -4,7 +4,7 @@
 
 # Naming of the job and queue name
 #BSUB -J profile
-#BSUB -q gpum2050
+#BSUB -q gpuv100
 
 # Specify
 #BSUB -oo Output.out 
