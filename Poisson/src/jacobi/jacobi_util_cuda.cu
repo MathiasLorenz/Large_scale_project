@@ -169,17 +169,16 @@ void jacobi_iteration_cuda_separate(Information *information, Information *infor
 		jacobi_iteration_kernel_interior<<<BlockSize,BlockAmount>>>
 				(information_cuda, U_cuda, F_cuda, Unew_cuda);
 	}
-	if (strcmp(ver, "b") == 0) 
+	if (strcmp(ver, "b") == 0)   // boundary
 	{
-		// Completely fucking arbitrarily chosen
-		int num_blocks = 256;
-		int threads_per_block = 256;
-		jacobi_iteration_kernel_boundary<<<num_blocks, threads_per_block>>>
+		dim3 BlockSize = dim3(32, 32, 1);
+		dim3 BlockAmount = dim3( K/BlockSize.x + 1, J/BlockSize.y + 1, 1 );
+		jacobi_iteration_kernel_boundary<<<BlockSize,BlockAmount>>>
 				(information_cuda, U_cuda, F_cuda, Unew_cuda);
 	}
 }
 
-// Kernel for interior points
+// Kernel for interior points. Starts being used in mixed_3
 __global__ void jacobi_iteration_kernel_interior(Information *information_cuda,
 	double *U_cuda, double *F_cuda, double *Unew_cuda)
 {
@@ -236,7 +235,7 @@ __global__ void jacobi_iteration_kernel_interior(Information *information_cuda,
 	}
 }
 
-// Kernel for boundary points
+// Kernel for boundary points. Starts being used in mixed_3
 __global__ void jacobi_iteration_kernel_boundary(Information *information_cuda,
 	double *U_cuda, double *F_cuda, double *Unew_cuda)
 {
