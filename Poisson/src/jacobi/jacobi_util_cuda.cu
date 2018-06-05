@@ -16,8 +16,6 @@ void copy_information_cuda(Information *information_cuda, Information *informati
 {
 	// Solution to use temporary structures was found at:
 	// https://stackoverflow.com/questions/31133522/simple-operation-on-structure-in-cuda-segmentation-fault
-	// Consider to get all the memory pinned before copying
-	cudaSetDevice(0);
 	int size = information->size;
 
 	// Allocate the temporary information structure

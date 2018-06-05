@@ -34,6 +34,9 @@ void jacobi_mixed_1(Information *information, int maxit,
 	int loc_Ny = information->loc_Ny[rank];
 	int loc_Nz = information->loc_Nz[rank];
 
+	// Set the CUDA device
+	setCudaDevice(rank);
+
 	Information *information_cuda;
 	cuda_malloc((void**) &information_cuda,sizeof(Information));
 	copy_information_cuda(information_cuda,information);

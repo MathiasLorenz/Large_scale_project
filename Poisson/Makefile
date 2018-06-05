@@ -108,6 +108,8 @@ src/jacobi/jacobi_mpi3D_1.o: lib/matrix_routines.h lib/jacobi_util.h
 src/jacobi/jacobi_mpi3D_1.o: lib/poisson.h
 src/jacobi/jacobi_mpi3D_2.o: lib/matrix_routines.h lib/jacobi_util.h
 src/jacobi/jacobi_mpi3D_2.o: lib/poisson.h
+src/jacobi/jacobi_mpi3D_3.o: lib/matrix_routines.h lib/jacobi_util.h
+src/jacobi/jacobi_mpi3D_3.o: lib/poisson.h
 src/jacobi/jacobi_util.o: lib/matrix_routines.h lib/jacobi_util.h
 src/jacobi/jacobi_mixed_1.o: lib/matrix_routines.h lib/jacobi_util.h
 src/jacobi/jacobi_mixed_1.o: lib/poisson.h lib/cuda_routines.h
@@ -115,6 +117,9 @@ src/jacobi/jacobi_mixed_1.o: lib/jacobi_util_cuda.h
 src/jacobi/jacobi_mixed_2.o: lib/matrix_routines.h lib/jacobi_util.h
 src/jacobi/jacobi_mixed_2.o: lib/poisson.h lib/cuda_routines.h
 src/jacobi/jacobi_mixed_2.o: lib/jacobi_util_cuda.h
+src/jacobi/jacobi_mixed_3.o: lib/matrix_routines.h lib/jacobi_util.h
+src/jacobi/jacobi_mixed_3.o: lib/poisson.h lib/cuda_routines.h
+src/jacobi/jacobi_mixed_3.o: lib/jacobi_util_cuda.h
 src/jacobi/jacobi_cuda_1.o: lib/poisson.h lib/jacobi_util.h
 src/jacobi/jacobi_cuda_1.o: lib/matrix_routines.h lib/cuda_routines.h
 src/jacobi/jacobi_cuda_1.o: lib/jacobi_util_cuda.h

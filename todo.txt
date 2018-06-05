@@ -10,3 +10,7 @@ Things that must be done:
 - In jacobi util, we need to change how we handle h's and steps.
 + Sendrecv doesn't work with -oversubscribe, test if it works when submitted.
 - Consider how we time execution and corresponding FLOP(s).
+
+- Remember to consider the error is not decreasing as fast for big systems.
+- What is our baseline tests? omp, mpi_1, cuda?
+- Consider if specific kernels can be waited for.

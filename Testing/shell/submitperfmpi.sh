@@ -14,7 +14,7 @@
 
 # Ask for n cores placed on R host.
 #BSUB -n 6
-#BSUB -R "span[ptile=1]"
+#BSUB -R "span[ptile=2]"
 
 # Memory specifications. Amount we need and when to kill the
 # program using too much memory.

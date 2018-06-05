@@ -19,14 +19,13 @@
 # Memory specifications. Amount we need and when to kill the
 # program using too much memory.
 #BSUB -R "rusage[mem=20GB]"
-#BSUB -R gpu
 #BSUB -M 20GB
 
 # Time specifications (hh:mm)
 #BSUB -W 01:00
 
 # GPU options
-#BSUB -gpu "num=1:mode=exclusive_process"
+#BSUB -gpu "num=2:mode=exclusive_process"
 
 # -- Notification options
 
@@ -83,8 +82,8 @@ Program()
 	# Define the actual test part of the script 
 
 	# Run the programs (Max array size for GPU: 874)
-	N="256"
-	#N="512"
+	#N="32"
+	N="512"
 
 	# Run the MPI based tests
 	TEST="mpi3d_3 mixed_2"
