@@ -88,12 +88,13 @@ __global__ void free_information_arrays_cuda(Information *information_cuda)
 void jacobi_iteration_cuda(Information *information, Information *information_cuda,
 	double *U_cuda, double *F_cuda, double *Unew_cuda)
 {
-	int K = information->global_Nx;
-	int J = information->global_Ny;
-	int I = information->global_Nz;
+	int rank = information_cuda->rank;
+	int K = information_cuda->loc_Nx[rank];
+	int J = information_cuda->loc_Ny[rank];
+	int I = information_cuda->loc_Nz[rank];
 
 	dim3 BlockSize = dim3(32,32,32);
-	dim3 BlockAmount = dim3( K/BlockSize.x + 1, J/BlockSize.y + 1, I/BlockSize.z + 1 );
+	dim3 BlockAmount = dim3( K/BlockSize.x + 3, J/BlockSize.y + 3, I/BlockSize.z + 3 );
 	jacobi_iteration_kernel<<<BlockSize,BlockAmount>>>
 		(information_cuda, U_cuda, F_cuda, Unew_cuda);
 }
@@ -160,22 +161,24 @@ __global__ void jacobi_iteration_kernel(Information *information_cuda,
 void jacobi_iteration_cuda_separate(Information *information, Information *information_cuda,
 	double *U_cuda, double *F_cuda, double *Unew_cuda, const char *ver)
 {
-	int K = information->global_Nx;
-	int J = information->global_Ny;
-	int I = information->global_Nz;
+
+	int rank = information_cuda->rank;
+	int K = information_cuda->loc_Nx[rank];
+	int J = information_cuda->loc_Ny[rank];
+	int I = information_cuda->loc_Nz[rank];
 
 	// interior or boundary
 	if (strcmp(ver, "i") == 0)
 	{
 		dim3 BlockSize = dim3(32, 32, 32);
-		dim3 BlockAmount = dim3( K/BlockSize.x + 1, J/BlockSize.y + 1, I/BlockSize.z + 1 );
+		dim3 BlockAmount = dim3( K/BlockSize.x + 3, J/BlockSize.y + 3, I/BlockSize.z + 3 );
 		jacobi_iteration_kernel_interior<<<BlockSize,BlockAmount>>>
 				(information_cuda, U_cuda, F_cuda, Unew_cuda);
 	}
 	if (strcmp(ver, "b") == 0)   // boundary
 	{
 		dim3 BlockSize = dim3(32, 32, 1);
-		dim3 BlockAmount = dim3( K/BlockSize.x + 1, J/BlockSize.y + 1, 1 );
+		dim3 BlockAmount = dim3( K/BlockSize.x + 3, J/BlockSize.y + 3, 1 );
 		jacobi_iteration_kernel_boundary<<<BlockSize,BlockAmount>>>
 				(information_cuda, U_cuda, F_cuda, Unew_cuda);
 	}
