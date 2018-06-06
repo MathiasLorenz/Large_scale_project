@@ -14,7 +14,7 @@
 
 # Ask for n cores placed on R host.
 #BSUB -n 2
-#BSUB -R "span[ptile=1]"
+#BSUB -R "span[ptile=2]"
 
 # Memory specifications. Amount we need and when to kill the
 # program using too much memory.
@@ -25,7 +25,7 @@
 #BSUB -W 00:10
 
 # GPU options
-#BSUB -gpu "num=1:mode=exclusive_process"
+#BSUB -gpu "num=2:mode=exclusive_process"
 
 # -- Notification options
 

@@ -13,7 +13,7 @@
 # -- Technical options
 
 # Ask for n cores placed on R host.
-#BSUB -n 6
+#BSUB -n 12
 #BSUB -R "span[ptile=2]"
 
 # Memory specifications. Amount we need and when to kill the
@@ -22,7 +22,7 @@
 #BSUB -M 20GB
 
 # Time specifications (hh:mm)
-#BSUB -W 01:00
+#BSUB -W 02:00
 
 # GPU options
 #BSUB -gpu "num=2:mode=exclusive_process"
@@ -86,7 +86,7 @@ Program()
 	N="32 64 128 254 512"
 
 	# Run the MPI based tests
-	TEST="mpi3d_3 mixed_2"
+	TEST="mpi3d_3 mixed_3"
 	for t in $TEST
 	do
 		dat=$t.dat

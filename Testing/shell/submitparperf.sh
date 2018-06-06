@@ -13,8 +13,8 @@
 # -- Technical options
 
 # Ask for n cores placed on R host.
-#BSUB -n 6
-#BSUB -R "span[ptile=1]"
+#BSUB -n 12
+#BSUB -R "span[ptile=2]"
 
 # Memory specifications. Amount we need and when to kill the
 # program using too much memory.
@@ -22,10 +22,10 @@
 #BSUB -M 20GB
 
 # Time specifications (hh:mm)
-#BSUB -W 01:00
+#BSUB -W 03:00
 
 # GPU options
-#BSUB -gpu "num=1:mode=exclusive_process"
+#BSUB -gpu "num=2:mode=exclusive_process"
 
 # -- Notification options
 
@@ -81,11 +81,10 @@ Program()
 	# -------------------------------------------------------------------------
 	# Define the actual test part of the script 
 
-	# Run the programs (Max array size for GPU: 874)
 	#N="32"
-	#C="2 3"
+	#C="2 3 4"
 
-	C="2 3 4 5 6"
+	C="2 3 4 5 6 7 8 9 10 11 12"
 	N="512"
 
 	# Run the MPI based tests
@@ -95,7 +94,7 @@ Program()
 		for c in $C
 		do
 			dat="$c-$t.dat"
-			>&2 echo "Test: $t, C: $c"
+			echo "Test: $t, C: $c"
 			mpiexec -q -n $c ./jacobiSolver.bin $t $N >> $LSB_JOBNAME-$dat
 		done
 	done

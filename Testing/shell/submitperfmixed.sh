@@ -85,7 +85,7 @@ Program()
 	#N="8 16"
 	N="32 64 128 254 512"
 
-	TEST="mixed_1 mixed_2"
+	TEST="mixed_1 mixed_2 mixed_3"
 	for t in $TEST
 	do
 		dat=$t.dat

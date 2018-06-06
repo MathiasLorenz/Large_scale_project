@@ -25,7 +25,7 @@ title(PlotTitle,'FontSize',14)
 
 %% Do the plots
 hold on
-P = plot(log2(memory),flops,'-d');
+P = plot(log2(memory),flops./1000,'-d');
 hold off
 
 %% Handle the legend
@@ -40,7 +40,7 @@ legend(CurrentLegend);
 %% Handle the axes and the ticks
 n = max(2 , floor(min(log2(memory(:,1)))));
 xlabel('Memory footprint')
-ylabel('Mflop/s')
+ylabel('Gflop/s')
 grid on
 A = gca;
 A.XLim(1) = n;

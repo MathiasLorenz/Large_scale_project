@@ -24,7 +24,9 @@ EXEC="$EPATH/jacobiSolver.bin"
 
 # Define which shell script will be executed
 if [ -z "$1" ] ; then
-	TEST="mpi_1 mpi_2 cuda_1 mixed_1"
+	echo "ERROR:"
+	echo "	Please specify which test to run."
+	exit
 else 
 	TEST="$@"
 fi
