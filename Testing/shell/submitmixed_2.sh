@@ -13,19 +13,20 @@
 # -- Technical options
 
 # Ask for n cores placed on R host.
-#BSUB -n 3
-#BSUB -R "span[ptile=1]"
+#BSUB -n 10
+#BSUB -R "span[ptile=2]"
+#BSUB -K
 
 # Memory specifications. Amount we need and when to kill the
 # program using too much memory.
-#BSUB -R "rusage[mem=10GB]"
-#BSUB -M 10GB
+#BSUB -R "rusage[mem=50GB]"
+#BSUB -M 50GB
 
 # Time specifications (hh:mm)
 #BSUB -W 01:00
 
 # GPU options
-#BSUB -gpu "num=1:mode=exclusive_process"
+#BSUB -gpu "num=2:mode=exclusive_process"
 
 # -- Notification options
 
@@ -65,6 +66,7 @@ Prepare()
 	
 	# Define modules
 	module load cuda/9.1 mpi/2.1.0-gcc-6.3.0
+	nvidia-smi
 }
 
 # End of Preparation
@@ -80,11 +82,14 @@ Program()
 	# Define the actual test part of the script 
 
 	# Run the program
-	N="50 200"
+	N="1024 2048 4096"
 	for n in $N 
 	do
-		OUTPUT_INFO=matrix_full mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_2 $n >> $LSB_JOBNAME-$n.dat
+		>&2 echo "N: $n"
+		#OUTPUT_INFO=matrix_full mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_2 $n >> $LSB_JOBNAME-$n.dat
+		mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_2 $n >> $LSB_JOBNAME-$n.dat
 	done
+
 
 	# -------------------------------------------------------------------------
 	mv -t $DPATH *.dat 

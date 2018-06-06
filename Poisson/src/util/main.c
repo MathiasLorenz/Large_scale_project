@@ -71,6 +71,13 @@ int main(int argc, char *argv[])
 		MPI_Finalize();
 		return EXIT_FAILURE;
 	}
+	if ( 1.0/(1024.0*1024.0*1024.0) * Nx*Ny*(Nz/size) * 3.0*8.0 > 11.0 ) {
+		fprintf(stderr,
+		"\nInvalid dimension inputs. Maximal amount of memory available\n"
+		"is 16GB\n\n");
+		MPI_Finalize();
+		return EXIT_FAILURE;
+	}
 
 	// ------------------------------------------------------------------------
 	// Handle Enviromental values
