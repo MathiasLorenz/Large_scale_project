@@ -22,7 +22,7 @@
 #BSUB -M 20GB
 
 # Time specifications (hh:mm)
-#BSUB -W 01:00
+#BSUB -W 03:00
 
 # GPU options
 #BSUB -gpu "num=2:mode=exclusive_process"
