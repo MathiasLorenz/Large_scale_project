@@ -24,7 +24,7 @@ function matlabperformance(DataName,datPath,figPath)
 
 close all
 if ~exist('DataName','var') || isempty(DataName)
-    DataName = 'performance';
+    DataName = 'perfmpi';
 end
 
 
