@@ -161,11 +161,10 @@ __global__ void jacobi_iteration_kernel(Information *information_cuda,
 void jacobi_iteration_cuda_separate(Information *information, Information *information_cuda,
 	double *U_cuda, double *F_cuda, double *Unew_cuda, const char *ver)
 {
-
-	int rank = information_cuda->rank;
-	int K = information_cuda->loc_Nx[rank];
-	int J = information_cuda->loc_Ny[rank];
-	int I = information_cuda->loc_Nz[rank];
+	int rank = information->rank;
+	int K = information->loc_Nx[rank];
+	int J = information->loc_Ny[rank];
+	int I = information->loc_Nz[rank];
 
 	// interior or boundary
 	if (strcmp(ver, "i") == 0)
