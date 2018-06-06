@@ -16,13 +16,13 @@
 ##BSUB -K
 
 # Ask for n cores placed on R host.
-#BSUB -n 2
+#BSUB -n 4
 #BSUB -R "span[ptile=2]"
 
 # Memory specifications. Amount we need and when to kill the
 # program using too much memory.
-#BSUB -R "rusage[mem=50GB]"
-#BSUB -M 50GB
+#BSUB -R "rusage[mem=10GB]"
+#BSUB -M 10GB
 
 # Time specifications (hh:mm)
 #BSUB -W 01:00
@@ -88,13 +88,13 @@ Program()
 	for n in $N 
 	do
 		echo omp2d
-		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin omp2d $n
+		time OUTPUT_INFO=error OMP_NUM_THREADS=$LSB_DJOB_NUMPROC ./jacobiSolver.bin omp2d $n
 		
 		echo omp3d
-		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin omp3d $n
+		time OUTPUT_INFO=error OMP_NUM_THREADS=$LSB_DJOB_NUMPROC ./jacobiSolver.bin omp3d $n
 		
 		echo mpi3d_1
-		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_1 $n
+		time OUTPUT_INFO=error USE_TOLERANCE=on mpiexec -q -n 2 ./jacobiSolver.bin mpi3d_1 $n
 		
 		echo mpi3d_2
 		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_2 $n
@@ -103,7 +103,7 @@ Program()
 		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_3 $n
 		
 		echo cuda_1
-		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin cuda_1 $n
+		time OUTPUT_INFO=error ./jacobiSolver.bin cuda_1 $n
 		
 		echo mixed_1
 		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_1 $n
