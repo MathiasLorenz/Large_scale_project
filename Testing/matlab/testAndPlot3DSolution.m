@@ -1,8 +1,8 @@
-% Script to load in 3D solution, calculate the error and plotcl
+% Script to load in 3D solution, calculate the error and plot
 clc, clear, close all
 addpath 'functions'
 
-fname = '../data/mixed_3_test-50.dat';
+fname = '../data/mixed_3_test-250.dat';
 
 my_sol = read3DMatrixFromFile(fname);
 [Nx,Ny,Nz] = size(my_sol);
@@ -12,6 +12,7 @@ gvz = linspace(-1, 1, Nz);
 [X, Y, Z] = meshgrid(gvx, gvy, gvz);
 
 true_sol = sin(pi*X).*sin(pi*Y).*sin(pi*Z);
+disp('Done loading');
 
 %% Calculate max error
 [err, err_idx] = max(abs(my_sol(:) - true_sol(:)));

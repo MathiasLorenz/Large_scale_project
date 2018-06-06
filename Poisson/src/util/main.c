@@ -73,12 +73,6 @@ int main(int argc, char *argv[])
 	}
 
 	// ------------------------------------------------------------------------
-	// Setup information structure
-	
-	Information information;
-	write_information(&information,Nx,Ny,Nz,rank,size);
-	
-	// ------------------------------------------------------------------------
 	// Handle Enviromental values
 
 	char *problem_name, *output_info, *use_tol, *tol_env, *maxiter;
@@ -94,6 +88,12 @@ int main(int argc, char *argv[])
 	if ( (tol_env = getenv("TOLERANCE")) == NULL)
 		putenv( "TOLERANCE=1e-6" );
 	
+	// ------------------------------------------------------------------------
+	// Setup information structure
+	
+	Information information;
+	write_information(&information,Nx,Ny,Nz,rank,size);
+
 	// ------------------------------------------------------------------------
 	// Make the call for the desired test
 	

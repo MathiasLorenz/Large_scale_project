@@ -114,32 +114,29 @@ void test_jacobi_3D(Information *information, char const *solver)
 		return;
 	}
 
-	// Handle the environmental variables
-	int maxiter = atoi(getenv("MAX_ITER"));
-	double tol = atof(getenv("TOLERANCE"));
-
 	// Main computation and time
 	double t = omp_get_wtime();
 
 	if (strcmp(solver, "omp3d") == 0)
-		jacobi_openmp_3D(Nx, Ny, Nz, maxiter, tol, U, F, Unew);
+		jacobi_openmp_3D(Nx, Ny, Nz, information->maxit,
+			information->tol, U, F, Unew);
 
 	else if (strcmp(solver, "mpi3d_1") == 0)
-		jacobi_mpi3D_1(information, maxiter, tol, U, F, Unew);
+		jacobi_mpi3D_1(information, U, F, Unew);
 	else if (strcmp(solver, "mpi3d_2") == 0)
-		jacobi_mpi3D_2(information, maxiter, tol, U, F, Unew);
+		jacobi_mpi3D_2(information, U, F, Unew);
 	else if (strcmp(solver, "mpi3d_3") == 0)
-		jacobi_mpi3D_3(information, maxiter, tol, U, F, Unew);
+		jacobi_mpi3D_3(information, U, F, Unew);
 
 	else if (strcmp(solver, "cuda_1") == 0)
-		jacobi_cuda_1(information,maxiter,tol,U,F,Unew);
+		jacobi_cuda_1(information, U, F, Unew);
 
 	else if (strcmp(solver, "mixed_1") == 0)
-		jacobi_mixed_1(information, maxiter, tol, U, F, Unew);
+		jacobi_mixed_1(information, U, F, Unew);
 	else if (strcmp(solver, "mixed_2") == 0)
-		jacobi_mixed_2(information, maxiter, tol, U, F, Unew);
+		jacobi_mixed_2(information, U, F, Unew);
 	else if (strcmp(solver, "mixed_3") == 0)
-		jacobi_mixed_3(information, maxiter, tol, U, F, Unew);
+		jacobi_mixed_3(information, U, F, Unew);
 	
 
 	MPI_Barrier(MPI_COMM_WORLD);

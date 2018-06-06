@@ -3,7 +3,7 @@
 # --  General options 
 
 # Naming of the job and queue name
-#BSUB -J mixed_3_test
+#BSUB -J all_tests
 #BSUB -q gpuv100
 
 # Specify
@@ -13,7 +13,11 @@
 # -- Technical options
 
 # Add progress
+<<<<<<< HEAD:Testing/shell/submitmixed_3_test.sh
 # #BSUB -K
+=======
+##BSUB -K
+>>>>>>> b2893bfd003a7f28aee4d94cc13d672d7dcc0673:Testing/shell/submitall_tests.sh
 
 # Ask for n cores placed on R host.
 #BSUB -n 2
@@ -83,12 +87,45 @@ Program()
 	# Define the actual test part of the script 
 
 	# Run the program
+<<<<<<< HEAD:Testing/shell/submitmixed_3_test.sh
 	#N="200"
 	N="10 20 50 100 200 1024"
 	for n in $N 
 	do
 		OUTPUT_INFO=matrix_full mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_3 $n >> $LSB_JOBNAME-$n.dat
 		#OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_3 $n
+=======
+	N="100"
+	#N="10 20 50 100 200 300 400 500 600 700"
+	for n in $N 
+	do
+		echo omp2d
+		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin omp2d $n
+		
+		echo omp3d
+		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin omp3d $n
+		
+		echo mpi3d_1
+		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_1 $n
+		
+		echo mpi3d_2
+		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_2 $n
+		
+		echo mpi3d_3
+		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_3 $n
+		
+		echo cuda_1
+		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin cuda_1 $n
+		
+		echo mixed_1
+		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_1 $n
+		
+		echo mixed_2
+		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_2 $n
+		
+		echo mixed_3
+		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_3 $n
+>>>>>>> b2893bfd003a7f28aee4d94cc13d672d7dcc0673:Testing/shell/submitall_tests.sh
 	done
 
 	# -------------------------------------------------------------------------

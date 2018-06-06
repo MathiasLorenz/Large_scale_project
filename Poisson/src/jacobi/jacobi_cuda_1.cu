@@ -17,8 +17,7 @@ extern double MFLOP;
 // ============================================================================
 // JACOBI 3D SOLVER USING CUDA
 
-void jacobi_cuda_1(Information *information, int maxit,
-	double threshold, double *U, double *F, double *Unew)
+void jacobi_cuda_1(Information *information, double *U, double *F, double *Unew)
 {
 	cudaSetDevice(0);
 	// Check for errors in the input
@@ -33,13 +32,14 @@ void jacobi_cuda_1(Information *information, int maxit,
 	copy_information_cuda(information_cuda,information);
 
 	// Read the information structure
-	int rank = information->rank;
-	int Nx 	 = information->global_Nx;
-	int Ny 	 = information->global_Ny;
-	int Nz 	 = information->global_Nz;
+	int rank   = information->rank;
+	int Nx 	   = information->global_Nx;
+	int Ny 	   = information->global_Ny;
+	int Nz 	   = information->global_Nz;
 	int loc_Nx = information->loc_Nx[rank];
 	int loc_Ny = information->loc_Ny[rank];
 	int loc_Nz = information->loc_Nz[rank];
+	int maxit  = information->maxit;
 
 	// Rewritting to C style coordinates
     int I, J, K;

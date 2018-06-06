@@ -52,6 +52,11 @@ void copy_information_cuda(Information *information_cuda, Information *informati
 		cudaMemcpyHostToDevice
 	));
 
+	Temp.maxit = information->maxit;
+	Temp.tol = information->tol;
+	Temp.use_tol = information->use_tol;
+	Temp.norm_diff = information->norm_diff;
+
 	checkCudaErrors(cudaDeviceSynchronize());
 
 	// Copy over the information structure
