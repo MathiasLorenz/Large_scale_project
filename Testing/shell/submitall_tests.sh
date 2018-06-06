@@ -13,11 +13,7 @@
 # -- Technical options
 
 # Add progress
-<<<<<<< HEAD:Testing/shell/submitmixed_3_test.sh
-# #BSUB -K
-=======
 ##BSUB -K
->>>>>>> b2893bfd003a7f28aee4d94cc13d672d7dcc0673:Testing/shell/submitall_tests.sh
 
 # Ask for n cores placed on R host.
 #BSUB -n 2
@@ -87,14 +83,6 @@ Program()
 	# Define the actual test part of the script 
 
 	# Run the program
-<<<<<<< HEAD:Testing/shell/submitmixed_3_test.sh
-	#N="200"
-	N="10 20 50 100 200 1024"
-	for n in $N 
-	do
-		OUTPUT_INFO=matrix_full mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_3 $n >> $LSB_JOBNAME-$n.dat
-		#OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_3 $n
-=======
 	N="100"
 	#N="10 20 50 100 200 300 400 500 600 700"
 	for n in $N 
@@ -125,7 +113,6 @@ Program()
 		
 		echo mixed_3
 		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_3 $n
->>>>>>> b2893bfd003a7f28aee4d94cc13d672d7dcc0673:Testing/shell/submitall_tests.sh
 	done
 
 	# -------------------------------------------------------------------------
