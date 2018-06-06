@@ -21,18 +21,18 @@ extern double MFLOP;
 // ============================================================================
 // JACOBI 3D SOLVER
 
-void jacobi_mixed_2(Information *information, int maxit,
-	double threshold, double *U, double *F, double *Unew)
+void jacobi_mixed_2(Information *information, double *U, double *F, double *Unew)
 {
 	// Read the information structure
-	int rank = information->rank;
-	int size = information->size;
-	int Nx 	 = information->global_Nx;
-	int Ny 	 = information->global_Ny;
-	int Nz 	 = information->global_Nz;
+	int rank   = information->rank;
+	int size   = information->size;
+	int Nx	   = information->global_Nx;
+	int Ny	   = information->global_Ny;
+	int Nz	   = information->global_Nz;
 	int loc_Nx = information->loc_Nx[rank];
 	int loc_Ny = information->loc_Ny[rank];
 	int loc_Nz = information->loc_Nz[rank];
+	int maxit  = information->maxit;
 
 	// Set the CUDA device
 	setCudaDevice(rank);

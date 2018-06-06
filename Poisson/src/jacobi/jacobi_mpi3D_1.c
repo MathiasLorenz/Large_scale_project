@@ -18,17 +18,18 @@ extern double MFLOP;
 // ============================================================================
 // JACOBI 3D SOLVER
 
-void jacobi_mpi3D_1(Information *information, int maxit,
-	double threshold, double *U, double *F, double *Unew)
+void jacobi_mpi3D_1(Information *information, double *U, double *F, double *Unew)
 {
 	// Read the information structure
-	int rank = information->rank;
-	int Nx 	 = information->global_Nx;
-	int Ny 	 = information->global_Ny;
-	int Nz 	 = information->global_Nz;
+	int rank   = information->rank;
+	int Nx	   = information->global_Nx;
+	int Ny	   = information->global_Ny;
+	int Nz	   = information->global_Nz;
 	int loc_Nx = information->loc_Nx[rank];
 	int loc_Ny = information->loc_Ny[rank];
 	int loc_Nz = information->loc_Nz[rank];
+	int maxit  = information->maxit;
+
 	MPI_Request req;
 
 	// ------------------------------------------------------------------------
@@ -47,27 +48,13 @@ void jacobi_mpi3D_1(Information *information, int maxit,
 	// Rewritting to C style coordinates
     int J, K;
 	J = loc_Ny; K = loc_Nx;
-
-	// Remember to implement tolerance
-	/*
-    // Prepare stop criterion
-    bool use_tol = false;
-	double norm_diff = 10.0;
-	
-	if (strcmp("on",getenv("USE_TOLERANCE")) == 0) { use_tol = true; }
-	*/
 	
 	// Prepare stop criterion
 	int iter = 0; 
     
-
 	// ------------------------------------------------------------------------
 	// Run the iterative method
     for(iter = 0; iter < maxit ; iter++){
-		// Remember to implement tolerance
-		/*
-        norm_diff = 0.0;
-		*/
 
 		// Compute the iteration of the jacobi method
         jacobi_iteration(information, U, F, Unew);
@@ -99,16 +86,6 @@ void jacobi_mpi3D_1(Information *information, int maxit,
 		// Synchronize and swap
 		MPI_Barrier(MPI_COMM_WORLD);
 		memcpy(U_ptr_r, r_buf, N_buffer*sizeof(double));
-
-		// Remember to implement tolerance
-		/*
-
-        if (use_tol && (norm_diff < threshold))
-		{
-			norm_diff = sqrt(norm_diff);
-            break;
-		}
-		*/
     }
 
 	// ------------------------------------------------------------------------

@@ -48,6 +48,16 @@ void write_information(Information *information, int Nx, int Ny, int Nz,
 		}
 	}
 
+	// Handle the environmental variables
+	information->maxit	= atoi(getenv("MAX_ITER"));
+	information->tol	= atof(getenv("TOLERANCE"));
+
+	if (strcmp("on",getenv("USE_TOLERANCE")) == 0) 
+		information->use_tol = true;
+	else
+		information->use_tol = false;
+	information->norm_diff = 0.0;
+
 }
 
 void free_information_arrays(Information *information)
@@ -156,6 +166,8 @@ void jacobi_iteration(Information *information,
 	double f3 = 1.0/3.0;
 	double f6 = 1.0/6.0;
 
+	//double norm_diff = 0.0; // Tolerance criterion
+
 	// Loop over all interior points
 	for (int i = 1; i < I - 1; i++) {
 		for (int j = 1; j < J - 1; j++) {
@@ -176,6 +188,13 @@ void jacobi_iteration(Information *information,
 
 				// Collect terms
 				Unew[ijk] = f6 * (ui + uj + uk);
+
+				// Tolerance criterion
+				//double uij    = U[ijk];
+				//double unewij = Unew[ijk];
+				//norm_diff += (uij - unewij)*(uij - unewij);
+				//if (use_tol && (norm_diff < threshold))
+					//break;
 			}
 		}
 	}

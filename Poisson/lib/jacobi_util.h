@@ -1,6 +1,8 @@
 #ifndef __JACOBI_UTIL__
 #define __JACOBI_UTIL__
 
+#include <stdbool.h> // For bool
+
 // Makes sure that linker can understand the code
 #ifdef __cplusplus
 extern "C"{
@@ -20,6 +22,14 @@ typedef struct Information {
 	int *loc_Nx;	
 	int *loc_Ny;
 	int *loc_Nz;
+
+	// Variables for looping
+	int 	maxit;
+	double  tol;
+
+	// For relative stop criterion
+	bool 	use_tol;
+	double  norm_diff;
 } Information;
 
 void write_information(Information *information, int Nx, int Ny, int Nz, int rank, int size);
