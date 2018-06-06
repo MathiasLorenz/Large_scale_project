@@ -88,10 +88,10 @@ __global__ void free_information_arrays_cuda(Information *information_cuda)
 void jacobi_iteration_cuda(Information *information, Information *information_cuda,
 	double *U_cuda, double *F_cuda, double *Unew_cuda)
 {
-	int rank = information_cuda->rank;
-	int K = information_cuda->loc_Nx[rank];
-	int J = information_cuda->loc_Ny[rank];
-	int I = information_cuda->loc_Nz[rank];
+	int rank = information->rank;
+	int K = information->loc_Nx[rank];
+	int J = information->loc_Ny[rank];
+	int I = information->loc_Nz[rank];
 
 	dim3 BlockSize = dim3(32,32,32);
 	dim3 BlockAmount = dim3( K/BlockSize.x + 3, J/BlockSize.y + 3, I/BlockSize.z + 3 );
