@@ -55,15 +55,6 @@ void jacobi_mpi3D_3(Information *information, double *U, double *F, double *Unew
 	// Rewritting to C style coordinates
     int J, K;
 	J = loc_Ny; K = loc_Nx;
-
-	// Remember to implement tolerance
-	/*
-    // Prepare stop criterion
-    bool use_tol = false;
-	double norm_diff = 10.0;
-	
-	if (strcmp("on",getenv("USE_TOLERANCE")) == 0) { use_tol = true; }
-	*/
 	
 	// Prepare stop criterion
 	int iter = 0;
@@ -71,10 +62,6 @@ void jacobi_mpi3D_3(Information *information, double *U, double *F, double *Unew
 	// ------------------------------------------------------------------------
 	// Run the iterative method
     for(iter = 0; iter < maxit ; iter++){
-		// Remember to implement tolerance
-		/*
-        norm_diff = 0.0;
-		*/
 
 		// Compute the boundary first so we can send it while computing int
 		jacobi_iteration_separate(information, U, F, Unew, "b");
@@ -117,8 +104,6 @@ void jacobi_mpi3D_3(Information *information, double *U, double *F, double *Unew
 			neighbour_2 = rank + 1;
 		}
 
-		//MPI_Barrier(MPI_COMM_WORLD);
-
 		// Send boundaries and receive boundaries
 		MPI_Isend(s_buf1, N_buffer, MPI_DOUBLE, neighbour_1, 0, MPI_COMM_WORLD,
 				&req[0]);
@@ -126,13 +111,11 @@ void jacobi_mpi3D_3(Information *information, double *U, double *F, double *Unew
 			MPI_Isend(s_buf2, N_buffer, MPI_DOUBLE, neighbour_2, 0, MPI_COMM_WORLD,
 					&req[2]);
 
-
 		MPI_Irecv(r_buf1, N_buffer, MPI_DOUBLE, neighbour_1, 0,
 					MPI_COMM_WORLD, &req[1]);
 		if ( rank != 0 && rank != (size - 1) )
 			MPI_Irecv(r_buf2, N_buffer, MPI_DOUBLE, neighbour_2, 0,
 					MPI_COMM_WORLD, &req[3]);
-
 
 		// Compute interior while boundary is being sent
 		jacobi_iteration_separate(information, U, F, Unew, "i");
@@ -145,20 +128,15 @@ void jacobi_mpi3D_3(Information *information, double *U, double *F, double *Unew
 		if (rank > 0 && rank < (size - 1) )
 			memcpy(U_ptr_r2, r_buf2, N_buffer*sizeof(double));
 
-
-
-		// Here?
 		// Swap the arrays
         swap_array( &U, &Unew );
 
-		// Remember to implement tolerance
-		/*
-        norm_diff = sqrt(norm_diff);
-
-        if (use_tol && (norm_diff < threshold))
-            break;
-		*/
+		// Stop early if relative error is used
+		if ( (information->use_tol) && (information->norm_diff < information->tol) )
+			break;
     }
+
+	information->iter = iter;
 
 	// ------------------------------------------------------------------------
 	// Finalise
@@ -174,19 +152,6 @@ void jacobi_mpi3D_3(Information *information, double *U, double *F, double *Unew
 	// 		Update:
 	//			Simple:		15
 	MFLOP += 1e-6*( (6.0 + 5.0*4.0 ) + 15.0*Nx*Ny*Nz)*iter;
-
-	// Print the information requested
-    if (strcmp("matrix",getenv("OUTPUT_INFO")) == 0){
-		fprintf(stdout, "Exited because iter = maxit\n");
-
-		/*
-		// Remember to implement tolerance
-        if(norm_diff < threshold && use_tol)
-            fprintf(stdout, "Exited because norm < threshold\n");
-        else
-            fprintf(stdout, "Exited because iter = maxit\n");
-		*/
-    }
 }
 // END OF FILE
 // ============================================================================

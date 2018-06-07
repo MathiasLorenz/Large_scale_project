@@ -97,10 +97,10 @@ Program()
 		time OUTPUT_INFO=error USE_TOLERANCE=on mpiexec -q -n 2 ./jacobiSolver.bin mpi3d_1 $n
 		
 		echo mpi3d_2
-		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_2 $n
+		time OUTPUT_INFO=error USE_TOLERANCE=on mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_2 $n
 		
 		echo mpi3d_3
-		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_3 $n
+		time OUTPUT_INFO=error USE_TOLERANCE=on mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_3 $n
 		
 		echo cuda_1
 		time OUTPUT_INFO=error ./jacobiSolver.bin cuda_1 $n

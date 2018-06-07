@@ -86,6 +86,10 @@ void jacobi_mpi3D_1(Information *information, double *U, double *F, double *Unew
 		// Synchronize and swap
 		MPI_Barrier(MPI_COMM_WORLD);
 		memcpy(U_ptr_r, r_buf, N_buffer*sizeof(double));
+
+		// Stop early if relative error is used
+		if ( (information->use_tol) && (information->norm_diff < information->tol) )
+			break;
     }
 
 	// ------------------------------------------------------------------------
@@ -93,6 +97,8 @@ void jacobi_mpi3D_1(Information *information, double *U, double *F, double *Unew
 	MPI_Barrier(MPI_COMM_WORLD);
 	free(s_buf);
 	free(r_buf);
+
+	information->iter = iter;
 	
 	// Flop Counts:
 	// jacobi_iteration: (iter)
@@ -102,19 +108,6 @@ void jacobi_mpi3D_1(Information *information, double *U, double *F, double *Unew
 	// 		Update:
 	//			Simple:		15
 	MFLOP += 1e-6*( (6.0 + 5.0*4.0 ) + 15.0*Nx*Ny*Nz)*iter;
-
-	// Print the information requested
-    if (strcmp("matrix",getenv("OUTPUT_INFO")) == 0){
-		fprintf(stdout, "Exited because iter = maxit\n");
-
-		/*
-		// Remember to implement tolerance
-        if(norm_diff < threshold && use_tol)
-            fprintf(stdout, "Exited because norm < threshold\n");
-        else
-            fprintf(stdout, "Exited because iter = maxit\n");
-		*/
-    }
 }
 // END OF FILE
 // ============================================================================

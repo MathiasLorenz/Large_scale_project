@@ -50,6 +50,7 @@ void write_information(Information *information, int Nx, int Ny, int Nz,
 
 	// Handle the environmental variables
 	information->maxit	= atoi(getenv("MAX_ITER"));
+	information->iter	= -1;
 	information->tol	= atof(getenv("TOLERANCE"));
 
 	if (strcmp("on",getenv("USE_TOLERANCE")) == 0) 
@@ -166,7 +167,8 @@ void jacobi_iteration(Information *information,
 	double f3 = 1.0/3.0;
 	double f6 = 1.0/6.0;
 
-	//double norm_diff = 0.0; // Tolerance criterion
+	if (information->use_tol)
+		information->norm_diff = 0.0;
 
 	// Loop over all interior points
 	for (int i = 1; i < I - 1; i++) {
@@ -189,19 +191,24 @@ void jacobi_iteration(Information *information,
 				// Collect terms
 				Unew[ijk] = f6 * (ui + uj + uk);
 
+				// CONSIDER MOVING OUT OF LOOP!!!
 				// Tolerance criterion
-				//double uij    = U[ijk];
-				//double unewij = Unew[ijk];
-				//norm_diff += (uij - unewij)*(uij - unewij);
-				//if (use_tol && (norm_diff < threshold))
-					//break;
+				if (information->use_tol)
+				{
+					double uij    = U[ijk];
+					double unewij = Unew[ijk];
+					information->norm_diff += (uij - unewij)*(uij - unewij);
+				}
 			}
 		}
 	}
+
+	// DO REDUCTION
+	information->norm_diff = sqrt(information->norm_diff);
 }
 
 // ============================================================================
-// JACOBI ITERATION xxxxx
+// JACOBI ITERATION with interior and boundary split
 
 void jacobi_iteration_separate(Information *information,
 					double *U, double *F, double *Unew, const char *ver)
@@ -302,24 +309,22 @@ void jacobi_iteration_separate(Information *information,
 	
 }
 
-
-// END OF FILE
-// ============================================================================
-
 // Function to compute global error on solution. 
-void compute_global_error(Information *information, double *A, double *U)
+void compute_global_error(Information *information, double *A, double *U,
+	double *global_error)
 {
-	int Nx = information->global_Nx;
-	int Ny = information->global_Nx;
-	int Nz = information->global_Nx;
-	int rank = information->rank;
-	double global_error = 0.0, local_error = 0.0;
+	*global_error = 0.0;
+	double local_error = 0.0;
 
 	compute_max_error(information, A, U, &local_error);
 	MPI_Barrier(MPI_COMM_WORLD);
-	MPI_Reduce(&local_error, &global_error, 1, MPI_DOUBLE, MPI_MAX,
+	MPI_Reduce(&local_error, global_error, 1, MPI_DOUBLE, MPI_MAX,
 		0, MPI_COMM_WORLD);
-	
-	if (rank == 0)
-		printf("Grid: %d %d %d, error: %.7e\n", Nx, Ny, Nz, global_error);
 }
+
+
+
+
+
+// END OF FILE
+// ============================================================================
