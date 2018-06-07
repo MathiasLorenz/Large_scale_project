@@ -52,10 +52,12 @@ void copy_information_cuda(Information *information_cuda, Information *informati
 		cudaMemcpyHostToDevice
 	));
 
-	Temp.maxit = information->maxit;
-	Temp.tol = information->tol;
-	Temp.use_tol = information->use_tol;
-	Temp.norm_diff = information->norm_diff;
+	Temp.maxit				= information->maxit;
+	Temp.iter				= information->iter;
+	Temp.tol				= information->tol;
+	Temp.use_tol			= information->use_tol;
+	Temp.norm_diff			= information->norm_diff;
+	Temp.global_norm_diff	= information->global_norm_diff;
 
 	checkCudaErrors(cudaDeviceSynchronize());
 
@@ -116,6 +118,9 @@ __global__ void jacobi_iteration_kernel(Information *information_cuda,
 	int loc_Ny = information_cuda->loc_Ny[rank];
 	int loc_Nz = information_cuda->loc_Nz[rank];
 
+	// For relative error stopping
+	information_cuda->norm_diff = 0.0;
+
     int I, J, K;
 	I = loc_Nz; J = loc_Ny; K = loc_Nx;
 
@@ -150,6 +155,16 @@ __global__ void jacobi_iteration_kernel(Information *information_cuda,
 
 		// Collect terms
 		Unew_cuda[ijk] = f6 * (ui + uj + uk);
+
+		// Tolerance criterion
+		// CONSIDER MOVING OR SOMETHING DUNNO
+		if (information_cuda->use_tol)
+		{
+			double uij    = U_cuda[ijk];
+			double unewij = Unew_cuda[ijk];
+			double diff_val = (uij - unewij)*(uij - unewij);
+			atomicAdd(&information_cuda->norm_diff, diff_val);
+		}
 	}
 }
 

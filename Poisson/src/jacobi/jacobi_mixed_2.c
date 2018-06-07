@@ -130,14 +130,7 @@ void jacobi_mixed_2(Information *information, double *U, double *F, double *Unew
 		
 		// Determine source and destination
 		int neighbour_1, neighbour_2;
-		if (rank == 0) {
-			neighbour_1 = 1;
-		} else if (rank == size - 1) {
-			neighbour_1 = size - 2;
-		} else {
-			neighbour_1 = rank - 1; 
-			neighbour_2 = rank + 1;
-		}
+		compute_neighbors(information, &neighbour_1, &neighbour_2);
 
 		cuda_synchronize();
 		MPI_Barrier(MPI_COMM_WORLD);
@@ -169,6 +162,9 @@ void jacobi_mixed_2(Information *information, double *U, double *F, double *Unew
             break;
 		*/
     }
+
+	// Save number of iterations
+	information->iter = iter;
 
 	// ------------------------------------------------------------------------
 	// Finalise

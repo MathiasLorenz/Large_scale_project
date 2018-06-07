@@ -385,6 +385,21 @@ void print_error(Information *information, double *A, double *U)
 	}
 }
 
+// Function to compute neighbors for mpi threads.
+void compute_neighbors(Information *information,
+	int *neighbour_1, int *neighbour_2)
+{
+	int rank   = information->rank;
+	int size   = information->size;
+	if (rank == 0) {
+		*neighbour_1 = 1;
+	} else if (rank == size - 1) {
+		*neighbour_1 = size - 2;
+	} else {
+		*neighbour_1 = rank - 1; 
+		*neighbour_2 = rank + 1;
+	}
+}
 
 
 // END OF FILE

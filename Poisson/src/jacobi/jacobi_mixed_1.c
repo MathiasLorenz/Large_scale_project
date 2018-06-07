@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <mpi.h>
 
 #include "matrix_routines.h"
@@ -135,14 +136,7 @@ void jacobi_mixed_1(Information *information, double *U, double *F, double *Unew
 		
 		// Determine source and destination
 		int neighbour_1, neighbour_2;
-		if (rank == 0) {
-			neighbour_1 = 1;
-		} else if (rank == size - 1) {
-			neighbour_1 = size - 2;
-		} else {
-			neighbour_1 = rank - 1; 
-			neighbour_2 = rank + 1;
-		}
+		compute_neighbors(information, &neighbour_1, &neighbour_2);
 
 		MPI_Barrier(MPI_COMM_WORLD);
 
@@ -156,22 +150,27 @@ void jacobi_mixed_1(Information *information, double *U, double *F, double *Unew
 		if ( rank != 0 && rank != (size - 1) )
 			MPI_Recv(r_buf2, N_buffer, MPI_DOUBLE, neighbour_2, 0, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 
-		//MPI_Wait(req,MPI_STATUS_IGNORE);
-
 		// Synchronize and swap
 		MPI_Barrier(MPI_COMM_WORLD);
 		memcpy(U_ptr_r1, r_buf1, N_buffer*sizeof(double));
 		if (rank > 0 && rank < (size - 1) )
 			memcpy(U_ptr_r2, r_buf2, N_buffer*sizeof(double));
 
-		// Remember to implement tolerance
+		// Stop early if relative error is used
+		// Can i read directly from information_cuda??
 		/*
-        norm_diff = sqrt(norm_diff);
+		information_cuda->norm_diff = sqrt(information_cuda->norm_diff);
+		MPI_Allreduce(&information_cuda->norm_diff, &information_cuda->global_norm_diff,
+			1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
-        if (use_tol && (norm_diff < threshold))
-            break;
+		if ( (information_cuda->use_tol) && 
+			(information_cuda->global_norm_diff < information_cuda->tol) )
+			break;
 		*/
     }
+
+	// Save number of iterations
+	information->iter = iter;
 
 	// ------------------------------------------------------------------------
 	// Finalise

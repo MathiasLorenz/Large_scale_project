@@ -44,6 +44,8 @@ void compute_max_error(Information *information, double *A, double *U, double *l
 void compute_global_error(Information *information, double *A, double *U,
 		double *global_error);
 void print_error(Information *information, double *A, double *U);
+void compute_neighbors(Information *information,
+	int *neighbour_1, int *neighbour_2);
 
 #ifdef __cplusplus
 } // Extern "C"

@@ -113,6 +113,9 @@ Program()
 		
 		echo mixed_3
 		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_3 $n
+	
+		echo mixed_4
+		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_4 $n
 	done
 
 	# -------------------------------------------------------------------------

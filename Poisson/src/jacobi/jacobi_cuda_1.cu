@@ -112,7 +112,10 @@ void jacobi_cuda_1(Information *information, double *U, double *F, double *Unew)
         if (use_tol && (norm_diff < threshold))
             break;
 		*/
-    }
+	}
+	
+	// Save number of iterations
+	information->iter = iter;
 
 	// ========================================================================
 	// Finalise

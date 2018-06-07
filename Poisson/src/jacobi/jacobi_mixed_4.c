@@ -134,14 +134,7 @@ void jacobi_mixed_4(Information *information, double *U, double *F, double *Unew
 		
 		// Determine source and destination
 		int neighbour_1, neighbour_2;
-		if (rank == 0) {
-			neighbour_1 = 1;
-		} else if (rank == size - 1) {
-			neighbour_1 = size - 2;
-		} else {
-			neighbour_1 = rank - 1; 
-			neighbour_2 = rank + 1;
-		}
+		compute_neighbors(information, &neighbour_1, &neighbour_2);
 
 		// Send boundaries and receive boundaries
 		MPI_Isend(s_buf1, N_buffer, MPI_DOUBLE, neighbour_1, 0, MPI_COMM_WORLD,
@@ -171,6 +164,9 @@ void jacobi_mixed_4(Information *information, double *U, double *F, double *Unew
         swap_array( &U_cuda, &Unew_cuda );
 		
     }
+
+	// Save number of iterations
+	information->iter = iter;
 
 	// ------------------------------------------------------------------------
 	// Finalise
