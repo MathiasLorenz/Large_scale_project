@@ -60,7 +60,7 @@ void write_information(Information *information, int Nx, int Ny, int Nz,
 		information->use_tol = false;
 
 	information->norm_diff = 0.0;
-	information->global_norm_diff = 0.0;
+	information->global_norm_diff = 10.0;
 }
 
 void free_information_arrays(Information *information)
@@ -143,8 +143,8 @@ void jacobi_iteration(Information *information,
 	double f3 = 1.0/3.0;
 	double f6 = 1.0/6.0;
 
-	if (information->use_tol)
-		information->norm_diff = 0.0;
+	// For relative error stopping
+	information->norm_diff = 0.0;
 
 	// Loop over all interior points
 	for (int i = 1; i < I - 1; i++) {
@@ -167,8 +167,10 @@ void jacobi_iteration(Information *information,
 				// Collect terms
 				Unew[ijk] = f6 * (ui + uj + uk);
 
-				// CONSIDER MOVING OUT OF LOOP!!!
 				// Tolerance criterion
+				// For small problems it is more efficient to put outside the loop,
+				// however for large problems (as we wish to solve) looping only once
+				// is more efficient.				
 				if (information->use_tol)
 				{
 					double uij    = U[ijk];
@@ -210,6 +212,9 @@ void jacobi_iteration_separate(Information *information,
 	double f3 = 1.0/3.0;
 	double f6 = 1.0/6.0;
 
+	// For relative error stopping
+	information->norm_diff = 0.0;
+
 	// Loop over points. Either interior or boundary
 	if (strcmp(ver, "i") == 0) // interior
 	{
@@ -233,6 +238,17 @@ void jacobi_iteration_separate(Information *information,
 
 					// Collect terms
 					Unew[ijk] = f6 * (ui + uj + uk);
+
+					// Tolerance criterion
+					// For small problems it is more efficient to put outside the loop,
+					// however for large problems (as we wish to solve) looping only once
+					// is more efficient.				
+					if (information->use_tol)
+					{
+						double uij    = U[ijk];
+						double unewij = Unew[ijk];
+						information->norm_diff += (uij - unewij)*(uij - unewij);
+					}
 				}
 			}
 		}
@@ -258,6 +274,17 @@ void jacobi_iteration_separate(Information *information,
 
 				// Collect terms
 				Unew[ijk] = f6 * (ui + uj + uk);
+
+				// Tolerance criterion
+				// For small problems it is more efficient to put outside the loop,
+				// however for large problems (as we wish to solve) looping only once
+				// is more efficient.				
+				if (information->use_tol)
+				{
+					double uij    = U[ijk];
+					double unewij = Unew[ijk];
+					information->norm_diff += (uij - unewij)*(uij - unewij);
+				}
 			}
 		}
 		i = I - 2;
@@ -279,10 +306,23 @@ void jacobi_iteration_separate(Information *information,
 
 				// Collect terms
 				Unew[ijk] = f6 * (ui + uj + uk);
+
+				// Tolerance criterion
+				// For small problems it is more efficient to put outside the loop,
+				// however for large problems (as we wish to solve) looping only once
+				// is more efficient.				
+				if (information->use_tol)
+				{
+					double uij    = U[ijk];
+					double unewij = Unew[ijk];
+					information->norm_diff += (uij - unewij)*(uij - unewij);
+				}
 			}
 		}
 	}
-	
+
+	// Save relative error for this grid
+	information->norm_diff = sqrt(information->norm_diff);
 }
 
 // Compute max absolute error
@@ -330,7 +370,7 @@ void print_error(Information *information, double *A, double *U)
 	int Ny = information->global_Nx;
 	int Nz = information->global_Nx;
 	int rank = information->rank;
-	double norm_diff = information->norm_diff;
+	double global_norm_diff = information->global_norm_diff;
 	int iter = information->iter;
 	double global_error = 0.0;
 	compute_global_error(information, A, U, &global_error);
@@ -338,7 +378,7 @@ void print_error(Information *information, double *A, double *U)
 	{
 		if (information->use_tol)
 			printf("Grid: %d %d %d, iter: %d, norm error: %.7e, error: %.7e\n",
-				Nx, Ny, Nz, iter, norm_diff, global_error);
+				Nx, Ny, Nz, iter, global_norm_diff, global_error);
 		else
 			printf("Grid: %d %d %d, iter: %d, error: %.7e\n",
 				Nx, Ny, Nz, iter, global_error);

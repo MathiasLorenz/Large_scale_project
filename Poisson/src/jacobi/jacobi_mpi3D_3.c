@@ -127,7 +127,6 @@ void jacobi_mpi3D_3(Information *information, double *U, double *F, double *Unew
 		MPI_Waitall(num_req, req, MPI_STATUS_IGNORE);
 
 		// Synchronize and copy buffers
-		MPI_Barrier(MPI_COMM_WORLD); // Maybe not necessary after waitall?
 		memcpy(U_ptr_r1, r_buf1, N_buffer*sizeof(double));
 		if (rank > 0 && rank < (size - 1) )
 			memcpy(U_ptr_r2, r_buf2, N_buffer*sizeof(double));
@@ -138,6 +137,7 @@ void jacobi_mpi3D_3(Information *information, double *U, double *F, double *Unew
 		// Stop early if relative error is used
 		MPI_Allreduce(&information->norm_diff, &information->global_norm_diff,
 			1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+
 		if ( (information->use_tol) && (information->global_norm_diff < information->tol) )
 			break;
     }
@@ -146,7 +146,7 @@ void jacobi_mpi3D_3(Information *information, double *U, double *F, double *Unew
 
 	// ------------------------------------------------------------------------
 	// Finalise
-	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_Barrier(MPI_COMM_WORLD); // needed?
 	free(s_buf1); free(s_buf2);
 	free(r_buf1); free(r_buf2);
 	
