@@ -23,6 +23,7 @@ void jacobi_mixed_1(Information *information, double *U, double *F, double *Unew
 void jacobi_mixed_2(Information *information, double *U, double *F, double *Unew);
 void jacobi_mixed_3(Information *information, double *U, double *F, double *Unew);
 void jacobi_mixed_4(Information *information, double *U, double *F, double *Unew);
+void jacobi_mixed_5(Information *information, double *U, double *F, double *Unew);
 
 
 #ifdef __cplusplus
