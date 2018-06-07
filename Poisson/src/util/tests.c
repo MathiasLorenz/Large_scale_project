@@ -158,23 +158,7 @@ void test_jacobi_3D(Information *information, char const *solver)
 	}	
 	else if (strcmp("error", getenv("OUTPUT_INFO")) == 0)
 	{
-		int Nx = information->global_Nx;
-		int Ny = information->global_Nx;
-		int Nz = information->global_Nx;
-		int rank = information->rank;
-		double norm_diff = information->norm_diff;
-		int iter = information->iter;
-		double global_error = 0.0;
-		compute_global_error(information, A, U, &global_error);
-		if (rank == 0)
-		{
-			if (information->use_tol)
-				printf("Grid: %d %d %d, iter: %d, norm error: %.7e, error: %.7e\n",
-					Nx, Ny, Nz, iter, norm_diff, global_error);
-			else
-				printf("Grid: %d %d %d, iter: %d, error: %.7e\n",
-					Nx, Ny, Nz, iter, global_error);
-		}
+		print_error(information, A, U);
 	}
 		
 

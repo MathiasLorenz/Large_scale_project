@@ -53,12 +53,14 @@ void write_information(Information *information, int Nx, int Ny, int Nz,
 	information->iter	= -1;
 	information->tol	= atof(getenv("TOLERANCE"));
 
+	// Variables for tolerance calculations
 	if (strcmp("on",getenv("USE_TOLERANCE")) == 0) 
 		information->use_tol = true;
 	else
 		information->use_tol = false;
-	information->norm_diff = 0.0;
 
+	information->norm_diff = 0.0;
+	information->global_norm_diff = 0.0;
 }
 
 void free_information_arrays(Information *information)
@@ -113,32 +115,6 @@ void generate_true_solution(double *A, Information *information)
 		z += hi;
 	}
 }
-
-// Compute max absolute error
-void compute_max_error(Information *information, double *A, double *U, double *abs_err)
-{
-	if (!A || !U || !abs_err || !information)
-	{ fprintf(stderr, "Pointer is NULL.\n"); return; }
-	*abs_err = 0.0;
-
-	// Extract problem dimensions
-	int rank = information->rank;
-	int loc_Nx = information->loc_Nx[rank];
-	int loc_Ny = information->loc_Ny[rank];
-	int loc_Nz = information->loc_Nz[rank];
-	// Rewritting to C style coordinates
-	int K = loc_Nx, J = loc_Ny, I = loc_Nz;
-
-	// Loop over all interior points
-	for (int i = 1; i < (I - 1); ++i)
-		for (int j = 1; j < (J - 1); ++j)
-			for (int k = 1; k < (K - 1); ++k) {
-				int ijk = IND_3D(i, j, k, I, J, K);
-				double err = fabs(U[ijk] - A[ijk]);
-				if (err > *abs_err) *abs_err = err; // Save largest element
-			}
-}
-
 
 // ============================================================================
 // JACOBI ITERATION
@@ -203,7 +179,7 @@ void jacobi_iteration(Information *information,
 		}
 	}
 
-	// DO REDUCTION
+	// Save relative error for this grid
 	information->norm_diff = sqrt(information->norm_diff);
 }
 
@@ -309,6 +285,31 @@ void jacobi_iteration_separate(Information *information,
 	
 }
 
+// Compute max absolute error
+void compute_max_error(Information *information, double *A, double *U, double *abs_err)
+{
+	if (!A || !U || !abs_err || !information)
+	{ fprintf(stderr, "Pointer is NULL.\n"); return; }
+	*abs_err = 0.0;
+
+	// Extract problem dimensions
+	int rank = information->rank;
+	int loc_Nx = information->loc_Nx[rank];
+	int loc_Ny = information->loc_Ny[rank];
+	int loc_Nz = information->loc_Nz[rank];
+	// Rewritting to C style coordinates
+	int K = loc_Nx, J = loc_Ny, I = loc_Nz;
+
+	// Loop over all interior points
+	for (int i = 1; i < (I - 1); ++i)
+		for (int j = 1; j < (J - 1); ++j)
+			for (int k = 1; k < (K - 1); ++k) {
+				int ijk = IND_3D(i, j, k, I, J, K);
+				double err = fabs(U[ijk] - A[ijk]);
+				if (err > *abs_err) *abs_err = err; // Save largest element
+			}
+}
+
 // Function to compute global error on solution. 
 void compute_global_error(Information *information, double *A, double *U,
 	double *global_error)
@@ -322,7 +323,27 @@ void compute_global_error(Information *information, double *A, double *U,
 		0, MPI_COMM_WORLD);
 }
 
-
+// Function to print error for OUTPUT_INFO=error
+void print_error(Information *information, double *A, double *U)
+{
+	int Nx = information->global_Nx;
+	int Ny = information->global_Nx;
+	int Nz = information->global_Nx;
+	int rank = information->rank;
+	double norm_diff = information->norm_diff;
+	int iter = information->iter;
+	double global_error = 0.0;
+	compute_global_error(information, A, U, &global_error);
+	if (rank == 0)
+	{
+		if (information->use_tol)
+			printf("Grid: %d %d %d, iter: %d, norm error: %.7e, error: %.7e\n",
+				Nx, Ny, Nz, iter, norm_diff, global_error);
+		else
+			printf("Grid: %d %d %d, iter: %d, error: %.7e\n",
+				Nx, Ny, Nz, iter, global_error);
+	}
+}
 
 
 
