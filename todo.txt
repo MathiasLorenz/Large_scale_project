@@ -15,6 +15,8 @@ Things that must be done:
 - What is our baseline tests? omp, mpi_1, cuda?
 - Consider if specific kernels can be waited for.
 
+New implementations
+- mixed_5 should contain cuda pointers for direct send and receive
 
 Snake med Drengene:
 - Giver det mening at gå over til floating point.
