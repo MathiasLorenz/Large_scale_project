@@ -137,6 +137,8 @@ void test_jacobi_3D(Information *information, char const *solver)
 		jacobi_mixed_2(information, U, F, Unew);
 	else if (strcmp(solver, "mixed_3") == 0)
 		jacobi_mixed_3(information, U, F, Unew);
+	else if (strcmp(solver, "mixed_4") == 0)
+		jacobi_mixed_4(information, U, F, Unew);
 	
 
 	MPI_Barrier(MPI_COMM_WORLD);

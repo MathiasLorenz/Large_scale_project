@@ -115,7 +115,7 @@ Visualize()
 {
 	echo ' '
 	echo Visualizing
-	matlab -r "addpath(genpath('../../'));matlabspeedup('$LSB_JOBNAME','omp3d','$DPATH/','$FIGS');exit;"
+	matlab -r "addpath(genpath('../../'));matlabparperf('$LSB_JOBNAME','$DPATH/','$FIGS');exit;"
 }
 
 # End of Visualize

@@ -30,6 +30,8 @@ for i = 1:length(Names)
     for n = 1:length(N)
         if strcmp(Names{i},N{n})
             Data(Cores(i)-1,n) = flops(i);
+            
+            fprintf('Name: %s, C: %d, flops: %f\n',Names{i},Cores(i),flops(i))
         end
     end
 end
@@ -37,7 +39,7 @@ hold on
 for n = 1:length(N)
     plot(C,Data(:,n)./Data(1,n))
 end
-plot(2:C(end)+2,1:C(end)+1)
+plot(2:C(end)+2,1:C(end)+1,'LineStyle','--')
 hold off
 
 %% Handle the axes and the ticks

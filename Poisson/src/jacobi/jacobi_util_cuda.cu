@@ -169,18 +169,23 @@ void jacobi_iteration_cuda_separate(Information *information, Information *infor
 	// interior or boundary
 	if (strcmp(ver, "i") == 0)
 	{
+		cudaStream_t stream;
+		cudaStreamCreate(&stream);
 		dim3 BlockSize = dim3(32, 32, 32);
 		dim3 BlockAmount = dim3( K/BlockSize.x + 3, J/BlockSize.y + 3, I/BlockSize.z + 3 );
-		jacobi_iteration_kernel_interior<<<BlockSize,BlockAmount>>>
+		jacobi_iteration_kernel_interior<<<BlockSize,BlockAmount,0,stream>>>
 				(information_cuda, U_cuda, F_cuda, Unew_cuda);
 	}
 	if (strcmp(ver, "b") == 0)   // boundary
 	{
 		dim3 BlockSize = dim3(32, 32, 1);
 		dim3 BlockAmount = dim3( K/BlockSize.x + 3, J/BlockSize.y + 3, 1 );
-		jacobi_iteration_kernel_boundary<<<BlockSize,BlockAmount>>>
+		jacobi_iteration_kernel_boundary<<<BlockSize,BlockAmount,0,0>>>
 				(information_cuda, U_cuda, F_cuda, Unew_cuda);
 	}
+}
+void cuda_wait_boundary(){
+	checkCudaErrors(cudaStreamSynchronize(0));
 }
 
 // Kernel for interior points. Starts being used in mixed_3
