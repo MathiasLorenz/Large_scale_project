@@ -4,8 +4,8 @@ Things that must be done:
 + Fix non rectangular grids. Not sure if it is correct.
 + Check that FLOP is counted over all timed functions.
 - Write report with simple cases and indexing.
-- In MPI test 1, consider the fail cases when allocating arrays.
-- In MPI init 1, remember hi is incorrect. Make the computation general.
++ In MPI test 1, consider the fail cases when allocating arrays.
++ In MPI init 1, remember hi is incorrect. Make the computation general.
 - In MPI jacobi 1, we need to handle tolerances via broadcast or similar.
 - In jacobi util, we need to change how we handle h's and steps.
 + Sendrecv doesn't work with -oversubscribe, test if it works when submitted.
@@ -14,3 +14,8 @@ Things that must be done:
 - Remember to consider the error is not decreasing as fast for big systems.
 - What is our baseline tests? omp, mpi_1, cuda?
 - Consider if specific kernels can be waited for.
+
+
+Snake med Drengene:
+- Giver det mening at gå over til floating point.
+- ECTS points.
