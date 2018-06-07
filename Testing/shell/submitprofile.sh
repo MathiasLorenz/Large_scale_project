@@ -88,7 +88,7 @@ Program()
 		--output-profile profile.%q{OMPI_COMM_WORLD_RANK} \
 		--process-name "rank %q{OMPI_COMM_WORLD_RANK}" \
 		--context-name "rank %q{OMPI_COMM_WORLD_RANK}" \
-		./jacobiSolver.bin mixed_3 100
+		./jacobiSolver.bin mixed_4 512
 
 	# -------------------------------------------------------------------------
 	end=`date +%s`
