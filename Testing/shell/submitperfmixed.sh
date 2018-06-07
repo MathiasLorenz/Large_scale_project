@@ -83,7 +83,7 @@ Program()
 
 	# Run the programs (Max array size for GPU: 874)
 	#N="8 16"
-	N="32 64 128 254 512"
+	N="32 64 128 254 512 1024"
 
 	TEST="mixed_1 mixed_2 mixed_3 mixed_4"
 	for t in $TEST

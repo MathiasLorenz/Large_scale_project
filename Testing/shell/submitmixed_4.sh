@@ -13,7 +13,7 @@
 # -- Technical options
 
 # Ask for n cores placed on R host.
-#BSUB -n 4
+#BSUB -n 2
 #BSUB -R "span[ptile=2]"
 #BSUB -K
 
@@ -82,11 +82,11 @@ Program()
 	# Define the actual test part of the script 
 
 	# Run the program
-	N="100"
+	N="256"
 	for n in $N 
 	do
 		>&2 echo "N: $n"
-		OUTPUT_INFO=matrix_full mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_2 $n >> $LSB_JOBNAME-$n.dat
+		OUTPUT_INFO=matrix_full mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_4 $n >> $LSB_JOBNAME-$n.dat
 		#mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_4 $n >> $LSB_JOBNAME-$n.dat
 	done
 
