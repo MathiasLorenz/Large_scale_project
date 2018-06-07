@@ -1,6 +1,9 @@
 # =============================================================================
 # .GITIGNORE FILE - Specification of files ignored by git.
 # =============================================================================
+# Project Specific Files
+merge.sh
+
 # Folders
 [Oo]bj
 [Ll]ogs
