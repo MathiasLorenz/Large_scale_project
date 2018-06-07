@@ -4,9 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
-#include <math.h>
-#include <omp.h>
 #include <mpi.h>
 
 #include "matrix_routines.h"
@@ -22,6 +19,7 @@ void jacobi_mpi3D_1(Information *information, double *U, double *F, double *Unew
 {
 	// Read the information structure
 	int rank   = information->rank;
+	int size   = information->size;
 	int Nx	   = information->global_Nx;
 	int Ny	   = information->global_Ny;
 	int Nz	   = information->global_Nz;
@@ -29,6 +27,13 @@ void jacobi_mpi3D_1(Information *information, double *U, double *F, double *Unew
 	int loc_Ny = information->loc_Ny[rank];
 	int loc_Nz = information->loc_Nz[rank];
 	int maxit  = information->maxit;
+
+	// Can only run on two cores.
+	if (size != 2)
+	{
+		fprintf(stderr, "Version mpi3d_1 can only run on 2 cores. Exiting.\n");
+		return;
+	}
 
 	MPI_Request req;
 
@@ -86,6 +91,12 @@ void jacobi_mpi3D_1(Information *information, double *U, double *F, double *Unew
 		// Synchronize and swap
 		MPI_Barrier(MPI_COMM_WORLD);
 		memcpy(U_ptr_r, r_buf, N_buffer*sizeof(double));
+
+		// Stop early if relative error is used
+		MPI_Allreduce(&information->norm_diff, &information->global_norm_diff,
+			1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+		if ( (information->use_tol) && (information->global_norm_diff < information->tol) )
+			break;
     }
 
 	// ------------------------------------------------------------------------
@@ -93,6 +104,8 @@ void jacobi_mpi3D_1(Information *information, double *U, double *F, double *Unew
 	MPI_Barrier(MPI_COMM_WORLD);
 	free(s_buf);
 	free(r_buf);
+
+	information->iter = iter;
 	
 	// Flop Counts:
 	// jacobi_iteration: (iter)
@@ -102,19 +115,6 @@ void jacobi_mpi3D_1(Information *information, double *U, double *F, double *Unew
 	// 		Update:
 	//			Simple:		15
 	MFLOP += 1e-6*( (6.0 + 5.0*4.0 ) + 15.0*Nx*Ny*Nz)*iter;
-
-	// Print the information requested
-    if (strcmp("matrix",getenv("OUTPUT_INFO")) == 0){
-		fprintf(stdout, "Exited because iter = maxit\n");
-
-		/*
-		// Remember to implement tolerance
-        if(norm_diff < threshold && use_tol)
-            fprintf(stdout, "Exited because norm < threshold\n");
-        else
-            fprintf(stdout, "Exited because iter = maxit\n");
-		*/
-    }
 }
 // END OF FILE
 // ============================================================================

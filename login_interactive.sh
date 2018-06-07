@@ -12,6 +12,6 @@ echo "Executing the command:"
 echo "bsub -W 4:00 -q hpcint -app qrsh -env \"TERM\" -Is -n $NUMCORES \"reset; $SHELL -l\""
 echo " "
 
-bsub -W 4:00 -q hpcint -app qrsh -env "TERM" -Is -n $NUMCORES "reset; $SHELL -l"
+bsub -J interactive_login -W 4:00 -q hpcint -app qrsh -env "TERM" -Is -n $NUMCORES "reset; $SHELL -l"
 
 exit 0

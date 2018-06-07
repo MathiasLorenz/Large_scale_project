@@ -50,14 +50,17 @@ void write_information(Information *information, int Nx, int Ny, int Nz,
 
 	// Handle the environmental variables
 	information->maxit	= atoi(getenv("MAX_ITER"));
+	information->iter	= -1;
 	information->tol	= atof(getenv("TOLERANCE"));
 
+	// Variables for tolerance calculations
 	if (strcmp("on",getenv("USE_TOLERANCE")) == 0) 
 		information->use_tol = true;
 	else
 		information->use_tol = false;
-	information->norm_diff = 0.0;
 
+	information->norm_diff = 0.0;
+	information->global_norm_diff = 10.0;
 }
 
 void free_information_arrays(Information *information)
@@ -113,32 +116,6 @@ void generate_true_solution(double *A, Information *information)
 	}
 }
 
-// Compute max absolute error
-void compute_max_error(Information *information, double *A, double *U, double *abs_err)
-{
-	if (!A || !U || !abs_err || !information)
-	{ fprintf(stderr, "Pointer is NULL.\n"); return; }
-	*abs_err = 0.0;
-
-	// Extract problem dimensions
-	int rank = information->rank;
-	int loc_Nx = information->loc_Nx[rank];
-	int loc_Ny = information->loc_Ny[rank];
-	int loc_Nz = information->loc_Nz[rank];
-	// Rewritting to C style coordinates
-	int K = loc_Nx, J = loc_Ny, I = loc_Nz;
-
-	// Loop over all interior points
-	for (int i = 1; i < (I - 1); ++i)
-		for (int j = 1; j < (J - 1); ++j)
-			for (int k = 1; k < (K - 1); ++k) {
-				int ijk = IND_3D(i, j, k, I, J, K);
-				double err = fabs(U[ijk] - A[ijk]);
-				if (err > *abs_err) *abs_err = err; // Save largest element
-			}
-}
-
-
 // ============================================================================
 // JACOBI ITERATION
 
@@ -166,7 +143,8 @@ void jacobi_iteration(Information *information,
 	double f3 = 1.0/3.0;
 	double f6 = 1.0/6.0;
 
-	//double norm_diff = 0.0; // Tolerance criterion
+	// For relative error stopping
+	information->norm_diff = 0.0;
 
 	// Loop over all interior points
 	for (int i = 1; i < I - 1; i++) {
@@ -190,18 +168,25 @@ void jacobi_iteration(Information *information,
 				Unew[ijk] = f6 * (ui + uj + uk);
 
 				// Tolerance criterion
-				//double uij    = U[ijk];
-				//double unewij = Unew[ijk];
-				//norm_diff += (uij - unewij)*(uij - unewij);
-				//if (use_tol && (norm_diff < threshold))
-					//break;
+				// For small problems it is more efficient to put outside the loop,
+				// however for large problems (as we wish to solve) looping only once
+				// is more efficient.				
+				if (information->use_tol)
+				{
+					double uij    = U[ijk];
+					double unewij = Unew[ijk];
+					information->norm_diff += (uij - unewij)*(uij - unewij);
+				}
 			}
 		}
 	}
+
+	// Save relative error for this grid
+	information->norm_diff = sqrt(information->norm_diff);
 }
 
 // ============================================================================
-// JACOBI ITERATION xxxxx
+// JACOBI ITERATION with interior and boundary split
 
 void jacobi_iteration_separate(Information *information,
 					double *U, double *F, double *Unew, const char *ver)
@@ -227,6 +212,9 @@ void jacobi_iteration_separate(Information *information,
 	double f3 = 1.0/3.0;
 	double f6 = 1.0/6.0;
 
+	// For relative error stopping
+	information->norm_diff = 0.0;
+
 	// Loop over points. Either interior or boundary
 	if (strcmp(ver, "i") == 0) // interior
 	{
@@ -250,6 +238,17 @@ void jacobi_iteration_separate(Information *information,
 
 					// Collect terms
 					Unew[ijk] = f6 * (ui + uj + uk);
+
+					// Tolerance criterion
+					// For small problems it is more efficient to put outside the loop,
+					// however for large problems (as we wish to solve) looping only once
+					// is more efficient.				
+					if (information->use_tol)
+					{
+						double uij    = U[ijk];
+						double unewij = Unew[ijk];
+						information->norm_diff += (uij - unewij)*(uij - unewij);
+					}
 				}
 			}
 		}
@@ -275,6 +274,17 @@ void jacobi_iteration_separate(Information *information,
 
 				// Collect terms
 				Unew[ijk] = f6 * (ui + uj + uk);
+
+				// Tolerance criterion
+				// For small problems it is more efficient to put outside the loop,
+				// however for large problems (as we wish to solve) looping only once
+				// is more efficient.				
+				if (information->use_tol)
+				{
+					double uij    = U[ijk];
+					double unewij = Unew[ijk];
+					information->norm_diff += (uij - unewij)*(uij - unewij);
+				}
 			}
 		}
 		i = I - 2;
@@ -296,30 +306,86 @@ void jacobi_iteration_separate(Information *information,
 
 				// Collect terms
 				Unew[ijk] = f6 * (ui + uj + uk);
+
+				// Tolerance criterion
+				// For small problems it is more efficient to put outside the loop,
+				// however for large problems (as we wish to solve) looping only once
+				// is more efficient.				
+				if (information->use_tol)
+				{
+					double uij    = U[ijk];
+					double unewij = Unew[ijk];
+					information->norm_diff += (uij - unewij)*(uij - unewij);
+				}
 			}
 		}
 	}
-	
+
+	// Save relative error for this grid
+	information->norm_diff = sqrt(information->norm_diff);
 }
 
+// Compute max absolute error
+void compute_max_error(Information *information, double *A, double *U, double *abs_err)
+{
+	if (!A || !U || !abs_err || !information)
+	{ fprintf(stderr, "Pointer is NULL.\n"); return; }
+	*abs_err = 0.0;
 
-// END OF FILE
-// ============================================================================
+	// Extract problem dimensions
+	int rank = information->rank;
+	int loc_Nx = information->loc_Nx[rank];
+	int loc_Ny = information->loc_Ny[rank];
+	int loc_Nz = information->loc_Nz[rank];
+	// Rewritting to C style coordinates
+	int K = loc_Nx, J = loc_Ny, I = loc_Nz;
+
+	// Loop over all interior points
+	for (int i = 1; i < (I - 1); ++i)
+		for (int j = 1; j < (J - 1); ++j)
+			for (int k = 1; k < (K - 1); ++k) {
+				int ijk = IND_3D(i, j, k, I, J, K);
+				double err = fabs(U[ijk] - A[ijk]);
+				if (err > *abs_err) *abs_err = err; // Save largest element
+			}
+}
 
 // Function to compute global error on solution. 
-void compute_global_error(Information *information, double *A, double *U)
+void compute_global_error(Information *information, double *A, double *U,
+	double *global_error)
+{
+	*global_error = 0.0;
+	double local_error = 0.0;
+
+	compute_max_error(information, A, U, &local_error);
+	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_Reduce(&local_error, global_error, 1, MPI_DOUBLE, MPI_MAX,
+		0, MPI_COMM_WORLD);
+}
+
+// Function to print error for OUTPUT_INFO=error
+void print_error(Information *information, double *A, double *U)
 {
 	int Nx = information->global_Nx;
 	int Ny = information->global_Nx;
 	int Nz = information->global_Nx;
 	int rank = information->rank;
-	double global_error = 0.0, local_error = 0.0;
-
-	compute_max_error(information, A, U, &local_error);
-	MPI_Barrier(MPI_COMM_WORLD);
-	MPI_Reduce(&local_error, &global_error, 1, MPI_DOUBLE, MPI_MAX,
-		0, MPI_COMM_WORLD);
-	
+	double global_norm_diff = information->global_norm_diff;
+	int iter = information->iter;
+	double global_error = 0.0;
+	compute_global_error(information, A, U, &global_error);
 	if (rank == 0)
-		printf("Grid: %d %d %d, error: %.7e\n", Nx, Ny, Nz, global_error);
+	{
+		if (information->use_tol)
+			printf("Grid: %d %d %d, iter: %d, norm error: %.7e, error: %.7e\n",
+				Nx, Ny, Nz, iter, global_norm_diff, global_error);
+		else
+			printf("Grid: %d %d %d, iter: %d, error: %.7e\n",
+				Nx, Ny, Nz, iter, global_error);
+	}
 }
+
+
+
+// END OF FILE
+// ============================================================================

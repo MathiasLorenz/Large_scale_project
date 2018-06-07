@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 	if ( (output_info = getenv("OUTPUT_INFO")) == NULL )
 		putenv("OUTPUT_INFO=timing");
 	if ( (use_tol = getenv("USE_TOLERANCE")) == NULL )
-		putenv("USE_TOLERANCE=on");
+		putenv("USE_TOLERANCE=off");
 	if ( (maxiter = getenv("MAX_ITER")) == NULL)
 		putenv( "MAX_ITER=10000" );
 	if ( (tol_env = getenv("TOLERANCE")) == NULL)
@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
 			"omp2d, omp3d, "
 			"mpi3d_1, mpi3d_2, mpi3d_3 "
 			"cuda_1, "
-			"mixed_1, mixed_2"
+			"mixed_1, mixed_2, mixed_3"
 			".\n\n"
 			,T);
 		MPI_Finalize();

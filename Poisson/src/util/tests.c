@@ -159,7 +159,10 @@ void test_jacobi_3D(Information *information, char const *solver)
 			print_jacobi3d_z_sliced(U, information, "%10g ");
 	}	
 	else if (strcmp("error", getenv("OUTPUT_INFO")) == 0)
-		compute_global_error(information, A, U);
+	{
+		print_error(information, A, U);
+	}
+		
 
 	// Free the arrays created for the computation
 	free(U); free(F); free(A); free(Unew);		

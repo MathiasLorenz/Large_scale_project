@@ -25,11 +25,13 @@ typedef struct Information {
 
 	// Variables for looping
 	int 	maxit;
+	int		iter;
 	double  tol;
 
 	// For relative stop criterion
 	bool 	use_tol;
 	double  norm_diff;
+	double  global_norm_diff;
 } Information;
 
 void write_information(Information *information, int Nx, int Ny, int Nz, int rank, int size);
@@ -39,7 +41,9 @@ void jacobi_iteration_separate(Information *information, double *U, double *F, d
 		const char *ver);
 void generate_true_solution(double *A, Information *information);
 void compute_max_error(Information *information, double *A, double *U, double *local_error);
-void compute_global_error(Information *information, double *A, double *U);
+void compute_global_error(Information *information, double *A, double *U,
+		double *global_error);
+void print_error(Information *information, double *A, double *U);
 
 #ifdef __cplusplus
 } // Extern "C"

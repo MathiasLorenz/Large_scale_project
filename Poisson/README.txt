@@ -76,7 +76,7 @@ Extra environmental variables: ( > ENV_NAME=value ./jacobiSolver ...)
 		Sets the tolerance for the program to terminate when the maximal 
 		absolute error falls under this number.
 
-	USE_TOLERANCE: [default: on] 
+	USE_TOLERANCE: [default: off] 
 		Defines if the tolerance should be used or not.
 
 		on :	Use the tolerance as stop criterion.
