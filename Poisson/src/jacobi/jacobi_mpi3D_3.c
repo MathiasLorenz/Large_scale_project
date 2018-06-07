@@ -33,6 +33,13 @@ void jacobi_mpi3D_3(Information *information, double *U, double *F, double *Unew
 	int loc_Nz = information->loc_Nz[rank];
 	int maxit  = information->maxit;
 	
+	// Must run on more than one core
+	if (size < 2)
+	{
+		fprintf(stderr, "Version mpi3d_3 must run on multiple cores. Exiting.\n");
+		return;
+	}
+
 	// Number of requests for MPI send/recv. 
 	int num_req = (rank > 1 && rank < (size - 1)) ? 4 : 2;
 	MPI_Request req[num_req];
@@ -132,7 +139,9 @@ void jacobi_mpi3D_3(Information *information, double *U, double *F, double *Unew
         swap_array( &U, &Unew );
 
 		// Stop early if relative error is used
-		if ( (information->use_tol) && (information->norm_diff < information->tol) )
+		MPI_Allreduce(&information->norm_diff, &information->global_norm_diff,
+			1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+		if ( (information->use_tol) && (information->global_norm_diff < information->tol) )
 			break;
     }
 

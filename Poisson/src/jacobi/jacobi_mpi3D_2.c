@@ -30,8 +30,13 @@ void jacobi_mpi3D_2(Information *information, double *U, double *F, double *Unew
 	int loc_Ny = information->loc_Ny[rank];
 	int loc_Nz = information->loc_Nz[rank];
 	int maxit  = information->maxit;
-	
-	printf("Rank is %d, size is %d.\n", rank, size);
+
+	// Must run on more than one core
+	if (size < 2)
+	{
+		fprintf(stderr, "Version mpi3d_2 must run on multiple cores. Exiting.\n");
+		return;
+	}
 
 	MPI_Request req;
 
@@ -56,7 +61,6 @@ void jacobi_mpi3D_2(Information *information, double *U, double *F, double *Unew
 	
 	// Prepare stop criterion
 	int iter = 0;
-	printf("maxit = %d.\n", maxit);
 
 	// ------------------------------------------------------------------------
 	// Run the iterative method
@@ -64,9 +68,6 @@ void jacobi_mpi3D_2(Information *information, double *U, double *F, double *Unew
 
 		// Compute the iteration of the jacobi method
         jacobi_iteration(information, U, F, Unew);
-
-		if (rank == 0)
-			printf("0, iter = %d.\n", iter);
 		
         // Swap the arrays and check for convergence
         swap_array( &U, &Unew );
@@ -109,22 +110,14 @@ void jacobi_mpi3D_2(Information *information, double *U, double *F, double *Unew
 			neighbour_2 = rank + 1;
 		}
 
-		MPI_Barrier(MPI_COMM_WORLD);
-
 		// Send boundaries and receive boundaries
 		MPI_Isend(s_buf1, N_buffer, MPI_DOUBLE, neighbour_1, 0, MPI_COMM_WORLD, &req);
 		if ( rank != 0 && rank != (size - 1) )
 			MPI_Isend(s_buf2, N_buffer, MPI_DOUBLE, neighbour_2, 0, MPI_COMM_WORLD, &req);
 
-		if (rank == 0)
-			printf("xx, iter = %d.\n", iter);
-
 		MPI_Recv(r_buf1, N_buffer, MPI_DOUBLE, neighbour_1, 0, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 		if ( rank != 0 && rank != (size - 1) )
 			MPI_Recv(r_buf2, N_buffer, MPI_DOUBLE, neighbour_2, 0, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-
-		if (rank == 0)
-			printf("xxx, iter = %d.\n", iter);
 
 		// Synchronize and swap
 		MPI_Barrier(MPI_COMM_WORLD);
@@ -133,11 +126,10 @@ void jacobi_mpi3D_2(Information *information, double *U, double *F, double *Unew
 			memcpy(U_ptr_r2, r_buf2, N_buffer*sizeof(double));
 
 		// Stop early if relative error is used
-		if ( (information->use_tol) && (information->norm_diff < information->tol) )
-			{ printf("I'm breaking.\n"); break; }
-
-		if (rank == 0)
-			printf("1, iter = %d.\n", iter);
+		MPI_Allreduce(&information->norm_diff, &information->global_norm_diff,
+			1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+		if ( (information->use_tol) && (information->global_norm_diff < information->tol) )
+			break;
     }
 
 	information->iter = iter;

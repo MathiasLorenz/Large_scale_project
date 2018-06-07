@@ -22,6 +22,7 @@ void jacobi_mpi3D_1(Information *information, double *U, double *F, double *Unew
 {
 	// Read the information structure
 	int rank   = information->rank;
+	int size   = information->size;
 	int Nx	   = information->global_Nx;
 	int Ny	   = information->global_Ny;
 	int Nz	   = information->global_Nz;
@@ -29,6 +30,13 @@ void jacobi_mpi3D_1(Information *information, double *U, double *F, double *Unew
 	int loc_Ny = information->loc_Ny[rank];
 	int loc_Nz = information->loc_Nz[rank];
 	int maxit  = information->maxit;
+
+	// Can only run on two cores.
+	if (size != 2)
+	{
+		fprintf(stderr, "Version mpi3d_1 can only run on 2 cores. Exiting.\n");
+		return;
+	}
 
 	MPI_Request req;
 
@@ -88,7 +96,9 @@ void jacobi_mpi3D_1(Information *information, double *U, double *F, double *Unew
 		memcpy(U_ptr_r, r_buf, N_buffer*sizeof(double));
 
 		// Stop early if relative error is used
-		if ( (information->use_tol) && (information->norm_diff < information->tol) )
+		MPI_Allreduce(&information->norm_diff, &information->global_norm_diff,
+			1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+		if ( (information->use_tol) && (information->global_norm_diff < information->tol) )
 			break;
     }
 
