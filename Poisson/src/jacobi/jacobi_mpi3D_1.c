@@ -93,10 +93,13 @@ void jacobi_mpi3D_1(Information *information, double *U, double *F, double *Unew
 		memcpy(U_ptr_r, r_buf, N_buffer*sizeof(double));
 
 		// Stop early if relative error is used
-		MPI_Allreduce(&information->norm_diff, &information->global_norm_diff,
-			1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-		if ( (information->use_tol) && (information->global_norm_diff < information->tol) )
-			break;
+		if (information->use_tol)
+		{
+			MPI_Allreduce(&information->norm_diff, &information->global_norm_diff,
+				1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+			if (information->global_norm_diff < information->tol)
+				break;
+		}
     }
 
 	// ------------------------------------------------------------------------
