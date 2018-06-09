@@ -3,7 +3,7 @@
 # --  General options 
 
 # Naming of the job and queue name
-#BSUB -J cuda_1
+#BSUB -J mixed_3
 #BSUB -q gpuv100
 
 # Specify
@@ -13,20 +13,20 @@
 # -- Technical options
 
 # Ask for n cores placed on R host.
-#BSUB -n 1
-#BSUB -R "span[ptile=1]"
+#BSUB -n 4
+#BSUB -R "span[ptile=2]"
 #BSUB -K
 
 # Memory specifications. Amount we need and when to kill the
 # program using too much memory.
-#BSUB -R "rusage[mem=20GB]"
-#BSUB -M 20GB
+#BSUB -R "rusage[mem=50GB]"
+#BSUB -M 50GB
 
 # Time specifications (hh:mm)
 #BSUB -W 01:00
 
 # GPU options
-#BSUB -gpu "num=1:mode=exclusive_process"
+#BSUB -gpu "num=2:mode=exclusive_process"
 
 # -- Notification options
 
@@ -81,13 +81,16 @@ Program()
 	# -------------------------------------------------------------------------
 	# Define the actual test part of the script 
 
-	# Run t
-	he program
-	N="850"
+	# Run the program
+	N="400"
 	for n in $N 
 	do
-		./jacobiSolver.bin cuda_1 $n
+		>&2 echo "N: $n"
+		OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_2 $n
+		OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_3 $n
+		#OUTPUT_INFO=matrix_full mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_3 $n >> $LSB_JOBNAME-$n.dat
 	done
+
 
 	# -------------------------------------------------------------------------
 	mv -t $DPATH *.dat 
@@ -101,7 +104,7 @@ Visualize()
 {
 	echo ' '
 	echo Visualizing
-	matlab -r "addpath(genpath('../../'));matlab3Dplots('$LSB_JOBNAME','$DPATH/','$FIGS');exit;"
+	#matlab -r "addpath(genpath('../../'));matlab3Dplots('$LSB_JOBNAME','$DPATH/','$FIGS');exit;"
 }
 
 # End of Visualize
@@ -121,7 +124,7 @@ Finalize()
 
 # End of Visualize
 #==============================================================================
-# Define Early Termination
+# Define Early Termination (ONLY WORKS IN qsub)
 
 early()
 {
