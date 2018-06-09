@@ -17,6 +17,8 @@ void cuda_host_free(double *host_array);
 // ============================================================================
 // COPY DATA TO AND FROM DEVICE
 
+void copy_to_device_async(double *host, int N, double *device);
+void copy_from_device_async(double *host, int N, double *device);
 void copy_to_device(double *host, int N, double *device);
 void copy_from_device(double *host, int N, double *device);
 

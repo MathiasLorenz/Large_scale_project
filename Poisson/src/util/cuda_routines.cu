@@ -32,13 +32,21 @@ void cuda_host_free(double *host_array)
 // ============================================================================
 // COPY DATA TO AND FROM DEVICE
 
-void copy_to_device(double *host, int N, double *device)
+void copy_to_device_async(double *host, int N_bytes, double *device)
 {
-	checkCudaErrors(cudaMemcpyAsync(device, host, N, cudaMemcpyHostToDevice));
+	checkCudaErrors(cudaMemcpyAsync(device, host, N_bytes, cudaMemcpyHostToDevice));
 }
-void copy_from_device(double *host, int N, double *device)
+void copy_from_device_async(double *host, int N_bytes, double *device)
 {
-	checkCudaErrors(cudaMemcpyAsync(host, device, N, cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpyAsync(host, device, N_bytes, cudaMemcpyDeviceToHost));
+}
+void copy_to_device(double *host, int N_bytes, double *device)
+{
+	checkCudaErrors(cudaMemcpy(device, host, N_bytes, cudaMemcpyHostToDevice));
+}
+void copy_from_device(double *host, int N_bytes, double *device)
+{
+	checkCudaErrors(cudaMemcpy(host, device, N_bytes, cudaMemcpyDeviceToHost));
 }
 
 // ============================================================================

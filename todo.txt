@@ -14,6 +14,7 @@ Things that must be done:
 - Remember to consider the error is not decreasing as fast for big systems.
 - What is our baseline tests? omp, mpi_1, cuda?
 - Consider if specific kernels can be waited for.
+- Consider if flops count is different when USE_TOLERANCE=on
 
 New implementations
 - mixed_5 should contain cuda pointers for direct send and receive
@@ -21,3 +22,7 @@ New implementations
 Snake med Drengene:
 - Giver det mening at gå over til floating point.
 - ECTS points.
+
+Lorenz note:
+- Når jeg kører all_tests så er fejlen højere for mixed_3 og mixed_4 end de andre
+efter samme tal iterationer?

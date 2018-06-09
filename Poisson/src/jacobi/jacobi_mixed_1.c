@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <mpi.h>
 
 #include "matrix_routines.h"
@@ -67,8 +68,8 @@ void jacobi_mixed_1(Information *information, double *U, double *F, double *Unew
 	cuda_malloc((void**)&Unew_cuda, arraySizes);
 	
 	// Copy over F and Unew to the device
-	copy_to_device(F,   arraySizes,F_cuda   );
-	copy_to_device(Unew,arraySizes,Unew_cuda);
+	copy_to_device_async(F,   arraySizes,F_cuda   );
+	copy_to_device_async(Unew,arraySizes,Unew_cuda);
 
 	// Remember to implement tolerance
 	/*
@@ -90,7 +91,7 @@ void jacobi_mixed_1(Information *information, double *U, double *F, double *Unew
         norm_diff = 0.0;
 		*/
 		// Copy over the result of the last itteration
-		copy_to_device(U,   arraySizes,U_cuda   );
+		copy_to_device_async(U,   arraySizes,U_cuda   );
 		cuda_synchronize();
 
 		// Compute the iteration of the jacobi method on the GPU
@@ -100,7 +101,7 @@ void jacobi_mixed_1(Information *information, double *U, double *F, double *Unew
 		cuda_synchronize();
 
 		// Copy back the result to the CPU
-		copy_from_device(Unew,arraySizes,Unew_cuda);
+		copy_from_device_async(Unew,arraySizes,Unew_cuda);
 		cuda_synchronize();
 		
         // Swap the arrays and check for convergence
@@ -135,28 +136,18 @@ void jacobi_mixed_1(Information *information, double *U, double *F, double *Unew
 		
 		// Determine source and destination
 		int neighbour_1, neighbour_2;
-		if (rank == 0) {
-			neighbour_1 = 1;
-		} else if (rank == size - 1) {
-			neighbour_1 = size - 2;
-		} else {
-			neighbour_1 = rank - 1; 
-			neighbour_2 = rank + 1;
-		}
+		compute_neighbors(information, &neighbour_1, &neighbour_2);
 
-		MPI_Barrier(MPI_COMM_WORLD);
+		MPI_Barrier(MPI_COMM_WORLD); // Maybe remove?
 
 		// Send boundaries and receive boundaries
 		MPI_Isend(s_buf1, N_buffer, MPI_DOUBLE, neighbour_1, 0, MPI_COMM_WORLD, &req);
 		if ( rank != 0 && rank != (size - 1) )
 			MPI_Isend(s_buf2, N_buffer, MPI_DOUBLE, neighbour_2, 0, MPI_COMM_WORLD, &req);
 
-
 		MPI_Recv(r_buf1, N_buffer, MPI_DOUBLE, neighbour_1, 0, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 		if ( rank != 0 && rank != (size - 1) )
 			MPI_Recv(r_buf2, N_buffer, MPI_DOUBLE, neighbour_2, 0, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-
-		//MPI_Wait(req,MPI_STATUS_IGNORE);
 
 		// Synchronize and swap
 		MPI_Barrier(MPI_COMM_WORLD);
@@ -164,14 +155,27 @@ void jacobi_mixed_1(Information *information, double *U, double *F, double *Unew
 		if (rank > 0 && rank < (size - 1) )
 			memcpy(U_ptr_r2, r_buf2, N_buffer*sizeof(double));
 
-		// Remember to implement tolerance
+		// Stop early if relative error is used
 		/*
-        norm_diff = sqrt(norm_diff);
+		if (information_cuda->use_tol)
+		{
+			// Copy norm_diff^2 from device to host and sqrt it
+			copy_from_device(&information->norm_diff, 1*sizeof(double),
+				&information_cuda->norm_diff);
+			information->norm_diff = sqrt(information->norm_diff);
 
-        if (use_tol && (norm_diff < threshold))
-            break;
+			// Compute global norm_diff and stop if desired
+			MPI_Allreduce(&information->norm_diff, &information->global_norm_diff,
+				1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+
+			if ( (information->global_norm_diff < information->tol) )
+				break;
+		}
 		*/
     }
+
+	// Save number of iterations
+	information->iter = iter;
 
 	// ------------------------------------------------------------------------
 	// Finalise
