@@ -155,23 +155,34 @@ void jacobi_mixed_1(Information *information, double *U, double *F, double *Unew
 		if (rank > 0 && rank < (size - 1) )
 			memcpy(U_ptr_r2, r_buf2, N_buffer*sizeof(double));
 
+		//printf("I'm %d iter %d.\n", rank, iter);
+
 		// Stop early if relative error is used
-		/*
-		if (information_cuda->use_tol)
+		if (information->use_tol)
 		{
+			//printf("Hi1.\n");
+			//printf("norm_diff = %f.\n", information->norm_diff);
+
 			// Copy norm_diff^2 from device to host and sqrt it
 			copy_from_device(&information->norm_diff, 1*sizeof(double),
 				&information_cuda->norm_diff);
-			information->norm_diff = sqrt(information->norm_diff);
+			//information->norm_diff = sqrt(information->norm_diff);
+			//Information tmp; // ONLY to get tmp.norm_diff, pointers are invalid
+			//copy_from_device_void(&tmp, sizeof(Information), information_cuda);
+			//information->norm_diff = sqrt(tmp.norm_diff);
 
+			//printf("rank %d, norm_diff = %f.\n", rank, information->norm_diff);
+
+			//printf("pre reduction, global_norm_diff = %f.\n", information->global_norm_diff);
 			// Compute global norm_diff and stop if desired
 			MPI_Allreduce(&information->norm_diff, &information->global_norm_diff,
 				1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
+			//printf("global_norm_diff = %f.\n", information->global_norm_diff);
+
 			if ( (information->global_norm_diff < information->tol) )
 				break;
 		}
-		*/
     }
 
 	// Save number of iterations

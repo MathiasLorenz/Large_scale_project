@@ -21,6 +21,7 @@ void copy_to_device_async(double *host, int N, double *device);
 void copy_from_device_async(double *host, int N, double *device);
 void copy_to_device(double *host, int N, double *device);
 void copy_from_device(double *host, int N, double *device);
+//void copy_from_device_void(void *host, int N_bytes, void *device);
 
 // ============================================================================
 // UTILITY FUNCTIONS

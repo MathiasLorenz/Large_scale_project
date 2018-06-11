@@ -32,6 +32,9 @@ typedef struct Information {
 	bool 	use_tol;
 	double  norm_diff;
 	double  global_norm_diff;
+
+	// Device array to hold norm information. Same size as kernel block
+	double  *cuda_norm_array;
 } Information;
 
 void write_information(Information *information, int Nx, int Ny, int Nz, int rank, int size);
