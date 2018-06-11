@@ -27,7 +27,7 @@ void copy_from_device(double *host, int N, double *device);
 // UTILITY FUNCTIONS
 
 void cuda_synchronize();
-void setCudaDevice(int rank);
+void cuda_set_device(int rank);
 
 #ifdef __cplusplus
 }
