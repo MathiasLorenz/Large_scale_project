@@ -82,12 +82,13 @@ Program()
 	# Define the actual test part of the script 
 
 	# Run the program
-	N="256"
+	N="100 400"
 	for n in $N 
 	do
 		>&2 echo "N: $n"
-		OUTPUT_INFO=matrix_full mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_4 $n >> $LSB_JOBNAME-$n.dat
-		#mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_4 $n >> $LSB_JOBNAME-$n.dat
+		MAX_ITER=10000 OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_2 $n
+		MAX_ITER=10000 OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_4 $n
+		#OUTPUT_INFO=matrix_full mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_4 $n >> $LSB_JOBNAME-$n.dat
 	done
 
 
@@ -103,7 +104,7 @@ Visualize()
 {
 	echo ' '
 	echo Visualizing
-	matlab -r "addpath(genpath('../../'));matlab3Dplots('$LSB_JOBNAME','$DPATH/','$FIGS');exit;"
+	#matlab -r "addpath(genpath('../../'));matlab3Dplots('$LSB_JOBNAME','$DPATH/','$FIGS');exit;"
 }
 
 # End of Visualize
