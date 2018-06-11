@@ -27,6 +27,10 @@ __global__ void jacobi_iteration_kernel(
 	Information *information_cuda, 
 	double *U_cuda, double *F_cuda, double *Unew_cuda
 );
+__global__ void jacobi_iteration_kernel_tol(
+	Information *information_cuda, 
+	double *U_cuda, double *F_cuda, double *Unew_cuda
+);
 __global__ void jacobi_iteration_kernel_interior(
 	Information *information_cuda, 
 	double *U_cuda, double *F_cuda, double *Unew_cuda

@@ -48,6 +48,12 @@ void copy_from_device(double *host, int N_bytes, double *device)
 {
 	checkCudaErrors(cudaMemcpy(host, device, N_bytes, cudaMemcpyDeviceToHost));
 }
+/*
+void copy_from_device_void(void *host, int N_bytes, void *device)
+{
+	checkCudaErrors(cudaMemcpy(host, device, N_bytes, cudaMemcpyDeviceToHost));
+}
+*/
 
 // ============================================================================
 // UTILITY FUNCTIONS
