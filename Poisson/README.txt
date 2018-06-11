@@ -12,10 +12,17 @@ where:
 		omp3d	: Is the Jacobi method using OpenMP for a 3D problem.
 		mpi3d_1	: Is the Jacobi method using MPI with a single split along Z.
 		mpi3d_2	: Is the Jacobi method using MPI with multiple split along Z.
+		mpi3d_3	: This version overlaps the sending and receiving of data with
+				  computation of the interior of the domain.
 		cuda_1	: First implementation using cuda for a single GPU.
 		mixed_1	: First implementation using both MPI and CUDA. Very naive.
 		mixed_2	: Second implementation using both MPI and CUDA. Copies only 
 				  needed data.
+		mixed_3 : First attempt in overlapping computations.
+		mixed_4 : Stream based overlapping of computations.
+		mixed_5 : (REQUIRES CUDA AWARE MPI) Passes devicepointers directly to 
+				  MPI for streamlined pipelining. This version have not been 
+				  tested.
 
 	NX NY NZ : Integer numbers.
 		The number of points in the problem, fx. 7 by 7. Nz is the size in the 
@@ -54,9 +61,9 @@ Extra environmental variables: ( > ENV_NAME=value ./jacobiSolver ...)
 	OUTPUT_INFO: [default: timing]
 		Defines the output type.
 
-		matrix_slize: 
+		matrix_slice: 
 			Defines that the result matrix should be printed as the
-			output. This will print the slize at the center of z for,
+			output. This will print the slice at the center of z for,
 			3 dimensional problems.
 		matrix_full:
 			Defines that the result matrix should be printed as the
@@ -70,7 +77,8 @@ Extra environmental variables: ( > ENV_NAME=value ./jacobiSolver ...)
 			the analytical solution and the solution calculated in the program.	
 		timing:
 			Defines that the output should be the timing info. Giving
-			the memory footprint (kB), Mflops and Walltime for the main loop.
+			the memory footprint (kB), performance (Mflops) and walltime (s) 
+			for the main loop.
 
 	TOLERANCE:	[default: 1e-6]
 		Sets the tolerance for the program to terminate when the maximal 
@@ -82,7 +90,7 @@ Extra environmental variables: ( > ENV_NAME=value ./jacobiSolver ...)
 		on :	Use the tolerance as stop criterion.
 		off:	Do not use the tolerance. Force to do MAXITER iterations.
 
-	MAX_ITER: [default: 1e5]
+	MAX_ITER: [default: 1e4]
 		The maximal number of iterations done by the solver.
 
 
