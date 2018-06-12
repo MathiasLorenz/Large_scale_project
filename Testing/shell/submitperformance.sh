@@ -22,7 +22,7 @@
 #BSUB -M 20GB
 
 # Time specifications (hh:mm)
-#BSUB -W 02:00
+#BSUB -W 05:00
 
 # GPU options
 #BSUB -gpu "num=2:mode=exclusive_process"
@@ -83,10 +83,10 @@ Program()
 
 	# Run the programs (Max array size for GPU: 874)
 	#N="8 16"
-	N="32 64 128 254 512"
+	N="32 64 128 254 512 1024"
 
 	# Run the MPI based tests
-	TEST="mpi3d_3 mixed_3"
+	TEST="mpi3d_3 mixed_4"
 	for t in $TEST
 	do
 		dat=$t.dat
@@ -98,6 +98,7 @@ Program()
 	done
 
 	# Run the non MPI based tests
+	N="32 64 128 254 512"
 	TEST="omp3d cuda_1"
 	for t in $TEST
 	do

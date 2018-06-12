@@ -84,7 +84,7 @@ Program()
 	#N="32"
 	#C="2 3 4"
 
-	C="2 3 4 5 6 7 8 9 10 11 12"
+	C="2 3 4 5 6 7 8 9 10"
 	N="512"
 
 	# Run the MPI based tests
