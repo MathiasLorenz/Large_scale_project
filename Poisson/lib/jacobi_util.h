@@ -26,10 +26,10 @@ typedef struct Information {
 	// Variables for looping
 	int 	maxit;
 	int		iter;
-	double  tol;
 
 	// For relative stop criterion
 	bool 	use_tol;
+	double  tol;
 	double  norm_diff;
 	double  global_norm_diff;
 
@@ -49,6 +49,7 @@ void compute_global_error(Information *information, double *A, double *U,
 void print_error(Information *information, double *A, double *U);
 void compute_neighbors(Information *information,
 	int *neighbour_1, int *neighbour_2);
+bool norm_early_stop(Information *information);
 
 #ifdef __cplusplus
 } // Extern "C"
