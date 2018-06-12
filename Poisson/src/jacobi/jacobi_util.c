@@ -93,7 +93,7 @@ void generate_true_solution(double *A, Information *information)
 	double hj = 2.0 / (Ny - 1.0);
 	double hk = 2.0 / (Nx - 1.0);
 
-	// This is based on an offset where z is split once.
+	// Determine how far we are in the z-direction
 	double z = -1.0;
 	for (int r = 0; r < rank; r++)
 		z += hi*(information->loc_Nz[r]-2.0);
@@ -399,6 +399,17 @@ void compute_neighbors(Information *information,
 		*neighbour_1 = rank - 1; 
 		*neighbour_2 = rank + 1;
 	}
+}
+
+// Calculate if norm criterion is reached
+bool norm_early_stop(Information *information)
+{
+	// Reduce and send global norm diff to all threads
+	MPI_Allreduce(&information->norm_diff, &information->global_norm_diff,
+		1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+
+	// Returning boolean for stopping
+	return (information->global_norm_diff < information->tol) ? true : false;
 }
 
 

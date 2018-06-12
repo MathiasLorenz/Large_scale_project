@@ -127,14 +127,10 @@ void jacobi_mpi3D_3(Information *information, double *U, double *F, double *Unew
 		// Swap the arrays
         swap_array( &U, &Unew );
 
-		// Stop early if relative error is used
-		if (information->use_tol)
-		{
-			MPI_Allreduce(&information->norm_diff, &information->global_norm_diff,
-				1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-			if (information->global_norm_diff < information->tol)
-				break;
-		}
+		// Stop early if relative error is used.
+		// Second operand is only evaluated if the first is true
+		if (information->use_tol && norm_early_stop(information))
+			break;
     }
 
 	information->iter = iter;
