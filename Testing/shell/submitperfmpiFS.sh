@@ -22,7 +22,7 @@
 #BSUB -M 50GB
 
 # Time specifications (hh:mm)
-#BSUB -W 03:00
+#BSUB -W 05:00
 
 # -- Notification options
 
@@ -80,7 +80,7 @@ Program()
 
 	# Run the programs (Max array size for GPU: 874)
 	#N="8 16"
-	N="32 64 128 254 512 1024 2048"
+	N="32 64 128 254 512 1024"
 
 	TEST="mpi3d_1"
 	for t in $TEST

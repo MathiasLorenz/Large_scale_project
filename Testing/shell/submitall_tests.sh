@@ -13,7 +13,7 @@
 # -- Technical options
 
 # Add progress
-##BSUB -K
+#BSUB -K
 
 # Ask for n cores placed on R host.
 #BSUB -n 4
@@ -34,8 +34,8 @@
 
 # Set the email to recieve to and when to recieve it
 ##BSUB -u your_email_address
-##BSUB -B		# Send notification at start
-##BSUB -N 		# Send notification at completion
+#BSUB -B		# Send notification at start
+#BSUB -N 		# Send notification at completion
 
 echo --------------------------------------------------------------------------
 echo 'Job: '$LSB_JOBNAME', is running on '$LSB_DJOB_NUMPROC' cores.'

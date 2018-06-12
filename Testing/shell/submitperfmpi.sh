@@ -13,7 +13,7 @@
 # -- Technical options
 
 # Ask for n cores placed on R host.
-#BSUB -n 10
+#BSUB -n 12
 #BSUB -R "span[ptile=2]"
 
 # Memory specifications. Amount we need and when to kill the
@@ -22,7 +22,7 @@
 #BSUB -M 20GB
 
 # Time specifications (hh:mm)
-#BSUB -W 03:00
+#BSUB -W 05:00
 
 # -- Notification options
 
