@@ -102,17 +102,18 @@ void jacobi_mpi3D_3(Information *information, double *U, double *F, double *Unew
 		compute_neighbors(information, &neighbour_1, &neighbour_2);
 
 		// Send boundaries and receive boundaries
+		MPI_Irecv(r_buf1, N_buffer, MPI_DOUBLE, neighbour_1, 0,
+					MPI_COMM_WORLD, &req[1]);
+		if ( rank != 0 && rank != (size - 1) )
+			MPI_Irecv(r_buf2, N_buffer, MPI_DOUBLE, neighbour_2, 0,
+					MPI_COMM_WORLD, &req[3]);
+		
 		MPI_Isend(s_buf1, N_buffer, MPI_DOUBLE, neighbour_1, 0, MPI_COMM_WORLD,
 				&req[0]);
 		if ( rank != 0 && rank != (size - 1) )
 			MPI_Isend(s_buf2, N_buffer, MPI_DOUBLE, neighbour_2, 0, MPI_COMM_WORLD,
 					&req[2]);
 
-		MPI_Irecv(r_buf1, N_buffer, MPI_DOUBLE, neighbour_1, 0,
-					MPI_COMM_WORLD, &req[1]);
-		if ( rank != 0 && rank != (size - 1) )
-			MPI_Irecv(r_buf2, N_buffer, MPI_DOUBLE, neighbour_2, 0,
-					MPI_COMM_WORLD, &req[3]);
 
 		// Compute interior while boundary is being sent
 		jacobi_iteration_separate(information, U, F, Unew, "i");
