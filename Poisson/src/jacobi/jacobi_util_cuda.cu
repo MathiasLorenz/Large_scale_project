@@ -271,7 +271,7 @@ void jacobi_iteration_cuda_separate(Information *information, Information *infor
 	{
 		dim3 BlockSize = dim3(32, 32, 1);
 		dim3 BlockAmount = dim3( K/BlockSize.x + 3, J/BlockSize.y + 3, 1 );
-		jacobi_iteration_kernel_boundary<<<BlockSize,BlockAmount,0,0>>>
+		jacobi_iteration_kernel_boundary<<<BlockSize,BlockAmount>>>
 				(information_cuda, U_cuda, F_cuda, Unew_cuda);
 	}
 }

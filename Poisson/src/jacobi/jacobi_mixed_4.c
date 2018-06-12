@@ -103,7 +103,6 @@ void jacobi_mixed_4(Information *information, double *U, double *F, double *Unew
 		jacobi_iteration_cuda_separate(
 			information, information_cuda, U_cuda, F_cuda, Unew_cuda, "i");
 
-		cuda_wait_boundary();
 		// Extract boundaries
 		double *U_ptr_s1, *U_ptr_s2;
 		double *U_ptr_r1, *U_ptr_r2;
@@ -112,13 +111,13 @@ void jacobi_mixed_4(Information *information, double *U, double *F, double *Unew
 			U_ptr_s1 = &Unew_cuda[IND_3D(loc_Nz - 2, 0, 0, I, J, K)];
 			U_ptr_r1 = &Unew_cuda[IND_3D(loc_Nz - 1, 0, 0, I, J, K)];
 
-			copy_from_device_async(s_buf1, N_buffer*sizeof(double), U_ptr_s1);
+			copy_from_device(s_buf1, N_buffer*sizeof(double), U_ptr_s1);
 		} else if (rank == (size - 1)){
 			// Last rank needs the first updated index
 			U_ptr_s1 = &Unew_cuda[IND_3D(1, 0, 0, I, J, K)];
 			U_ptr_r1 = &Unew_cuda[IND_3D(0, 0, 0, I, J, K)];
 
-			copy_from_device_async(s_buf1, N_buffer*sizeof(double), U_ptr_s1);
+			copy_from_device(s_buf1, N_buffer*sizeof(double), U_ptr_s1);
 		} else {
 			// All other ranks needs the first and last updated index
 			U_ptr_s1 = &Unew_cuda[IND_3D(1, 0, 0, I, J, K)];
@@ -127,8 +126,8 @@ void jacobi_mixed_4(Information *information, double *U, double *F, double *Unew
 			U_ptr_r1 = &Unew_cuda[IND_3D(0, 0, 0, I, J, K)];
 			U_ptr_r2 = &Unew_cuda[IND_3D(loc_Nz - 1, 0, 0, I, J, K)];
 
-			copy_from_device_async(s_buf1, N_buffer*sizeof(double), U_ptr_s1);
-			copy_from_device_async(s_buf2, N_buffer*sizeof(double), U_ptr_s2);
+			copy_from_device(s_buf1, N_buffer*sizeof(double), U_ptr_s1);
+			copy_from_device(s_buf2, N_buffer*sizeof(double), U_ptr_s2);
 		}
 		
 		// Determine source and destination
@@ -150,15 +149,16 @@ void jacobi_mixed_4(Information *information, double *U, double *F, double *Unew
 
 		// Wait for boundaries to be completed
 		MPI_Waitall(num_req, req, MPI_STATUS_IGNORE);
+		MPI_Barrier(MPI_COMM_WORLD);
 
 		// Synchronize and copy back
-		copy_to_device_async(r_buf1, N_buffer*sizeof(double), U_ptr_r1);
+		copy_to_device(r_buf1, N_buffer*sizeof(double), U_ptr_r1);
 		if (rank > 0 && rank < (size - 1) )
-			copy_to_device_async(r_buf2, N_buffer*sizeof(double), U_ptr_r2);
-		
-		cuda_synchronize();
+			copy_to_device(r_buf2, N_buffer*sizeof(double), U_ptr_r2);
 
 		// Swap the arrays
+		cuda_synchronize();
+		MPI_Barrier(MPI_COMM_WORLD);
         swap_array( &U_cuda, &Unew_cuda );
 		
     }
