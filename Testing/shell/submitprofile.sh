@@ -22,7 +22,7 @@
 #BSUB -M 20GB
 
 # Time specifications (hh:mm)
-#BSUB -W 00:10
+#BSUB -W 01:00
 
 # GPU options
 #BSUB -gpu "num=2:mode=exclusive_process"
@@ -84,18 +84,27 @@ Program()
 
 	# Run the programs (Max array size for GPU: 874)
 
-	mpiexec -q -n $LSB_DJOB_NUMPROC nvprof \
-		--output-profile profile.%q{OMPI_COMM_WORLD_RANK} \
-		--process-name "rank %q{OMPI_COMM_WORLD_RANK}" \
-		--context-name "rank %q{OMPI_COMM_WORLD_RANK}" \
-		./jacobiSolver.bin mixed_4 512
+	Test="mixed_1 mixed_2 mixed_3 mixed_4"
+	N=200
 
+	t="cuda_1"
+	nvprof --output-profile profile.$t \
+			./jacobiSolver.bin $t $N
+
+
+	for t in $Test 
+	do
+		mpiexec -q -n $LSB_DJOB_NUMPROC nvprof \
+			--output-profile profile.$t.%q{OMPI_COMM_WORLD_RANK} \
+			--process-name "rank %q{OMPI_COMM_WORLD_RANK}" \
+			--context-name "rank %q{OMPI_COMM_WORLD_RANK}" \
+			./jacobiSolver.bin $t $N
+	done
 	# -------------------------------------------------------------------------
 	end=`date +%s`
 
 	runtime=$((end-start))
 	echo "Time spent on computations: $runtime"
-	#mv -t $DPATH *.dat 
 }
 
 # End of Program

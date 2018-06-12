@@ -13,7 +13,7 @@
 # -- Technical options
 
 # Ask for n cores placed on R host.
-#BSUB -n 4
+#BSUB -n 10
 #BSUB -R "span[ptile=2]"
 #BSUB -K
 
@@ -82,7 +82,7 @@ Program()
 	# Define the actual test part of the script 
 
 	# Run the program
-	N="200 400"
+	N="200 400 1000"
 	for n in $N 
 	do
 		>&2 echo "N: $n"

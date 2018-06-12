@@ -13,9 +13,9 @@
 # -- Technical options
 
 # Ask for n cores placed on R host.
-#BSUB -n 2
+#BSUB -n 10
 #BSUB -R "span[ptile=2]"
-#BSUB -K
+# #BSUB -K
 
 # Memory specifications. Amount we need and when to kill the
 # program using too much memory.
@@ -82,7 +82,7 @@ Program()
 	# Define the actual test part of the script 
 
 	# Run the program
-	N="100 400"
+	N="100 400 1000"
 	for n in $N 
 	do
 		>&2 echo "N: $n"

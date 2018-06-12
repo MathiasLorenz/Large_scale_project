@@ -81,9 +81,8 @@ Program()
 	# -------------------------------------------------------------------------
 	# Define the actual test part of the script 
 
-	# Run t
-	he program
-	N="850"
+	# Run the program
+	N="10"
 	for n in $N 
 	do
 		./jacobiSolver.bin cuda_1 $n
