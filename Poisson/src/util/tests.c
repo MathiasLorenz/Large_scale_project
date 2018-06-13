@@ -107,7 +107,7 @@ void test_jacobi_3D(Information *information, char const *solver)
 		if (size == 1)
 			init_sin_3D(U, F, Unew, Nx, Ny, Nz);
 		else
-			init_sin_mpi3D_2(U, F, Unew, information);
+			init_sin_mpi3D(U, F, Unew, information);
 	}
 	else {
 		fprintf(stderr, "Problem type is not supported.\n");
