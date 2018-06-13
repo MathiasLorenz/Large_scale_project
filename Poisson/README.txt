@@ -1,5 +1,5 @@
 README for jacobiSolver
--------------------------------------------------------------------------------
+----------------------------------------------------------------------------
 The Jacobi solver have been implemented into the jacobiSolver executable.
 
 Default call to the function will be as bellow, please be adviced mpiexec or 
@@ -37,7 +37,7 @@ where:
 		Where the boundary is set during the function and the elemnets in X is
 		computed.
 
--------------------------------------------------------------------------------
+----------------------------------------------------------------------------
 The solver will read for several environmental variables and change behavior
 based on these. The environmental variables supported are listed bellow.
 
@@ -57,6 +57,12 @@ Extra environmental variables: ( > ENV_NAME=value ./jacobiSolver ...)
 				(3D version):
 					f(x,y,z) = 3*pi^2*sin(pi*x)*sin(pi*y)*sin(pi*z)
 					u(x,y,z) = 0, for (x,y,z) on boundary.
+		rad : 	[ONLY OMP2D] The radiator problem with Boundary and source 
+				is defined as:
+                    f(x,y) = 200 for x in [ 0, 1/3 ] and y in [ -2/3, -1/3 ]
+                    f(x,y) = 0 otherwise.
+                    u(x,1) = 20, u(x ,-1) =  0,
+                    u(1,y) = 20, u(-1, y) = 20.
 
 	OUTPUT_INFO: [default: timing]
 		Defines the output type.
