@@ -62,10 +62,7 @@ void jacobi_cuda_1(Information *information, double *U, double *F, double *Unew)
 	// ------------------------------------------------------------------------
 	// Setup blocks for the GPU
 	dim3 BlockSize = dim3(32,32,32);
-	dim3 BlockAmount = dim3( I/BlockSize.x + 1, J/BlockSize.y + 1, K/BlockSize.z + 1 );
-
-	//printf("BS.x: %3d, BS.y: %3d, BS.z: %3d\n",BlockSize.x,BlockSize.y,BlockSize.z);
-	//printf("BA.x: %3d, BA.y: %3d, BA.z: %3d\n",BlockAmount.x,BlockAmount.y,BlockAmount.z);
+	dim3 BlockAmount = dim3( K/BlockSize.x + 1, J/BlockSize.y + 1, I/BlockSize.z + 1 );
 
 	// ------------------------------------------------------------------------
 	// Prepare stop criterion
