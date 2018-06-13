@@ -85,7 +85,7 @@ Program()
 	#C="2 3 4"
 
 	C="2 3 4 5 6 7 8 9 10 11 12"
-	N="512"
+	N="1024"
 
 	# Run the MPI based tests
 	TEST="mixed_1 mixed_2 mixed_3 mpi3d_2 mpi3d_3"

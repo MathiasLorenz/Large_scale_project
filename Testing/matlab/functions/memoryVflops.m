@@ -35,7 +35,7 @@ if isempty(CurrentLegend)
 else
     CurrentLegend{end} = FuncName;
 end
-legend(CurrentLegend);
+legend(CurrentLegend,'Location','NorthWest');
 
 %% Handle the axes and the ticks
 n = max(2 , floor(min(log2(memory(:,1)))));
@@ -44,12 +44,13 @@ ylabel('Gflop/s')
 grid on
 A = gca;
 A.XLim(1) = n;
+A.XLim(2) = max([1.05.*log2(memory),A.XLim(2)]);
 A.YLim(1) = 0;
 A.YLim(2) = max(max(flops)*1.2,A.YLim(2))*1.1;
 A.YScale  = 'log';
 A.XTick = floor(n);
 while A.XTick(end) < A.XLim(2)
-    n = n+1;
+    n = n+2;
     A.XTick = [A.XTick, n];
 end
 for n = 1:length(A.XTick)
