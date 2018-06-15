@@ -71,15 +71,6 @@ void jacobi_mixed_2(Information *information, double *U, double *F, double *Unew
 	copy_to_device_async(F,   arraySizes,F_cuda   );
 	copy_to_device_async(Unew,arraySizes,Unew_cuda);
 	cuda_synchronize();
-
-	// Remember to implement tolerance
-	/*
-    // Prepare stop criterion
-    bool use_tol = false;
-	double norm_diff = 10.0;
-	
-	if (strcmp("on",getenv("USE_TOLERANCE")) == 0) { use_tol = true; }
-	*/
 	
 	// Prepare stop criterion
 	int iter = 0;
@@ -87,10 +78,6 @@ void jacobi_mixed_2(Information *information, double *U, double *F, double *Unew
 	// ------------------------------------------------------------------------
 	// Run the iterative method
     for(iter = 0; iter < maxit ; iter++){
-		// Remember to implement tolerance
-		/*
-        norm_diff = 0.0;
-		*/
 		
 		// Compute the iteration of the jacobi method
         jacobi_iteration_cuda(
@@ -150,13 +137,6 @@ void jacobi_mixed_2(Information *information, double *U, double *F, double *Unew
 			copy_to_device_async(r_buf2, N_buffer*sizeof(double), U_ptr_r2);
 		
 		cuda_synchronize();
-		// Remember to implement tolerance
-		/*
-        norm_diff = sqrt(norm_diff);
-
-        if (use_tol && (norm_diff < threshold))
-            break;
-		*/
     }
 
 	// Save number of iterations
@@ -183,19 +163,6 @@ void jacobi_mixed_2(Information *information, double *U, double *F, double *Unew
 	// 		Simple: 	21
 	//		Divisions: 	5
 	MFLOP += 1e-6*(21.0 + 5.0*4.0 )*iter*Nx*Ny*Nz;
-
-	// Print the information requested
-    if (strcmp("matrix",getenv("OUTPUT_INFO")) == 0){
-		fprintf(stdout, "Exited because iter = maxit\n");
-
-		/*
-		// Remember to implement tolerance
-        if(norm_diff < threshold && use_tol)
-            fprintf(stdout, "Exited because norm < threshold\n");
-        else
-            fprintf(stdout, "Exited because iter = maxit\n");
-		*/
-    }
 }
 // END OF FILE
 // ============================================================================

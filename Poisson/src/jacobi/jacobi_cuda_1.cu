@@ -68,47 +68,18 @@ void jacobi_cuda_1(Information *information, double *U, double *F, double *Unew)
 	// Prepare stop criterion
 	int iter = 0;
 
-	// Remember to implement tolerance
-	/*
-    // Prepare stop criterion
-    bool use_tol = false;
-	double norm_diff = 10.0;
-	
-	if (strcmp("on",getenv("USE_TOLERANCE")) == 0) { use_tol = true; }
-	*/
-
 	// ========================================================================
 	// Run the iterative method
 	checkCudaErrors(cudaDeviceSynchronize());
     for(iter = 0; iter < maxit ; iter++){
-		// Remember to implement tolerance
-		/*
-        norm_diff = 0.0;
-		*/
-
 		// Compute the iteration of the jacobi method
 		jacobi_iteration_kernel<<<BlockSize,BlockAmount>>>(information_cuda, U_cuda, F_cuda, Unew_cuda);
 		
+		// Wait for kernel to complete
 		checkCudaErrors(cudaDeviceSynchronize());
 
-        // Swap the arrays and check for convergence
+        // Swap the arrays
         swap_array( &U_cuda, &Unew_cuda );
-
-
-		// Compute the stop criterion
-		// Remember to implement tolerance
-		/*
-		double u = U_cuda[IND_3D(i, j, k, I, J, K)];
-		double unew = Unew_cuda[IND_3D(i, j, k, I, J, K)];
-		norm_diff  += (u - unew)*(u - unew);
-		*/
-		// Remember to implement tolerance
-		/*
-        norm_diff = sqrt(norm_diff);
-
-        if (use_tol && (norm_diff < threshold))
-            break;
-		*/
 	}
 	
 	// Save number of iterations
@@ -124,21 +95,6 @@ void jacobi_cuda_1(Information *information, double *U, double *F, double *Unew)
 	// 		Simple: 	21
 	//		Divisions: 	5
 	MFLOP += 1e-6*(21.0 + 5.0*4.0 )*iter*Nx*Ny*Nz;
-
-	// Print the information requested
-    if (strcmp("matrix",getenv("OUTPUT_INFO")) == 0){
-		fprintf(stdout, "Exited because iter = maxit\n");
-
-		/*
-		// Remember to implement tolerance
-        if(norm_diff < threshold && use_tol)
-            fprintf(stdout, "Exited because norm < threshold\n");
-        else
-            fprintf(stdout, "Exited because iter = maxit\n");
-		*/
-	}
-	
-
 
 	// ------------------------------------------------------------------------
 	// Free the arrays

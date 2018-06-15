@@ -145,6 +145,7 @@ __global__ void jacobi_iteration_kernel(Information *information_cuda,
     int I, J, K;
 	I = loc_Nz; J = loc_Ny; K = loc_Nx;
 
+	// Compute grid points
 	if ( 
 		( (i > 0) && (j > 0) && (k > 0)) 
 		&& ((i < (I-1)) && (j < (J-1)) && (k < (K-1) )) ) 
