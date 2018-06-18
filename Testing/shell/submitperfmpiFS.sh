@@ -4,7 +4,7 @@
 
 # Naming of the job and queue name
 #BSUB -J perfmpiFS
-#BSUB -q gpuv100
+#BSUB -q hpc
 
 # Specify
 #BSUB -oo Output.out 
@@ -13,8 +13,8 @@
 # -- Technical options
 
 # Ask for n cores placed on R host.
-#BSUB -n 60
-#BSUB -R "span[ptile=20]"
+#BSUB -n 32
+#BSUB -R "span[ptile=8]"
 
 # Memory specifications. Amount we need and when to kill the
 # program using too much memory.

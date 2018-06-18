@@ -49,8 +49,11 @@ echo ' '
 
 for test in $TEST
 do
+	# Make sure the test is not already running
+	bkill -J $test
+
 	# Create the folder needed
-	rm -fr $LPATH/$test/*
+	rm -fr $LPATH/$test
 	mkdir -p $LPATH/$test
 
 	# Clean and copy all files needed
