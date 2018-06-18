@@ -19,6 +19,14 @@ extern double MFLOP;
 
 void jacobi_cuda_1(Information *information, double *U, double *F, double *Unew)
 {
+	// Check if a device is available
+	int Ndevices;
+	cudaGetDeviceCount(&Ndevices);
+	if ( Ndevices < 1)
+	{
+		fprintf(stderr, "Version cuda_1 must run on a CUDA device.\n");
+		return;
+	}
 	cudaSetDevice(0);
 	// Check for errors in the input
 	if(!U || !F || !Unew) { fprintf(stderr,"Pointer is NULL.\n"); return; }

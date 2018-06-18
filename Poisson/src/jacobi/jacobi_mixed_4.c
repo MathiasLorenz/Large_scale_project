@@ -31,6 +31,20 @@ void jacobi_mixed_4(Information *information, double *U, double *F, double *Unew
 	int loc_Nz = information->loc_Nz[rank];
 	int maxit  = information->maxit;
 
+	// Check if program can run
+	int Ndevices;
+	cuda_get_device_count(&Ndevices);
+	if ( Ndevices < 1)
+	{
+		fprintf(stderr, "Version mixed_4 must run on a CUDA device.\n");
+		return;
+	}
+	if ( size < 2)
+	{
+		fprintf(stderr, "Version mixed_4 must run on multiple mpi ranks.\n");
+		return;
+	}
+
 	// Set the CUDA device
 	cuda_set_device(rank);
 	

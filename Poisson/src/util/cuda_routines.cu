@@ -61,6 +61,10 @@ void copy_from_device_void(void *host, int N_bytes, void *device)
 void cuda_synchronize(){
 	checkCudaErrors(cudaDeviceSynchronize());
 }
+void cuda_get_device_count(int *count)
+{
+	cudaGetDeviceCount( count );
+}
 void cuda_set_device(int rank)
 {
 	int Ndevices, device;
