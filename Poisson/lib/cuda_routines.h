@@ -28,6 +28,7 @@ void copy_from_device(double *host, int N, double *device);
 
 void cuda_synchronize();
 void cuda_set_device(int rank);
+void cuda_get_device_count(int *count);
 
 #ifdef __cplusplus
 }

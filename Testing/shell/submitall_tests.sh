@@ -16,7 +16,7 @@
 #BSUB -K
 
 # Ask for n cores placed on R host.
-#BSUB -n 4
+#BSUB -n 2
 #BSUB -R "span[ptile=2]"
 
 # Memory specifications. Amount we need and when to kill the
@@ -94,13 +94,13 @@ Program()
 		time OUTPUT_INFO=error OMP_NUM_THREADS=$LSB_DJOB_NUMPROC ./jacobiSolver.bin omp3d $n
 		
 		echo mpi3d_1
-		time OUTPUT_INFO=error USE_TOLERANCE=on mpiexec -q -n 2 ./jacobiSolver.bin mpi3d_1 $n
+		time OUTPUT_INFO=error mpiexec -q -n 2 ./jacobiSolver.bin mpi3d_1 $n
 		
 		echo mpi3d_2
-		time OUTPUT_INFO=error USE_TOLERANCE=on mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_2 $n
+		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_2 $n
 		
 		echo mpi3d_3
-		time OUTPUT_INFO=error USE_TOLERANCE=on mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_3 $n
+		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_3 $n
 		
 		echo cuda_1
 		time OUTPUT_INFO=error ./jacobiSolver.bin cuda_1 $n

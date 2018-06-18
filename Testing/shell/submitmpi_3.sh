@@ -4,7 +4,7 @@
 
 # Naming of the job and queue name
 #BSUB -J mpi_3
-#BSUB -q hpc
+#BSUB -q gpuv100
 
 # Specify
 #BSUB -oo Output.out 
@@ -13,8 +13,9 @@
 # -- Technical options
 
 # Ask for n cores placed on R host.
-#BSUB -n 13
-#BSUB -R "span[ptile=1]"
+#BSUB -n 30
+#BSUB -R "span[ptile=10]"
+#BSUB -K
 
 # Memory specifications. Amount we need and when to kill the
 # program using too much memory.
@@ -27,7 +28,7 @@
 # -- Notification options
 
 # Set the email to recieve to and when to recieve it
-##BSUB -u your_email_address
+#BSUB -u kef12702@cjpeg.com
 #BSUB -B		# Send notification at start
 #BSUB -N 		# Send notification at completion
 
@@ -77,10 +78,10 @@ Program()
 	# Define the actual test part of the script 
 
 	# Run the program
-	N="50 200"
+	N="200"
 	for n in $N 
 	do
-		OUTPUT_INFO=matrix_full mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_3 $n >> $LSB_JOBNAME-$n.dat
+		OUTPUT_INFO=matrix_full mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_2 $n >> $LSB_JOBNAME-$n.dat
 
 	done
 
