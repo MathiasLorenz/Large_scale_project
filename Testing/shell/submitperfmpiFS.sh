@@ -4,7 +4,7 @@
 
 # Naming of the job and queue name
 #BSUB -J perfmpiFS
-#BSUB -q hpc
+#BSUB -q gpuv100
 
 # Specify
 #BSUB -oo Output.out 
@@ -13,16 +13,16 @@
 # -- Technical options
 
 # Ask for n cores placed on R host.
-#BSUB -n 32
-#BSUB -R "span[ptile=8]"
+#BSUB -n 30
+#BSUB -R "span[ptile=10]"
 
 # Memory specifications. Amount we need and when to kill the
 # program using too much memory.
-#BSUB -R "rusage[mem=50GB]"
-#BSUB -M 50GB
+#BSUB -R "rusage[mem=30GB]"
+#BSUB -M 30GB
 
 # Time specifications (hh:mm)
-#BSUB -W 05:00
+#BSUB -W 10:00
 
 # -- Notification options
 
@@ -80,7 +80,7 @@ Program()
 
 	# Run the programs (Max array size for GPU: 874)
 	#N="8 16"
-	N="32 64 128 254 512 1024 2048"
+	N="32 64 128 254 512 1024"
 
 	TEST="mpi3d_1"
 	for t in $TEST
