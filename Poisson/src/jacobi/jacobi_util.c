@@ -409,7 +409,7 @@ bool norm_early_stop(Information *information)
 		1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
 	// Returning boolean for stopping
-	return (information->global_norm_diff < information->tol) ? true : false;
+	return (information->global_norm_diff < information->tol);
 }
 
 
