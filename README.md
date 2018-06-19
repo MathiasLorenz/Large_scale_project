@@ -4,26 +4,28 @@ steady-state partial differential equations. The implementation is based on
 OpenMP, openMPI and CUDA to test the performance gains of using parallel
 technology for finding the steady-state solution to a partial differential
 equation.
-In out implementation we have tested the program with a simple heat equation
-using a sinusodial function as our source. 
-The repository is containing all source code along with shell and matlab files
-which can be used to test the implementation.
+In our implementation we have tested the program with a simple heat equation
+using a sinusodial function as the source term. 
+The repository contain all source code for the implementation along with shell
+and matlab files which can be used to test it.
 
 ## Folder structure
-The repository contains two folders, 
+The repository contain two folders, 
 - Poisson 
-	- 	Contains all files needed for compiling the program including 
-		a makefile and a readme describing the functionalyty of the 
+	- 	Contain all files needed for compiling the program including 
+		a makefile and a readme describing the functionality of the 
 		program in depth.
 - Testing
 	- 	Containg shell scripts and matlab code used for testing and visualizing
 		the results of the program.
+- Technical report describing the process of developing the code and the theory 
+	the behind problem and method.
 - Additional files used by us for streamlining the development process of the 
   project.
 
 ### Prerequisites
 In order to compile and run the code the following libraries must be available: 
-(the versions specified in paranthesis is the tested versions)
+(the versions specified in paranthesis is the tested versions).
 - GCC	( 6.3.0 built with OpenMP suport )
 - MPI   ( openMPI 2.1.0 )
 - CUDA  ( 9.1 )
@@ -33,14 +35,14 @@ The poisson folder should be readily usable by the make utility. Please examine
 the makefile before compiling to check for compliation flags and compilers. 
 
 ## Running the tests
-For direct usage of the jacobiSolver in the commandline is described in the 
+For direct usage of the jacobiSolver in the commandline please see the 
 readme located in the Poisson folder. This describes the functionality in 
 depth.
 The test scripts located in Testing/shell is designed to run on the LSF based
 cluster at the Technical University of Denmark. Please modify these in order to
 use them elsewhere. 
 No additional packages are needed in order to run the matlab code used in the 
-visualization.
+visualization. Matlab version R2017a was used for testing.
 
 ## Authors
 * **Mathias Lorenz** -  [MathiasLorenz](https://github.com/MathiasLorenz)
