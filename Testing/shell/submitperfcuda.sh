@@ -3,7 +3,7 @@
 # --  General options 
 
 # Naming of the job and queue name
-#BSUB -J perfmpiFS
+#BSUB -J perfcuda
 #BSUB -q gpuv100
 
 # Specify
@@ -13,21 +13,24 @@
 # -- Technical options
 
 # Ask for n cores placed on R host.
-#BSUB -n 30
-#BSUB -R "span[ptile=10]"
+#BSUB -n 1
+#BSUB -R "span[ptile=1]"
 
 # Memory specifications. Amount we need and when to kill the
 # program using too much memory.
-#BSUB -R "rusage[mem=30GB]"
-#BSUB -M 30GB
+#BSUB -R "rusage[mem=20GB]"
+#BSUB -M 20GB
 
 # Time specifications (hh:mm)
-#BSUB -W 10:00
+#BSUB -W 01:00
+
+# GPU options
+#BSUB -gpu "num=2:mode=exclusive_process"
 
 # -- Notification options
 
 # Set the email to recieve to and when to recieve it
-##BSUB -u your_email_address
+# #BSUB -u your_email_address
 #BSUB -B		# Send notification at start
 #BSUB -N 		# Send notification at completion
 
@@ -80,19 +83,9 @@ Program()
 
 	# Run the programs (Max array size for GPU: 874)
 	#N="8 16"
-	N="32 64 128 254 512 1024"
+	N="32 64 128 254 512"
 
-	TEST="mpi3d_1"
-	for t in $TEST
-	do
-		dat=$t.dat
-		for n in $N 
-		do
-			echo "Test: $t, N: $n"
-			mpiexec -q -n 2 ./jacobiSolver.bin $t $n >> $LSB_JOBNAME-$dat
-		done
-	done
-	TEST="mpi3d_2 mpi3d_3"
+	TEST="cuda_1"
 	for t in $TEST
 	do
 		dat=$t.dat
