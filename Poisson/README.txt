@@ -3,7 +3,7 @@ README for jacobiSolver
 The Jacobi solver have been implemented into the jacobiSolver executable.
 
 Default call to the function will be as bellow, please be adviced mpiexec or 
-mpirun must be used for all mpi versions.
+mpirun must be used for all mpi based versions.
 	> ./jacobiSolver METHOD NX NY NZ
 
 where:
@@ -20,7 +20,7 @@ where:
 				  needed data.
 		mixed_3 : First attempt in overlapping computations.
 		mixed_4 : Stream based overlapping of computations.
-		mixed_5 : (REQUIRES CUDA AWARE MPI) Passes devicepointers directly to 
+		mixed_5 : (REQUIRES CUDA AWARE MPI) Passes device pointers directly to 
 				  MPI for streamlined pipelining. This version have not been 
 				  tested.
 
@@ -38,14 +38,14 @@ where:
 		computed.
 
 ----------------------------------------------------------------------------
-The solver will read for several environmental variables and change behavior
-based on these. The environmental variables supported are listed bellow.
+The solver will read for several environment variables and change behavior
+based on these. The environment variables supported are listed bellow.
 
 OpenMP: All default OpenMP controls such as setting number of threads
-		are present and jomp have been implemented such that the schedule
-		can be set during Runtime using OMP_SCHEDULE.
+		are present and the OpenMP versions have been implemented such that 
+		the schedule can be set during runtime using OMP_SCHEDULE.
 
-Extra environmental variables: ( > ENV_NAME=value ./jacobiSolver ...)
+Extra environment variables: ( > ENV_NAME=value ./jacobiSolver ...)
 	PROBLEM_NAME: [default: sin]
 		Defines the problem that should to be solved.
 
