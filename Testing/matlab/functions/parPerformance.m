@@ -51,7 +51,7 @@ A = gca;
 A.YLim = [0,C(end)];
 axis square
 
-legend(unique(Names),'Optimal')
+legend({unique(Names),'Optimal'},'Location','NorthWest')
 %% Insert Cache lines
 %{
 switch CPU

@@ -88,7 +88,7 @@ Program()
 	N="512"
 
 	# Run the MPI based tests
-	TEST="mixed_1 mixed_2 mixed_3 mpi3d_2 mpi3d_3"
+	TEST="mixed_1 mixed_2 mixed_3 mixed_4 mpi3d_2 mpi3d_3"
 	for t in $TEST
 	do
 		for c in $C
