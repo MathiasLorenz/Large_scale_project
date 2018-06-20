@@ -101,13 +101,13 @@ void jacobi_mpi3D_2(Information *information, double *U, double *F, double *Unew
 		compute_neighbors(information, &neighbour_1, &neighbour_2);
 
 		// Send boundaries and receive boundaries
-		MPI_Isend(s_buf1, N_buffer, MPI_DOUBLE, neighbour_1, 0, MPI_COMM_WORLD, &req);
+		MPI_Isend(s_buf1, N_buffer, MPI_DOUBLE, neighbour_1, iter, MPI_COMM_WORLD, &req);
 		if ( rank != 0 && rank != (size - 1) )
-			MPI_Isend(s_buf2, N_buffer, MPI_DOUBLE, neighbour_2, 0, MPI_COMM_WORLD, &req);
+			MPI_Isend(s_buf2, N_buffer, MPI_DOUBLE, neighbour_2, iter, MPI_COMM_WORLD, &req);
 
-		MPI_Recv(r_buf1, N_buffer, MPI_DOUBLE, neighbour_1, 0, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+		MPI_Recv(r_buf1, N_buffer, MPI_DOUBLE, neighbour_1, iter, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 		if ( rank != 0 && rank != (size - 1) )
-			MPI_Recv(r_buf2, N_buffer, MPI_DOUBLE, neighbour_2, 0, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+			MPI_Recv(r_buf2, N_buffer, MPI_DOUBLE, neighbour_2, iter, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 
 		// Synchronize and swap
 		MPI_Barrier(MPI_COMM_WORLD);

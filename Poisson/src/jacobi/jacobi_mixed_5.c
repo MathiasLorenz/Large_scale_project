@@ -133,18 +133,18 @@ void jacobi_mixed_5(Information *information, double *U, double *F, double *Unew
 		printf("%f\n",U_ptr_s1[0]);
 		printf("ITS A POINTER\n");
 		// Send boundaries and receive boundaries
-		MPI_Isend(U_ptr_s1, N_buffer, MPI_DOUBLE, neighbour_1, 0, MPI_COMM_WORLD,
+		MPI_Isend(U_ptr_s1, N_buffer, MPI_DOUBLE, neighbour_1, iter, MPI_COMM_WORLD,
 				&req[0]);
 		printf("Okay, Ready to send time 2\n");
 		if ( rank != 0 && rank != (size - 1) )
-			MPI_Isend(U_ptr_s2, N_buffer, MPI_DOUBLE, neighbour_2, 0, MPI_COMM_WORLD,
+			MPI_Isend(U_ptr_s2, N_buffer, MPI_DOUBLE, neighbour_2, iter, MPI_COMM_WORLD,
 					&req[2]);
 
 		printf("Okay, Ready to receive\n");
-		MPI_Irecv(U_ptr_r1, N_buffer, MPI_DOUBLE, neighbour_1, 0,
+		MPI_Irecv(U_ptr_r1, N_buffer, MPI_DOUBLE, neighbour_1, iter,
 					MPI_COMM_WORLD, &req[1]);
 		if ( rank != 0 && rank != (size - 1) )
-			MPI_Irecv(U_ptr_r2, N_buffer, MPI_DOUBLE, neighbour_2, 0,
+			MPI_Irecv(U_ptr_r2, N_buffer, MPI_DOUBLE, neighbour_2, iter,
 					MPI_COMM_WORLD, &req[3]);
 		printf("Okay, Receive completed\n");
 		// Wait for boundaries to be completed
