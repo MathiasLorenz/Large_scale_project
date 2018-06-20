@@ -42,10 +42,19 @@ void free_information_arrays(Information *information);
 void jacobi_iteration(Information *information, double *U, double *F, double *Unew);
 void jacobi_iteration_separate(Information *information, double *U, double *F, double *Unew,
 		const char *ver);
-void compute_max_error(Information *information, double *U, double *local_error);
-void compute_global_error(Information *information, double *U,
+// Old versions
+void generate_true_solution(double *A, Information *information);
+void compute_max_error(Information *information, double *A, double *U, double *local_error);
+void compute_global_error(Information *information, double *A, double *U,
 		double *global_error);
-void print_error(Information *information, double *U);
+void print_error(Information *information, double *A, double *U);
+
+// New versions
+//void compute_max_error(Information *information, double *U, double *local_error);
+//void compute_global_error(Information *information, double *U,
+//		double *global_error);
+//void print_error(Information *information, double *U);
+
 void compute_neighbors(Information *information,
 	int *neighbour_1, int *neighbour_2);
 bool norm_early_stop(Information *information);

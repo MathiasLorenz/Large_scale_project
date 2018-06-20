@@ -279,7 +279,115 @@ void jacobi_iteration_separate(Information *information,
 	information->norm_diff = sqrt(information->norm_diff);
 }
 
+// ============================================================================
+// FUNCTION FOR GENERATING AND CHECKING SOLUTION AGAINST TRUE SOLUTION
+void generate_true_solution(double *A, Information *information)
+{
+	if (!A || !information) { fprintf(stderr, "Pointer is NULL.\n"); return; }
+
+	// Read information
+	int rank = information->rank;
+	int Nx = information->global_Nx;
+	int Ny = information->global_Ny;
+	int Nz = information->global_Nz;
+	int loc_Nx = information->loc_Nx[rank];
+	int loc_Ny = information->loc_Ny[rank];
+	int loc_Nz = information->loc_Nz[rank];
+
+	// Rewritting to C style coordinates
+	int K = loc_Nx, J = loc_Ny, I = loc_Nz;
+
+	// Setting up steps and variables 
+	double hi = 2.0 / (Nz - 1.0);
+	double hj = 2.0 / (Ny - 1.0);
+	double hk = 2.0 / (Nx - 1.0);
+
+	// Determine how far we are in the z-direction
+	double z = -1.0;
+	for (int r = 0; r < rank; r++)
+		z += hi*(information->loc_Nz[r]-2.0);
+
+	for (int i = 0; i < I; i++)
+	{
+		double y = -1.0;
+		for (int j = 0; j < J; j++)
+		{
+			double x = -1.0;
+			for (int k = 0; k < K; k++)
+			{
+				A[IND_3D(i, j, k, I, J, K)] =
+					sin(M_PI * x) * sin(M_PI * y) * sin(M_PI * z);
+				x += hk;
+			}
+			y += hj;
+		}
+		z += hi;
+	}
+}
+
 // Compute max absolute error
+void compute_max_error(Information *information, double *A, double *U, double *abs_err)
+{
+	if (!A || !U || !abs_err || !information)
+	{ fprintf(stderr, "Pointer is NULL.\n"); return; }
+	*abs_err = 0.0;
+
+	// Extract problem dimensions
+	int rank = information->rank;
+	int loc_Nx = information->loc_Nx[rank];
+	int loc_Ny = information->loc_Ny[rank];
+	int loc_Nz = information->loc_Nz[rank];
+	// Rewritting to C style coordinates
+	int K = loc_Nx, J = loc_Ny, I = loc_Nz;
+
+	// Loop over all interior points
+	for (int i = 1; i < (I - 1); ++i)
+		for (int j = 1; j < (J - 1); ++j)
+			for (int k = 1; k < (K - 1); ++k) {
+				int ijk = IND_3D(i, j, k, I, J, K);
+				double err = fabs(U[ijk] - A[ijk]);
+				if (err > *abs_err) *abs_err = err; // Save largest element
+			}
+}
+
+// Function to compute global error on solution. 
+void compute_global_error(Information *information, double *A, double *U,
+	double *global_error)
+{
+	*global_error = 0.0;
+	double local_error = 0.0;
+
+	compute_max_error(information, A, U, &local_error);
+	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_Reduce(&local_error, global_error, 1, MPI_DOUBLE, MPI_MAX,
+		0, MPI_COMM_WORLD);
+}
+
+// Function to print error for OUTPUT_INFO=error
+void print_error(Information *information, double *A, double *U)
+{
+	int Nx = information->global_Nx;
+	int Ny = information->global_Nx;
+	int Nz = information->global_Nx;
+	int rank = information->rank;
+	double global_norm_diff = information->global_norm_diff;
+	int iter = information->iter;
+	double global_error = 0.0;
+	compute_global_error(information, A, U, &global_error);
+	if (rank == 0)
+	{
+		if (information->use_tol)
+			printf("Grid: %d %d %d, iter: %d, norm error: %.7e, error: %.7e\n",
+				Nx, Ny, Nz, iter, global_norm_diff, global_error);
+		else
+			printf("Grid: %d %d %d, iter: %d, error: %.7e\n",
+				Nx, Ny, Nz, iter, global_error);
+	}
+}
+
+// NEW VERSION
+// Compute max absolute error
+/*
 void compute_max_error(Information *information, double *U, double *abs_err)
 {
 	if (!U || !abs_err || !information)
@@ -327,8 +435,11 @@ void compute_max_error(Information *information, double *U, double *abs_err)
 		z += hi;
 	}
 }
+*/
 
-// Function to compute global error on solution. 
+// NEW VERSION
+// Function to compute global error on solution.
+/*
 void compute_global_error(Information *information, double *U,
 	double *global_error)
 {
@@ -340,8 +451,11 @@ void compute_global_error(Information *information, double *U,
 	MPI_Reduce(&local_error, global_error, 1, MPI_DOUBLE, MPI_MAX,
 		0, MPI_COMM_WORLD);
 }
+*/
 
+// NEW VERSION
 // Function to print error for OUTPUT_INFO=error
+/*
 void print_error(Information *information, double *U)
 {
 	int Nx = information->global_Nx;
@@ -362,6 +476,7 @@ void print_error(Information *information, double *U)
 				Nx, Ny, Nz, iter, global_error);
 	}
 }
+*/
 
 // Function to compute neighbors for mpi threads.
 void compute_neighbors(Information *information,
