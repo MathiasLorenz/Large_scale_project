@@ -88,7 +88,6 @@ __global__ void free_information_arrays_cuda(Information *information_cuda)
 	free(information_cuda->loc_Nx);
 	free(information_cuda->loc_Ny);
 	free(information_cuda->loc_Nz);
-	free(information_cuda->cuda_norm_array);
 }
 
 // ============================================================================
