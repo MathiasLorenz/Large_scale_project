@@ -19,7 +19,13 @@ void jacobi_iteration_cuda_separate(
 	double *U_cuda, double *F_cuda, double *Unew_cuda,
 	const char *ver
 );
-void cuda_wait_boundary();
+void jacobi_iteration_cuda_separate_stream(
+	Information *information,
+	Information *information_cuda,
+	double *U_cuda, double *F_cuda, double *Unew_cuda,
+	const char *ver,
+	void *stream
+);
 
 #ifdef __cplusplus
 __global__ void free_information_arrays_cuda(Information *information_cuda);

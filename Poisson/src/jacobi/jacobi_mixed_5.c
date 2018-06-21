@@ -84,9 +84,9 @@ void jacobi_mixed_5(Information *information, double *U, double *F, double *Unew
 	cuda_malloc((void**)&F_cuda,    arraySizes);
 	cuda_malloc((void**)&Unew_cuda, arraySizes);
 
-	copy_to_device_async(U,   arraySizes,U_cuda   );
-	copy_to_device_async(F,   arraySizes,F_cuda   );
-	copy_to_device_async(Unew,arraySizes,Unew_cuda);
+	copy_to_device(U,   arraySizes,U_cuda   );
+	copy_to_device(F,   arraySizes,F_cuda   );
+	copy_to_device(Unew,arraySizes,Unew_cuda);
 	cuda_synchronize();
 	
 	// Prepare stop criterion
@@ -104,7 +104,6 @@ void jacobi_mixed_5(Information *information, double *U, double *F, double *Unew
 		jacobi_iteration_cuda_separate(
 			information, information_cuda, U_cuda, F_cuda, Unew_cuda, "i");
 
-		cuda_wait_boundary();
 		// Extract boundaries
 		double *U_ptr_s1, *U_ptr_s2;
 		double *U_ptr_r1, *U_ptr_r2;
@@ -163,7 +162,7 @@ void jacobi_mixed_5(Information *information, double *U, double *F, double *Unew
 	MPI_Barrier(MPI_COMM_WORLD);
 
 	// Copy back the result
-	copy_from_device_async(U,   arraySizes,U_cuda   );
+	copy_from_device(U,   arraySizes,U_cuda   );
 	cuda_synchronize();
 
 	// Free the arrays

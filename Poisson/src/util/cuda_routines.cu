@@ -32,13 +32,15 @@ void cuda_host_free(double *host_array)
 // ============================================================================
 // COPY DATA TO AND FROM DEVICE
 
-void copy_to_device_async(double *host, int N_bytes, double *device)
+void copy_to_device_async(double *host, int N_bytes, double *device, void *stream)
 {
-	checkCudaErrors(cudaMemcpyAsync(device, host, N_bytes, cudaMemcpyHostToDevice));
+	cudaStream_t *s = (cudaStream_t*)stream;
+	checkCudaErrors(cudaMemcpyAsync(device, host, N_bytes, cudaMemcpyHostToDevice, *s));
 }
-void copy_from_device_async(double *host, int N_bytes, double *device)
+void copy_from_device_async(double *host, int N_bytes, double *device, void *stream)
 {
-	checkCudaErrors(cudaMemcpyAsync(host, device, N_bytes, cudaMemcpyDeviceToHost));
+	cudaStream_t *s = (cudaStream_t*)stream;
+	checkCudaErrors(cudaMemcpyAsync(host, device, N_bytes, cudaMemcpyDeviceToHost, *s));
 }
 void copy_to_device(double *host, int N_bytes, double *device)
 {
@@ -58,9 +60,31 @@ void copy_from_device_void(void *host, int N_bytes, void *device)
 // ============================================================================
 // UTILITY FUNCTIONS
 
+// Synchronization
 void cuda_synchronize(){
 	checkCudaErrors(cudaDeviceSynchronize());
 }
+void cuda_stream_synchronize(void *stream){
+	cudaStream_t *s = (cudaStream_t*)stream;
+	checkCudaErrors(cudaStreamSynchronize(*s));
+}
+
+// Stream management
+void cuda_create_stream(void **stream)
+{
+	*stream = malloc(sizeof(cudaStream_t));
+	cudaStream_t streamT;
+	cudaStreamCreate(&streamT);
+	memcpy(*stream,&streamT,sizeof(cudaStream_t));
+}
+void cuda_destroy_stream(void *stream)
+{
+	cudaStream_t *s = (cudaStream_t*)stream;
+	cudaStreamDestroy(*s);
+	free(stream);	
+}
+
+// Device management
 void cuda_get_device_count(int *count)
 {
 	cudaGetDeviceCount( count );

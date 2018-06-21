@@ -260,11 +260,9 @@ void jacobi_iteration_cuda_separate(Information *information, Information *infor
 	// interior or boundary
 	if (strcmp(ver, "i") == 0)
 	{
-		cudaStream_t stream;
-		cudaStreamCreate(&stream);
 		dim3 BlockSize = dim3(32, 32, 32);
 		dim3 BlockAmount = dim3( K/BlockSize.x + 3, J/BlockSize.y + 3, I/BlockSize.z + 3 );
-		jacobi_iteration_kernel_interior<<<BlockSize,BlockAmount,0,stream>>>
+		jacobi_iteration_kernel_interior<<<BlockSize,BlockAmount>>>
 				(information_cuda, U_cuda, F_cuda, Unew_cuda);
 	}
 	if (strcmp(ver, "b") == 0)   // boundary
@@ -275,9 +273,33 @@ void jacobi_iteration_cuda_separate(Information *information, Information *infor
 				(information_cuda, U_cuda, F_cuda, Unew_cuda);
 	}
 }
-void cuda_wait_boundary(){
-	checkCudaErrors(cudaStreamSynchronize(0));
+void jacobi_iteration_cuda_separate_stream(Information *information, Information *information_cuda,
+	double *U_cuda, double *F_cuda, double *Unew_cuda, const char *ver,void *stream)
+{
+	cudaStream_t *s;
+	s = (cudaStream_t*)stream;
+	int rank = information->rank;
+	int K = information->loc_Nx[rank];
+	int J = information->loc_Ny[rank];
+	int I = information->loc_Nz[rank];
+
+	// interior or boundary
+	if (strcmp(ver, "i") == 0)
+	{
+		dim3 BlockSize = dim3(32, 32, 32);
+		dim3 BlockAmount = dim3( K/BlockSize.x + 3, J/BlockSize.y + 3, I/BlockSize.z + 3 );
+		jacobi_iteration_kernel_interior<<<BlockSize,BlockAmount,0,*s>>>
+				(information_cuda, U_cuda, F_cuda, Unew_cuda);
+	}
+	if (strcmp(ver, "b") == 0)   // boundary
+	{
+		dim3 BlockSize = dim3(32, 32, 1);
+		dim3 BlockAmount = dim3( K/BlockSize.x + 3, J/BlockSize.y + 3, 1 );
+		jacobi_iteration_kernel_boundary<<<BlockSize,BlockAmount,0,*s>>>
+				(information_cuda, U_cuda, F_cuda, Unew_cuda);
+	}
 }
+
 
 // Kernel for interior points. Starts being used in mixed_3
 __global__ void jacobi_iteration_kernel_interior(Information *information_cuda,
@@ -366,6 +388,7 @@ __global__ void jacobi_iteration_kernel_boundary(Information *information_cuda,
 	double stepk = hk*hk;
 	double f3 = 1.0/3.0;
 	double f6 = 1.0/6.0;
+	
 
 	// Boundary case
 	if ( 
@@ -390,7 +413,6 @@ __global__ void jacobi_iteration_kernel_boundary(Information *information_cuda,
 
 		// Collect terms
 		Unew_cuda[ijk] = f6 * (ui + uj + uk);
-
 
 		// Do for last boundary (i = I - 1)
 		i = I - 2;

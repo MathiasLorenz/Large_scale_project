@@ -82,8 +82,8 @@ void jacobi_mixed_1(Information *information, double *U, double *F, double *Unew
 	cuda_malloc((void**)&Unew_cuda, arraySizes);
 	
 	// Copy over F and Unew to the device
-	copy_to_device_async(F,   arraySizes,F_cuda   );
-	copy_to_device_async(Unew,arraySizes,Unew_cuda);
+	copy_to_device(F,   arraySizes,F_cuda   );
+	copy_to_device(Unew,arraySizes,Unew_cuda);
 	
 	// Prepare stop criterion
 	int iter = 0;
@@ -93,18 +93,15 @@ void jacobi_mixed_1(Information *information, double *U, double *F, double *Unew
     for(iter = 0; iter < maxit ; iter++){
 
 		// Copy over the result of the last itteration
-		copy_to_device_async(U,   arraySizes,U_cuda   );
-		cuda_synchronize();
+		copy_to_device(U,   arraySizes,U_cuda   );
 
 		// Compute the iteration of the jacobi method on the GPU
         jacobi_iteration_cuda(
 			information, information_cuda, U_cuda, F_cuda, Unew_cuda
 		);
-		cuda_synchronize();
 
 		// Copy back the result to the CPU
-		copy_from_device_async(Unew,arraySizes,Unew_cuda);
-		cuda_synchronize();
+		copy_from_device(Unew,arraySizes,Unew_cuda);
 		
         // Swap the arrays and check for convergence
         swap_array( &U, &Unew );
