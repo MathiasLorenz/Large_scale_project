@@ -293,7 +293,7 @@ void jacobi_iteration_cuda_separate_stream(Information *information, Information
 	}
 	if (strcmp(ver, "b") == 0)   // boundary
 	{
-		dim3 BlockSize = dim3(32, 32, 1);
+		dim3 BlockSize = dim3(32, 32, 2);
 		dim3 BlockAmount = dim3( K/BlockSize.x + 3, J/BlockSize.y + 3, 1 );
 		jacobi_iteration_kernel_boundary<<<BlockSize,BlockAmount,0,*s>>>
 				(information_cuda, U_cuda, F_cuda, Unew_cuda);
@@ -362,11 +362,6 @@ __global__ void jacobi_iteration_kernel_interior(Information *information_cuda,
 __global__ void jacobi_iteration_kernel_boundary(Information *information_cuda,
 	double *U_cuda, double *F_cuda, double *Unew_cuda)
 {
-	// Determine where the thread is located
-	// Is super wrong for boundary now!
-	int k = threadIdx.x + blockDim.x*blockIdx.x;
-	int j = threadIdx.y + blockDim.y*blockIdx.y;
-
 	// Read the needed data from the information structure
 	int rank = information_cuda->rank;
 	int Nx = information_cuda->global_Nx;
@@ -388,7 +383,12 @@ __global__ void jacobi_iteration_kernel_boundary(Information *information_cuda,
 	double stepk = hk*hk;
 	double f3 = 1.0/3.0;
 	double f6 = 1.0/6.0;
+
 	
+	// Determine where the thread is located
+	int k = threadIdx.x + blockDim.x*blockIdx.x;
+	int j = threadIdx.y + blockDim.y*blockIdx.y;
+	int i = ( (threadIdx.z + blockDim.z*blockIdx.z) == 0) ? 1 : I - 2;
 
 	// Boundary case
 	if ( 
@@ -397,7 +397,6 @@ __global__ void jacobi_iteration_kernel_boundary(Information *information_cuda,
 	{
 		// Compute new value
 		// Do for first boundary (i = 1)
-		int i = 1;
 		int ijk = IND_3D(i, j, k, I, J, K);
 
 		// Linear indexing with macro
@@ -408,24 +407,6 @@ __global__ void jacobi_iteration_kernel_boundary(Information *information_cuda,
 			+ U_cuda[IND_3D(i, j + 1, k, I, J, K)] 
 			+ f3 * stepj * F_cuda[ijk];
 		double uk = U_cuda[IND_3D(i, j, k - 1, I, J, K)] 
-			+ U_cuda[IND_3D(i, j, k + 1, I, J, K)] 
-			+ f3 * stepk * F_cuda[ijk];
-
-		// Collect terms
-		Unew_cuda[ijk] = f6 * (ui + uj + uk);
-
-		// Do for last boundary (i = I - 1)
-		i = I - 2;
-		ijk = IND_3D(i, j, k, I, J, K);
-
-		// Linear indexing with macro
-		ui = U_cuda[IND_3D(i - 1, j, k, I, J, K)] 
-			+ U_cuda[IND_3D(i + 1, j, k, I, J, K)] 
-			+ f3 * stepi * F_cuda[ijk];
-		uj = U_cuda[IND_3D(i, j - 1, k, I, J, K)] 
-			+ U_cuda[IND_3D(i, j + 1, k, I, J, K)] 
-			+ f3 * stepj * F_cuda[ijk];
-		uk = U_cuda[IND_3D(i, j, k - 1, I, J, K)] 
 			+ U_cuda[IND_3D(i, j, k + 1, I, J, K)] 
 			+ f3 * stepk * F_cuda[ijk];
 

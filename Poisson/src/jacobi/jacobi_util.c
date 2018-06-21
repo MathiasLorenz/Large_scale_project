@@ -209,67 +209,40 @@ void jacobi_iteration_separate(Information *information,
 	}
 	if (strcmp(ver, "b") == 0) // boundary
 	{
-		int i = 1;
-		for (int j = 1; j < J - 1; j++) {
-			for (int k = 1; k < K - 1; k++) {
-				// Save i, j, k index once
-				int ijk = IND_3D(i, j, k, I, J, K);
+		for (int b = 0; b < 2; b++)
+		{
+			// Determine which boundary we are on
+			int i = ( b == 0) ? 1 : I - 2;
 
-				// Linear indexing with macro
-				double ui = U[IND_3D(i - 1, j, k, I, J, K)] 
-					+ U[IND_3D(i + 1, j, k, I, J, K)] 
-					+ f3 * stepi * F[ijk];
-				double uj = U[IND_3D(i, j - 1, k, I, J, K)] 
-					+ U[IND_3D(i, j + 1, k, I, J, K)] 
-					+ f3 * stepj * F[ijk];
-				double uk = U[IND_3D(i, j, k - 1, I, J, K)] 
-					+ U[IND_3D(i, j, k + 1, I, J, K)] 
-					+ f3 * stepk * F[ijk];
+			for (int j = 1; j < J - 1; j++) {
+				for (int k = 1; k < K - 1; k++) {
+					// Save i, j, k index once
+					int ijk = IND_3D(i, j, k, I, J, K);
 
-				// Collect terms
-				Unew[ijk] = f6 * (ui + uj + uk);
+					// Linear indexing with macro
+					double ui = U[IND_3D(i - 1, j, k, I, J, K)] 
+						+ U[IND_3D(i + 1, j, k, I, J, K)] 
+						+ f3 * stepi * F[ijk];
+					double uj = U[IND_3D(i, j - 1, k, I, J, K)] 
+						+ U[IND_3D(i, j + 1, k, I, J, K)] 
+						+ f3 * stepj * F[ijk];
+					double uk = U[IND_3D(i, j, k - 1, I, J, K)] 
+						+ U[IND_3D(i, j, k + 1, I, J, K)] 
+						+ f3 * stepk * F[ijk];
 
-				// Tolerance criterion
-				// For small problems it is more efficient to put outside the loop,
-				// however for large problems (as we wish to solve) looping only once
-				// is more efficient.				
-				if (information->use_tol)
-				{
-					double uij    = U[ijk];
-					double unewij = Unew[ijk];
-					information->norm_diff += (uij - unewij)*(uij - unewij);
-				}
-			}
-		}
-		i = I - 2;
-		for (int j = 1; j < J - 1; j++) {
-			for (int k = 1; k < K - 1; k++) {
-				// Save i, j, k index once
-				int ijk = IND_3D(i, j, k, I, J, K);
+					// Collect terms
+					Unew[ijk] = f6 * (ui + uj + uk);
 
-				// Linear indexing with macro
-				double ui = U[IND_3D(i - 1, j, k, I, J, K)] 
-					+ U[IND_3D(i + 1, j, k, I, J, K)] 
-					+ f3 * stepi * F[ijk];
-				double uj = U[IND_3D(i, j - 1, k, I, J, K)] 
-					+ U[IND_3D(i, j + 1, k, I, J, K)] 
-					+ f3 * stepj * F[ijk];
-				double uk = U[IND_3D(i, j, k - 1, I, J, K)] 
-					+ U[IND_3D(i, j, k + 1, I, J, K)] 
-					+ f3 * stepk * F[ijk];
-
-				// Collect terms
-				Unew[ijk] = f6 * (ui + uj + uk);
-
-				// Tolerance criterion
-				// For small problems it is more efficient to put outside the loop,
-				// however for large problems (as we wish to solve) looping only once
-				// is more efficient.				
-				if (information->use_tol)
-				{
-					double uij    = U[ijk];
-					double unewij = Unew[ijk];
-					information->norm_diff += (uij - unewij)*(uij - unewij);
+					// Tolerance criterion
+					// For small problems it is more efficient to put outside the loop,
+					// however for large problems (as we wish to solve) looping only once
+					// is more efficient.				
+					if (information->use_tol)
+					{
+						double uij    = U[ijk];
+						double unewij = Unew[ijk];
+						information->norm_diff += (uij - unewij)*(uij - unewij);
+					}
 				}
 			}
 		}
