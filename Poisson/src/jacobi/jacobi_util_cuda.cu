@@ -260,11 +260,9 @@ void jacobi_iteration_cuda_separate(Information *information, Information *infor
 	// interior or boundary
 	if (strcmp(ver, "i") == 0)
 	{
-		cudaStream_t stream;
-		cudaStreamCreate(&stream);
 		dim3 BlockSize = dim3(32, 32, 32);
 		dim3 BlockAmount = dim3( K/BlockSize.x + 3, J/BlockSize.y + 3, I/BlockSize.z + 3 );
-		jacobi_iteration_kernel_interior<<<BlockSize,BlockAmount,0,stream>>>
+		jacobi_iteration_kernel_interior<<<BlockSize,BlockAmount>>>
 				(information_cuda, U_cuda, F_cuda, Unew_cuda);
 	}
 	if (strcmp(ver, "b") == 0)   // boundary
@@ -275,9 +273,33 @@ void jacobi_iteration_cuda_separate(Information *information, Information *infor
 				(information_cuda, U_cuda, F_cuda, Unew_cuda);
 	}
 }
-void cuda_wait_boundary(){
-	checkCudaErrors(cudaStreamSynchronize(0));
+void jacobi_iteration_cuda_separate_stream(Information *information, Information *information_cuda,
+	double *U_cuda, double *F_cuda, double *Unew_cuda, const char *ver,void *stream)
+{
+	cudaStream_t *s;
+	s = (cudaStream_t*)stream;
+	int rank = information->rank;
+	int K = information->loc_Nx[rank];
+	int J = information->loc_Ny[rank];
+	int I = information->loc_Nz[rank];
+
+	// interior or boundary
+	if (strcmp(ver, "i") == 0)
+	{
+		dim3 BlockSize = dim3(32, 32, 32);
+		dim3 BlockAmount = dim3( K/BlockSize.x + 3, J/BlockSize.y + 3, I/BlockSize.z + 3 );
+		jacobi_iteration_kernel_interior<<<BlockSize,BlockAmount,0,*s>>>
+				(information_cuda, U_cuda, F_cuda, Unew_cuda);
+	}
+	if (strcmp(ver, "b") == 0)   // boundary
+	{
+		dim3 BlockSize = dim3(32, 32, 2);
+		dim3 BlockAmount = dim3( K/BlockSize.x + 3, J/BlockSize.y + 3, 1 );
+		jacobi_iteration_kernel_boundary<<<BlockSize,BlockAmount,0,*s>>>
+				(information_cuda, U_cuda, F_cuda, Unew_cuda);
+	}
 }
+
 
 // Kernel for interior points. Starts being used in mixed_3
 __global__ void jacobi_iteration_kernel_interior(Information *information_cuda,
@@ -340,11 +362,6 @@ __global__ void jacobi_iteration_kernel_interior(Information *information_cuda,
 __global__ void jacobi_iteration_kernel_boundary(Information *information_cuda,
 	double *U_cuda, double *F_cuda, double *Unew_cuda)
 {
-	// Determine where the thread is located
-	// Is super wrong for boundary now!
-	int k = threadIdx.x + blockDim.x*blockIdx.x;
-	int j = threadIdx.y + blockDim.y*blockIdx.y;
-
 	// Read the needed data from the information structure
 	int rank = information_cuda->rank;
 	int Nx = information_cuda->global_Nx;
@@ -367,6 +384,12 @@ __global__ void jacobi_iteration_kernel_boundary(Information *information_cuda,
 	double f3 = 1.0/3.0;
 	double f6 = 1.0/6.0;
 
+	
+	// Determine where the thread is located
+	int k = threadIdx.x + blockDim.x*blockIdx.x;
+	int j = threadIdx.y + blockDim.y*blockIdx.y;
+	int i = ( (threadIdx.z + blockDim.z*blockIdx.z) == 0) ? 1 : I - 2;
+
 	// Boundary case
 	if ( 
 		( (j > 0) && (k > 0)) 
@@ -374,7 +397,6 @@ __global__ void jacobi_iteration_kernel_boundary(Information *information_cuda,
 	{
 		// Compute new value
 		// Do for first boundary (i = 1)
-		int i = 1;
 		int ijk = IND_3D(i, j, k, I, J, K);
 
 		// Linear indexing with macro
@@ -385,25 +407,6 @@ __global__ void jacobi_iteration_kernel_boundary(Information *information_cuda,
 			+ U_cuda[IND_3D(i, j + 1, k, I, J, K)] 
 			+ f3 * stepj * F_cuda[ijk];
 		double uk = U_cuda[IND_3D(i, j, k - 1, I, J, K)] 
-			+ U_cuda[IND_3D(i, j, k + 1, I, J, K)] 
-			+ f3 * stepk * F_cuda[ijk];
-
-		// Collect terms
-		Unew_cuda[ijk] = f6 * (ui + uj + uk);
-
-
-		// Do for last boundary (i = I - 1)
-		i = I - 2;
-		ijk = IND_3D(i, j, k, I, J, K);
-
-		// Linear indexing with macro
-		ui = U_cuda[IND_3D(i - 1, j, k, I, J, K)] 
-			+ U_cuda[IND_3D(i + 1, j, k, I, J, K)] 
-			+ f3 * stepi * F_cuda[ijk];
-		uj = U_cuda[IND_3D(i, j - 1, k, I, J, K)] 
-			+ U_cuda[IND_3D(i, j + 1, k, I, J, K)] 
-			+ f3 * stepj * F_cuda[ijk];
-		uk = U_cuda[IND_3D(i, j, k - 1, I, J, K)] 
 			+ U_cuda[IND_3D(i, j, k + 1, I, J, K)] 
 			+ f3 * stepk * F_cuda[ijk];
 
