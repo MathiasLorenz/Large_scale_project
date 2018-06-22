@@ -26,6 +26,10 @@ void jacobi_iteration_cuda_separate_stream(
 	const char *ver,
 	void *stream
 );
+void compute_relative_norm_cuda(
+	Information *information,Information *information_cuda, 
+	double *U_cuda, double *Unew_cuda
+);
 
 #ifdef __cplusplus
 __global__ void free_information_arrays_cuda(Information *information_cuda);
@@ -44,6 +48,10 @@ __global__ void jacobi_iteration_kernel_interior(
 __global__ void jacobi_iteration_kernel_boundary(
 	Information *information_cuda, 
 	double *U_cuda, double *F_cuda, double *Unew_cuda
+);
+__global__ void frobenious_kernel(
+	Information *information_cuda,
+	double *U_cuda, double *Unew_cuda
 );
 #endif //__cplusplus
 

@@ -365,9 +365,15 @@ void compute_global_max_error(Information *information, double *U,
 // Calculate if norm criterion is reached
 bool norm_early_stop(Information *information)
 {
+	int size = information->size;
+	
 	// Reduce and send global norm diff to all threads
-	MPI_Allreduce(&information->local_frobenius, &information->frobenius_error,
-		1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+	if (size > 1)
+		MPI_Allreduce(
+			&information->local_frobenius, &information->frobenius_error,
+			1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+	else
+		information->frobenius_error = information->local_frobenius;
 
 	// Returning boolean for stopping
 	return (information->frobenius_error < information->tol);

@@ -86,8 +86,14 @@ void jacobi_cuda_1(Information *information, double *U, double *F, double *Unew)
 		// Wait for kernel to complete
 		checkCudaErrors(cudaDeviceSynchronize());
 
-        // Swap the arrays
-        swap_array( &U_cuda, &Unew_cuda );
+		// Swap the arrays
+		swap_array( &U_cuda, &Unew_cuda );
+		if (information->use_tol)
+			compute_relative_norm_cuda(information,information_cuda,U_cuda,Unew_cuda);
+		// Stop early if relative error is used.
+		// Second operand is only evaluated if the first is true
+		if (information->use_tol && norm_early_stop(information))
+			break;
 	}
 	
 	// Save number of iterations

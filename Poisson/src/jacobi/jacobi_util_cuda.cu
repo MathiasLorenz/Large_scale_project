@@ -51,17 +51,13 @@ void copy_information_cuda(Information *information_cuda, Information *informati
 		information->size*sizeof(int), 
 		cudaMemcpyHostToDevice
 	));
-
+	
 	Temp.maxit				= information->maxit;
 	Temp.iter				= information->iter;
 	Temp.tol				= information->tol;
 	Temp.use_tol			= information->use_tol;
 	Temp.local_frobenius	= information->local_frobenius;
 	Temp.frobenius_error	= information->frobenius_error;
-
-	if (information->use_tol) // Is for now locked to blocksize of 32^3
-		checkCudaErrors(cudaMalloc((void**) &information->cuda_norm_array,
-			32*32*32*sizeof(double)));
 
 	checkCudaErrors(cudaDeviceSynchronize());
 
@@ -91,10 +87,6 @@ __global__ void free_information_arrays_cuda(Information *information_cuda)
 }
 
 // ============================================================================
-// CUDA wrapper to kernel that cal
-
-
-// ============================================================================
 // CUDA VERSION OF THE ITERATIVE CORE
 
 void jacobi_iteration_cuda(Information *information, Information *information_cuda,
@@ -109,16 +101,8 @@ void jacobi_iteration_cuda(Information *information, Information *information_cu
 	dim3 BlockSize = dim3(32,32,32);
 	dim3 BlockAmount = dim3( K/BlockSize.x + 3, J/BlockSize.y + 3, I/BlockSize.z + 3 );
 
-	if (information->use_tol)
-	{
-		// Compute iteration with norm error
-		information->local_frobenius = 0.0;
-		jacobi_iteration_kernel_tol<<<BlockSize,BlockAmount>>>
-			(information_cuda, U_cuda, F_cuda, Unew_cuda);
-	} else {
-		jacobi_iteration_kernel<<<BlockSize,BlockAmount>>>
-			(information_cuda, U_cuda, F_cuda, Unew_cuda);
-	}
+	jacobi_iteration_kernel<<<BlockSize,BlockAmount>>>
+		(information_cuda, U_cuda, F_cuda, Unew_cuda);
 }
 
 __global__ void jacobi_iteration_kernel(Information *information_cuda,
@@ -178,71 +162,6 @@ __global__ void jacobi_iteration_kernel(Information *information_cuda,
 		Unew_cuda[ijk] = f6 * (ui + uj + uk);
 	}
 }
-
-__global__ void jacobi_iteration_kernel_tol(Information *information_cuda,
-	double *U_cuda, double *F_cuda, double *Unew_cuda)
-{
-	// Determine where the thread is located
-	int k = threadIdx.x + blockDim.x*blockIdx.x;
-	int j = threadIdx.y + blockDim.y*blockIdx.y;
-	int i = threadIdx.z + blockDim.z*blockIdx.z;
-
-	// Read the needed data from the information structure
-	int rank = information_cuda->rank;
-	int Nx = information_cuda->global_Nx;
-	int Ny = information_cuda->global_Ny;
-	int Nz = information_cuda->global_Nz;
-	int loc_Nx = information_cuda->loc_Nx[rank];
-	int loc_Ny = information_cuda->loc_Ny[rank];
-	int loc_Nz = information_cuda->loc_Nz[rank];
-
-	// For relative error stopping
-	information_cuda->local_frobenius = 0.0;
-
-    int I, J, K;
-	I = loc_Nz; J = loc_Ny; K = loc_Nx;
-
-	if ( 
-		( (i > 0) && (j > 0) && (k > 0)) 
-		&& ((i < (I-1)) && (j < (J-1)) && (k < (K-1) )) ) 
-	{
-		// Setting up steps
-		double hi = 2.0/(Nz-1.0);
-		double hj = 2.0/(Ny-1.0);
-		double hk = 2.0/(Nx-1.0);
-		double stepi = hi*hi;
-		double stepj = hj*hj;
-		double stepk = hk*hk;
-		double f3 = 1.0/3.0;
-		double f6 = 1.0/6.0;
-
-		// Compute new value
-		// Save i, j, k index once
-		int ijk = IND_3D(i, j, k, I, J, K);
-
-		// Linear indexing with macro
-		double ui = U_cuda[IND_3D(i - 1, j, k, I, J, K)] 
-			+ U_cuda[IND_3D(i + 1, j, k, I, J, K)] 
-			+ f3 * stepi * F_cuda[ijk];
-		double uj = U_cuda[IND_3D(i, j - 1, k, I, J, K)] 
-			+ U_cuda[IND_3D(i, j + 1, k, I, J, K)] 
-			+ f3 * stepj * F_cuda[ijk];
-		double uk = U_cuda[IND_3D(i, j, k - 1, I, J, K)] 
-			+ U_cuda[IND_3D(i, j, k + 1, I, J, K)] 
-			+ f3 * stepk * F_cuda[ijk];
-
-		// Collect terms
-		Unew_cuda[ijk] = f6 * (ui + uj + uk);
-
-		// Tolerance criterion
-		double uij    = U_cuda[ijk];
-		double unewij = Unew_cuda[ijk];
-		double diff_val = (uij - unewij)*(uij - unewij);
-		//atomicAdd(&Block_norm_array[IND_3D(i, j, k, I, J, K)], diff_val); // maybe?
-		information_cuda->cuda_norm_array[IND_3D(i, j, k, I, J, K)] += diff_val;
-	}
-}
-
 
 // ============================================================================
 // CUDA VERSION OF THE ITTERATIVE CORE
@@ -412,5 +331,47 @@ __global__ void jacobi_iteration_kernel_boundary(Information *information_cuda,
 
 		// Collect terms
 		Unew_cuda[ijk] = f6 * (ui + uj + uk);
+	}
+}
+
+// ============================================================================
+// Function to compute the frobenious norm 
+
+void compute_relative_norm_cuda(
+	Information *information, Information *information_cuda,
+	double *U_cuda, double *Unew_cuda)
+{
+	int N = 1024;
+	frobenious_kernel<<<1,N,N*sizeof(double)>>>(information_cuda,U_cuda,Unew_cuda);
+
+	copy_from_device(
+		&information->local_frobenius, sizeof(double),
+		&information_cuda->local_frobenius
+	);
+}
+__global__ void frobenious_kernel(
+	Information *information_cuda, double *U_cuda, double *Unew_cuda)
+{
+	extern __shared__ double local_frobenius[];
+	int rank = information_cuda->rank;
+	int loc_Nx = information_cuda->loc_Nx[rank];
+	int loc_Ny = information_cuda->loc_Ny[rank];
+	int loc_Nz = information_cuda->loc_Nz[rank];
+	
+    int I, J, K;
+	I = loc_Nz; J = loc_Ny; K = loc_Nx;
+
+	local_frobenius[threadIdx.x] = 0;
+	// Loop over all interior points
+	for (int ijk = threadIdx.x; ijk < I*J*K; ijk += blockDim.x) {
+		double uij    = U_cuda[ijk];
+		double unewij = Unew_cuda[ijk];
+		local_frobenius[threadIdx.x] += (uij - unewij)*(uij - unewij);
+	}
+	__syncthreads();
+	if (threadIdx.x == 0){
+		for (int i = 0; i < blockDim.x; i++)
+			information_cuda->local_frobenius += local_frobenius[i];
+		information_cuda->local_frobenius = sqrt(information_cuda->local_frobenius);
 	}
 }
