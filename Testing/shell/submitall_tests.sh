@@ -83,21 +83,21 @@ Program()
 	# Define the actual test part of the script 
 
 	# Run the program
-	N="100"
+	N="400"
 	#N="10 20 50 100 200 300 400 500 600 700"
 	for n in $N 
 	do
 		echo omp2d
-		time OUTPUT_INFO=error OMP_NUM_THREADS=$LSB_DJOB_NUMPROC ./jacobiSolver.bin omp2d $n
+		#time OUTPUT_INFO=error OMP_NUM_THREADS=$LSB_DJOB_NUMPROC ./jacobiSolver.bin omp2d $n
 		
 		echo omp3d
-		time OUTPUT_INFO=error OMP_NUM_THREADS=$LSB_DJOB_NUMPROC ./jacobiSolver.bin omp3d $n
+		#time OUTPUT_INFO=error OMP_NUM_THREADS=$LSB_DJOB_NUMPROC ./jacobiSolver.bin omp3d $n
 		
 		echo mpi3d_1
-		time OUTPUT_INFO=error mpiexec -q -n 2 ./jacobiSolver.bin mpi3d_1 $n
+		#time OUTPUT_INFO=error mpiexec -q -n 2 ./jacobiSolver.bin mpi3d_1 $n
 		
 		echo mpi3d_2
-		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_2 $n
+		#time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_2 $n
 		
 		echo mpi3d_3
 		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_3 $n

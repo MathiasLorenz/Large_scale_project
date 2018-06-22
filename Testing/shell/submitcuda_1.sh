@@ -82,12 +82,21 @@ Program()
 	# Define the actual test part of the script 
 
 	# Run the program
-	N="10"
+	echo "Iteration counts:"
+	N="100 200 250 300 350 400"
 	for n in $N 
 	do
-		./jacobiSolver.bin cuda_1 $n
+		USE_TOLERANCE=off MAX_ITER=10000 OUTPUT_INFO=timing ./jacobiSolver.bin cuda_1 $n
 	done
+	echo "Timings:"
+	#USE_TOLERANCE=on  MAX_ITER=6680 ./jacobiSolver.bin cuda_1 100
+	#USE_TOLERANCE=off MAX_ITER=6680 ./jacobiSolver.bin cuda_1 100
 
+	#USE_TOLERANCE=on  MAX_ITER=26301 ./jacobiSolver.bin cuda_1 200
+	#USE_TOLERANCE=off MAX_ITER=26301 ./jacobiSolver.bin cuda_1 200
+
+	#USE_TOLERANCE=on  MAX_ITER=6680 ./jacobiSolver.bin cuda_1 400
+	#USE_TOLERANCE=off MAX_ITER=6680 ./jacobiSolver.bin cuda_1 400
 	# -------------------------------------------------------------------------
 	mv -t $DPATH *.dat 
 }
