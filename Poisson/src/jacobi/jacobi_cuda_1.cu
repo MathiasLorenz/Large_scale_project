@@ -69,7 +69,7 @@ void jacobi_cuda_1(Information *information, double *U, double *F, double *Unew)
 	
 	// ------------------------------------------------------------------------
 	// Setup blocks for the GPU
-	dim3 BlockSize = dim3(32,32,32);
+	dim3 BlockSize = dim3(16,16,4);
 	dim3 BlockAmount = dim3( K/BlockSize.x + 1, J/BlockSize.y + 1, I/BlockSize.z + 1 );
 
 	// ------------------------------------------------------------------------
@@ -81,7 +81,7 @@ void jacobi_cuda_1(Information *information, double *U, double *F, double *Unew)
 	checkCudaErrors(cudaDeviceSynchronize());
     for(iter = 0; iter < maxit ; iter++){
 		// Compute the iteration of the jacobi method
-		jacobi_iteration_kernel<<<BlockSize,BlockAmount>>>(information_cuda, U_cuda, F_cuda, Unew_cuda);
+		jacobi_iteration_kernel<<<BlockAmount,BlockSize>>>(information_cuda, U_cuda, F_cuda, Unew_cuda);
 		
 		// Wait for kernel to complete
 		checkCudaErrors(cudaDeviceSynchronize());

@@ -98,10 +98,10 @@ void jacobi_iteration_cuda(Information *information, Information *information_cu
 	int I = information->loc_Nz[rank];
 
 	// Blocks
-	dim3 BlockSize = dim3(32,32,32);
+	dim3 BlockSize = dim3(16,16,4);
 	dim3 BlockAmount = dim3( K/BlockSize.x + 3, J/BlockSize.y + 3, I/BlockSize.z + 3 );
 
-	jacobi_iteration_kernel<<<BlockSize,BlockAmount>>>
+	jacobi_iteration_kernel<<<BlockAmount,BlockSize>>>
 		(information_cuda, U_cuda, F_cuda, Unew_cuda);
 }
 
@@ -179,16 +179,16 @@ void jacobi_iteration_cuda_separate(Information *information, Information *infor
 	// interior or boundary
 	if (strcmp(ver, "i") == 0)
 	{
-		dim3 BlockSize = dim3(32, 32, 32);
+		dim3 BlockSize = dim3(16, 16, 4);
 		dim3 BlockAmount = dim3( K/BlockSize.x + 3, J/BlockSize.y + 3, I/BlockSize.z + 3 );
-		jacobi_iteration_kernel_interior<<<BlockSize,BlockAmount>>>
+		jacobi_iteration_kernel_interior<<<BlockAmount,BlockSize>>>
 				(information_cuda, U_cuda, F_cuda, Unew_cuda);
 	}
 	if (strcmp(ver, "b") == 0)   // boundary
 	{
-		dim3 BlockSize = dim3(32, 32, 1);
+		dim3 BlockSize = dim3(32, 16, 2);
 		dim3 BlockAmount = dim3( K/BlockSize.x + 3, J/BlockSize.y + 3, 1 );
-		jacobi_iteration_kernel_boundary<<<BlockSize,BlockAmount>>>
+		jacobi_iteration_kernel_boundary<<<BlockAmount,BlockSize>>>
 				(information_cuda, U_cuda, F_cuda, Unew_cuda);
 	}
 }
@@ -205,16 +205,16 @@ void jacobi_iteration_cuda_separate_stream(Information *information, Information
 	// interior or boundary
 	if (strcmp(ver, "i") == 0)
 	{
-		dim3 BlockSize = dim3(32, 32, 32);
+		dim3 BlockSize = dim3(16, 16, 4);
 		dim3 BlockAmount = dim3( K/BlockSize.x + 3, J/BlockSize.y + 3, I/BlockSize.z + 3 );
-		jacobi_iteration_kernel_interior<<<BlockSize,BlockAmount,0,*s>>>
+		jacobi_iteration_kernel_interior<<<BlockAmount,BlockSize,0,*s>>>
 				(information_cuda, U_cuda, F_cuda, Unew_cuda);
 	}
 	if (strcmp(ver, "b") == 0)   // boundary
 	{
-		dim3 BlockSize = dim3(32, 32, 2);
+		dim3 BlockSize = dim3(32, 16, 2);
 		dim3 BlockAmount = dim3( K/BlockSize.x + 3, J/BlockSize.y + 3, 1 );
-		jacobi_iteration_kernel_boundary<<<BlockSize,BlockAmount,0,*s>>>
+		jacobi_iteration_kernel_boundary<<<BlockAmount,BlockSize,0,*s>>>
 				(information_cuda, U_cuda, F_cuda, Unew_cuda);
 	}
 }
