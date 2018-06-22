@@ -15,6 +15,7 @@
 # Ask for n cores placed on R host.
 #BSUB -n 2
 #BSUB -R "span[ptile=2]"
+#BSUB -K
 
 # Memory specifications. Amount we need and when to kill the
 # program using too much memory.
@@ -94,7 +95,8 @@ Program()
 
 	for t in $Test 
 	do
-		mpiexec -q -n $LSB_DJOB_NUMPROC nvprof \
+		MAX_ITER=10 \
+			mpiexec -q -n $LSB_DJOB_NUMPROC nvprof \
 			--output-profile profile.$t.%q{OMPI_COMM_WORLD_RANK} \
 			--process-name "rank %q{OMPI_COMM_WORLD_RANK}" \
 			--context-name "rank %q{OMPI_COMM_WORLD_RANK}" \

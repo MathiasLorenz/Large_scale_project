@@ -19,7 +19,7 @@ end
 
 %% Name the plot and set title and size
 F.Name = PlotName;
-title(PlotTitle,'FontSize',14)
+title(PlotTitle,'FontSize',18)
 
 %% Do the plots
 N = unique(Names);
@@ -30,16 +30,14 @@ for i = 1:length(Names)
     for n = 1:length(N)
         if strcmp(Names{i},N{n})
             Data(Cores(i)-1,n) = flops(i);
-            
-            fprintf('Name: %s, C: %d, flops: %f\n',Names{i},Cores(i),flops(i))
         end
     end
 end
 hold on
 for n = 1:length(N)
-    plot(C,Data(:,n)./Data(1,n))
+    plot(C,Data(:,n)./Data(1,n),'LineWidth',2)
 end
-plot(2:C(end)+2,1:C(end)+1,'LineStyle','--')
+plot(2:C(end)+2,1:C(end)+1,'LineStyle','--','LineWidth',2)
 hold off
 
 %% Handle the axes and the ticks
@@ -51,7 +49,8 @@ A = gca;
 A.YLim = [0,C(end)];
 axis square
 
-legend({unique(Names),'Optimal'},'Location','NorthWest')
+L = legend(unique(Names),'Optimal');
+set(L,'Location','NorthWest','FontSize',14);
 %% Insert Cache lines
 %{
 switch CPU
