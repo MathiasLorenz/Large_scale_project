@@ -135,6 +135,9 @@ void test_jacobi_3D(Information *information, char const *solver)
 	else if (strcmp(solver, "cuda_1") == 0)
 		jacobi_cuda_1(information, U, F, Unew);
 
+	else if (strcmp(solver, "cuda_2") == 0)
+		jacobi_cuda_2(information, U, F, Unew);
+
 	else if (strcmp(solver, "mixed_1") == 0)
 		jacobi_mixed_1(information, U, F, Unew);
 	else if (strcmp(solver, "mixed_2") == 0)

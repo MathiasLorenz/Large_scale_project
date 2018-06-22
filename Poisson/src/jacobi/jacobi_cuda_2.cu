@@ -50,31 +50,37 @@ void jacobi_cuda_2(Information *information, double *U, double *F, double *Unew)
 		fprintf(stderr, "Version cuda_2 must run on exactly 1 core and 2 GPUs.\n");
 		return;
     }
+
+    cudaSetDevice(0); // Just because
     
     // Enable peer access between GPUs
-    cuda_enable_peer_access(0, 1);
-    cuda_enable_peer_access(1, 0);
+    cuda_enable_peer_access();
 
+    // Define the information structure on the device and allocate
+    Information *information_cuda;
+    checkCudaErrors(cudaMalloc( (void**)&information_cuda, sizeof(Information) ));
+
+    // Arrays, one for each gpu
+    double *U_cuda[2], *F_cuda[2], *Unew_cuda[2];
 
 	// ========================================================================
     // Preparation. Do for both GPUs. Need pointers to arrays on both 
     for (int gpu = 0; gpu < 2; gpu++)
     {
         cudaSetDevice(gpu);
-        // Define the information structure on the device
-        Information *information_cuda;
-        checkCudaErrors(cudaMalloc( (void**)&information_cuda, sizeof(Information) ));
+        
+        // Copy information structure to the current device
         copy_information_cuda(information_cuda,information);
 
-        double *U_cuda, *F_cuda, *Unew_cuda;
-        checkCudaErrors(cudaMalloc((void**)&U_cuda,    arraySizes));
-        checkCudaErrors(cudaMalloc((void**)&F_cuda,    arraySizes));
-        checkCudaErrors(cudaMalloc((void**)&Unew_cuda, arraySizes));
+        // Allocat on the current gpu
+        checkCudaErrors(cudaMalloc((void**)&U_cuda[gpu],    arraySizes));
+        checkCudaErrors(cudaMalloc((void**)&F_cuda[gpu],    arraySizes));
+        checkCudaErrors(cudaMalloc((void**)&Unew_cuda[gpu], arraySizes));
 
         // Copy data to the GPU
-        checkCudaErrors(cudaMemcpyAsync(U_cuda   , U   , arraySizes, cudaMemcpyHostToDevice));
-        checkCudaErrors(cudaMemcpyAsync(F_cuda   , F   , arraySizes, cudaMemcpyHostToDevice));
-        checkCudaErrors(cudaMemcpyAsync(Unew_cuda, Unew, arraySizes, cudaMemcpyHostToDevice));
+        checkCudaErrors(cudaMemcpyAsync(U_cuda[gpu]   , U   , arraySizes, cudaMemcpyHostToDevice));
+        checkCudaErrors(cudaMemcpyAsync(F_cuda[gpu]   , F   , arraySizes, cudaMemcpyHostToDevice));
+        checkCudaErrors(cudaMemcpyAsync(Unew_cuda[gpu], Unew, arraySizes, cudaMemcpyHostToDevice));
     }
 
 

@@ -37,7 +37,7 @@ void cuda_destroy_stream(void  *stream);
 void cuda_set_device(int rank);
 void cuda_get_device_count(int *count);
 
-void cuda_enable_peer_access(const int access_from, const int access_to);
+void cuda_enable_peer_access();
 
 #ifdef __cplusplus
 }

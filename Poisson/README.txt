@@ -15,6 +15,7 @@ where:
 		mpi3d_3	: This version overlaps the sending and receiving of data with
 				  computation of the interior of the domain.
 		cuda_1	: First implementation using cuda for a single GPU.
+		cuda_2	: Second implementation using cuda on 2 GPUs on the same node.
 		mixed_1	: First implementation using both MPI and CUDA. Very naive.
 		mixed_2	: Second implementation using both MPI and CUDA. Copies only 
 				  needed data.
