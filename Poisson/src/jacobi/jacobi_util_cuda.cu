@@ -56,8 +56,8 @@ void copy_information_cuda(Information *information_cuda, Information *informati
 	Temp.iter				= information->iter;
 	Temp.tol				= information->tol;
 	Temp.use_tol			= information->use_tol;
-	Temp.norm_diff			= information->norm_diff;
-	Temp.global_norm_diff	= information->global_norm_diff;
+	Temp.local_frobenius	= information->local_frobenius;
+	Temp.frobenius_error	= information->frobenius_error;
 
 	if (information->use_tol) // Is for now locked to blocksize of 32^3
 		checkCudaErrors(cudaMalloc((void**) &information->cuda_norm_array,
@@ -112,7 +112,7 @@ void jacobi_iteration_cuda(Information *information, Information *information_cu
 	if (information->use_tol)
 	{
 		// Compute iteration with norm error
-		information->norm_diff = 0.0;
+		information->local_frobenius = 0.0;
 		jacobi_iteration_kernel_tol<<<BlockSize,BlockAmount>>>
 			(information_cuda, U_cuda, F_cuda, Unew_cuda);
 	} else {
@@ -139,7 +139,7 @@ __global__ void jacobi_iteration_kernel(Information *information_cuda,
 	int loc_Nz = information_cuda->loc_Nz[rank];
 
 	// For relative error stopping
-	information_cuda->norm_diff = 0.0;
+	information_cuda->local_frobenius = 0.0;
 
     int I, J, K;
 	I = loc_Nz; J = loc_Ny; K = loc_Nx;
@@ -197,7 +197,7 @@ __global__ void jacobi_iteration_kernel_tol(Information *information_cuda,
 	int loc_Nz = information_cuda->loc_Nz[rank];
 
 	// For relative error stopping
-	information_cuda->norm_diff = 0.0;
+	information_cuda->local_frobenius = 0.0;
 
     int I, J, K;
 	I = loc_Nz; J = loc_Ny; K = loc_Nx;

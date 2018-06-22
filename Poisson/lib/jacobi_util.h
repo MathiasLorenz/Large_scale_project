@@ -7,7 +7,8 @@
 #ifdef __cplusplus
 extern "C"{
 #endif //__cplusplus
-
+// ============================================================================
+// Handle the information structure
 typedef struct Information {
 	// MPI information of size and local rank.
 	int rank;
@@ -30,8 +31,8 @@ typedef struct Information {
 	// For relative stop criterion
 	bool 	use_tol;
 	double  tol;
-	double  norm_diff;
-	double  global_norm_diff;
+	double  local_frobenius;
+	double  frobenius_error;
 
 	// Device array to hold norm information. Same size as kernel block
 	double  *cuda_norm_array;
@@ -39,24 +40,31 @@ typedef struct Information {
 
 void write_information(Information *information, int Nx, int Ny, int Nz, int rank, int size);
 void free_information_arrays(Information *information);
-void jacobi_iteration(Information *information, double *U, double *F, double *Unew);
-void jacobi_iteration_separate(Information *information, double *U, double *F, double *Unew,
-		const char *ver);
-// Old versions
-void generate_true_solution(double *A, Information *information);
-void compute_max_error(Information *information, double *A, double *U, double *local_error);
-void compute_global_error(Information *information, double *A, double *U,
-		double *global_error);
-void print_error(Information *information, double *A, double *U);
 
-// New versions
-//void compute_max_error(Information *information, double *U, double *local_error);
-//void compute_global_error(Information *information, double *U,
-//		double *global_error);
-//void print_error(Information *information, double *U);
+// Function to determine neighbour ranks
+void compute_neighbors(
+	Information *information, int *neighbour_1, int *neighbour_2
+);
+// ============================================================================
+// Functions for computing jacobi iterations
+void jacobi_iteration(
+	Information *information,double *U,double *F,double *Unew
+);
+void jacobi_iteration_separate(
+	Information *information,double *U,double *F,double *Unew,const char *ver
+);
 
-void compute_neighbors(Information *information,
-	int *neighbour_1, int *neighbour_2);
+// ============================================================================
+// Functions to handle maximal absolute error
+void print_error(Information *information, double *U);
+
+void compute_local_max_error(
+	Information *information, double *U, double *local_error);
+void compute_global_max_error(
+	Information *information, double *U, double *global_error);
+
+// ============================================================================
+// Function to handle frobenius stop criterion
 bool norm_early_stop(Information *information);
 
 #ifdef __cplusplus

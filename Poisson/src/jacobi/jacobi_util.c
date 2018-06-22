@@ -59,8 +59,8 @@ void write_information(Information *information, int Nx, int Ny, int Nz,
 	else
 		information->use_tol = false;
 
-	information->norm_diff = 0.0;
-	information->global_norm_diff = 10.0;
+	information->local_frobenius = 0.0;
+	information->frobenius_error = 10.0;
 }
 
 void free_information_arrays(Information *information)
@@ -68,6 +68,23 @@ void free_information_arrays(Information *information)
 	free(information->loc_Nx);
 	free(information->loc_Ny);
 	free(information->loc_Nz);
+}
+
+// ============================================================================
+// Function to compute neighbors for mpi threads.
+void compute_neighbors(Information *information,
+	int *neighbour_1, int *neighbour_2)
+{
+	int rank   = information->rank;
+	int size   = information->size;
+	if (rank == 0) {
+		*neighbour_1 = 1;
+	} else if (rank == size - 1) {
+		*neighbour_1 = size - 2;
+	} else {
+		*neighbour_1 = rank - 1; 
+		*neighbour_2 = rank + 1;
+	}
 }
 
 // ============================================================================
@@ -98,7 +115,7 @@ void jacobi_iteration(Information *information,
 	double f6 = 1.0/6.0;
 
 	// For relative error stopping
-	information->norm_diff = 0.0;
+	information->local_frobenius = 0.0;
 
 	// Loop over all interior points
 	for (int i = 1; i < I - 1; i++) {
@@ -129,14 +146,14 @@ void jacobi_iteration(Information *information,
 				{
 					double uij    = U[ijk];
 					double unewij = Unew[ijk];
-					information->norm_diff += (uij - unewij)*(uij - unewij);
+					information->local_frobenius += (uij - unewij)*(uij - unewij);
 				}
 			}
 		}
 	}
 
 	// Save relative error for this grid
-	information->norm_diff = sqrt(information->norm_diff);
+	information->local_frobenius = sqrt(information->local_frobenius);
 }
 
 // ============================================================================
@@ -167,7 +184,7 @@ void jacobi_iteration_separate(Information *information,
 	double f6 = 1.0/6.0;
 
 	// For relative error stopping
-	information->norm_diff = 0.0;
+	information->local_frobenius = 0.0;
 
 	// Loop over points. Either interior or boundary
 	if (strcmp(ver, "i") == 0) // interior
@@ -201,7 +218,7 @@ void jacobi_iteration_separate(Information *information,
 					{
 						double uij    = U[ijk];
 						double unewij = Unew[ijk];
-						information->norm_diff += (uij - unewij)*(uij - unewij);
+						information->local_frobenius += (uij - unewij)*(uij - unewij);
 					}
 				}
 			}
@@ -241,7 +258,7 @@ void jacobi_iteration_separate(Information *information,
 					{
 						double uij    = U[ijk];
 						double unewij = Unew[ijk];
-						information->norm_diff += (uij - unewij)*(uij - unewij);
+						information->local_frobenius += (uij - unewij)*(uij - unewij);
 					}
 				}
 			}
@@ -249,123 +266,42 @@ void jacobi_iteration_separate(Information *information,
 	}
 
 	// Save relative error for this grid
-	information->norm_diff = sqrt(information->norm_diff);
+	information->local_frobenius = sqrt(information->local_frobenius);
 }
 
 // ============================================================================
-// FUNCTION FOR GENERATING AND CHECKING SOLUTION AGAINST TRUE SOLUTION
-void generate_true_solution(double *A, Information *information)
-{
-	if (!A || !information) { fprintf(stderr, "Pointer is NULL.\n"); return; }
-
-	// Read information
-	int rank = information->rank;
-	int Nx = information->global_Nx;
-	int Ny = information->global_Ny;
-	int Nz = information->global_Nz;
-	int loc_Nx = information->loc_Nx[rank];
-	int loc_Ny = information->loc_Ny[rank];
-	int loc_Nz = information->loc_Nz[rank];
-
-	// Rewritting to C style coordinates
-	int K = loc_Nx, J = loc_Ny, I = loc_Nz;
-
-	// Setting up steps and variables 
-	double hi = 2.0 / (Nz - 1.0);
-	double hj = 2.0 / (Ny - 1.0);
-	double hk = 2.0 / (Nx - 1.0);
-
-	// Determine how far we are in the z-direction
-	double z = -1.0;
-	for (int r = 0; r < rank; r++)
-		z += hi*(information->loc_Nz[r]-2.0);
-
-	for (int i = 0; i < I; i++)
-	{
-		double y = -1.0;
-		for (int j = 0; j < J; j++)
-		{
-			double x = -1.0;
-			for (int k = 0; k < K; k++)
-			{
-				A[IND_3D(i, j, k, I, J, K)] =
-					sin(M_PI * x) * sin(M_PI * y) * sin(M_PI * z);
-				x += hk;
-			}
-			y += hj;
-		}
-		z += hi;
-	}
-}
-
-// Compute max absolute error
-void compute_max_error(Information *information, double *A, double *U, double *abs_err)
-{
-	if (!A || !U || !abs_err || !information)
-	{ fprintf(stderr, "Pointer is NULL.\n"); return; }
-	*abs_err = 0.0;
-
-	// Extract problem dimensions
-	int rank = information->rank;
-	int loc_Nx = information->loc_Nx[rank];
-	int loc_Ny = information->loc_Ny[rank];
-	int loc_Nz = information->loc_Nz[rank];
-	// Rewritting to C style coordinates
-	int K = loc_Nx, J = loc_Ny, I = loc_Nz;
-
-	// Loop over all interior points
-	for (int i = 1; i < (I - 1); ++i)
-		for (int j = 1; j < (J - 1); ++j)
-			for (int k = 1; k < (K - 1); ++k) {
-				int ijk = IND_3D(i, j, k, I, J, K);
-				double err = fabs(U[ijk] - A[ijk]);
-				if (err > *abs_err) *abs_err = err; // Save largest element
-			}
-}
-
-// Function to compute global error on solution. 
-void compute_global_error(Information *information, double *A, double *U,
-	double *global_error)
-{
-	*global_error = 0.0;
-	double local_error = 0.0;
-
-	compute_max_error(information, A, U, &local_error);
-	MPI_Barrier(MPI_COMM_WORLD);
-	MPI_Reduce(&local_error, global_error, 1, MPI_DOUBLE, MPI_MAX,
-		0, MPI_COMM_WORLD);
-}
+// COMPUTE MAXIMAL ABSOLUTE DIFFERENCE ERROR
 
 // Function to print error for OUTPUT_INFO=error
-void print_error(Information *information, double *A, double *U)
+void print_error(Information *information, double *U)
 {
+	int rank = information->rank;
 	int Nx = information->global_Nx;
 	int Ny = information->global_Nx;
 	int Nz = information->global_Nx;
-	int rank = information->rank;
-	double global_norm_diff = information->global_norm_diff;
+
 	int iter = information->iter;
+	double frobenius_error = information->frobenius_error;
+
 	double global_error = 0.0;
-	compute_global_error(information, A, U, &global_error);
+	compute_global_max_error(information, U, &global_error);
+
 	if (rank == 0)
 	{
+		printf("Grid: %d %d %d, ",Nx, Ny, Nz);
 		if (information->use_tol)
-			printf("Grid: %d %d %d, iter: %d, norm error: %.7e, error: %.7e\n",
-				Nx, Ny, Nz, iter, global_norm_diff, global_error);
-		else
-			printf("Grid: %d %d %d, iter: %d, error: %.7e\n",
-				Nx, Ny, Nz, iter, global_error);
+			printf("iter: %d, frobenius error: %.7e ", iter, frobenius_error);
+		printf("Max absolute error: %.7e\n",global_error);
+		
 	}
 }
 
-// NEW VERSION
 // Compute max absolute error
-/*
-void compute_max_error(Information *information, double *U, double *abs_err)
+void compute_local_max_error(Information *information, double *U, double *local_error)
 {
-	if (!U || !abs_err || !information)
+	if (!U || !local_error || !information)
 	{ fprintf(stderr, "Pointer is NULL.\n"); return; }
-	*abs_err = 0.0;
+	*local_error = 0.0;
 
 	// Extract problem dimensions
 	int rank = information->rank;
@@ -390,17 +326,18 @@ void compute_max_error(Information *information, double *U, double *abs_err)
 
 	// Loop over all interior points
 	double x, y, true_sol, err;
-	for (int i = 1; i < (I - 1); ++i)
+	for (int i = 0; i < I; i++)
 	{
-		y = -1.0 + hj;
-		for (int j = 1; j < (J - 1); ++j)
+		y = -1.0;
+		for (int j = 0; j < J; j++)
 		{
-			x = -1.0 + hk;
-			for (int k = 1; k < (K - 1); ++k)
+			x = -1.0;
+			for (int k = 0; k < K; k++)
 			{
+				int ijk = IND_3D(i, j, k, I, J, K);
 				true_sol = sin(M_PI * x) * sin(M_PI * y) * sin(M_PI * z);
-				err = fabs(U[IND_3D(i, j, k, I, J, K)] - true_sol);
-				if (err > *abs_err) *abs_err = err; // Save largest element
+				err = fabs(U[ijk] - true_sol);
+				if (err > *local_error) *local_error = err; // Save largest element
 				x += hk;
 			}
 			y += hj;
@@ -408,74 +345,32 @@ void compute_max_error(Information *information, double *U, double *abs_err)
 		z += hi;
 	}
 }
-*/
-
-// NEW VERSION
 // Function to compute global error on solution.
-/*
-void compute_global_error(Information *information, double *U,
+void compute_global_max_error(Information *information, double *U,
 	double *global_error)
 {
 	*global_error = 0.0;
 	double local_error = 0.0;
 
-	compute_max_error(information, U, &local_error);
+	compute_local_max_error(information, U, &local_error);
 	MPI_Barrier(MPI_COMM_WORLD);
 	MPI_Reduce(&local_error, global_error, 1, MPI_DOUBLE, MPI_MAX,
 		0, MPI_COMM_WORLD);
 }
-*/
 
-// NEW VERSION
-// Function to print error for OUTPUT_INFO=error
-/*
-void print_error(Information *information, double *U)
-{
-	int Nx = information->global_Nx;
-	int Ny = information->global_Nx;
-	int Nz = information->global_Nx;
-	int rank = information->rank;
-	double global_norm_diff = information->global_norm_diff;
-	int iter = information->iter;
-	double global_error = 0.0;
-	compute_global_error(information, U, &global_error);
-	if (rank == 0)
-	{
-		if (information->use_tol)
-			printf("Grid: %d %d %d, iter: %d, norm error: %.7e, error: %.7e\n",
-				Nx, Ny, Nz, iter, global_norm_diff, global_error);
-		else
-			printf("Grid: %d %d %d, iter: %d, error: %.7e\n",
-				Nx, Ny, Nz, iter, global_error);
-	}
-}
-*/
 
-// Function to compute neighbors for mpi threads.
-void compute_neighbors(Information *information,
-	int *neighbour_1, int *neighbour_2)
-{
-	int rank   = information->rank;
-	int size   = information->size;
-	if (rank == 0) {
-		*neighbour_1 = 1;
-	} else if (rank == size - 1) {
-		*neighbour_1 = size - 2;
-	} else {
-		*neighbour_1 = rank - 1; 
-		*neighbour_2 = rank + 1;
-	}
-}
+// ============================================================================
+// COMPUTE STOP CRITERION BASED ON FROBENIUS
 
 // Calculate if norm criterion is reached
 bool norm_early_stop(Information *information)
 {
 	// Reduce and send global norm diff to all threads
-	MPI_Allreduce(&information->norm_diff, &information->global_norm_diff,
+	MPI_Allreduce(&information->local_frobenius, &information->frobenius_error,
 		1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
 	// Returning boolean for stopping
-	return (information->global_norm_diff < information->tol);
+	return (information->frobenius_error < information->tol);
 }
 
 

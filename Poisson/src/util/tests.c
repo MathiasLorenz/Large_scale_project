@@ -84,8 +84,6 @@ void test_jacobi_3D(Information *information, char const *solver)
 
 	// Allocation
 	double *U, *F, *Unew;
-	double *A; // TO BE REMOVED
-	A = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz); // TO BE REMOVED
 	U = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
 	F = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
 	Unew = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
@@ -94,16 +92,6 @@ void test_jacobi_3D(Information *information, char const *solver)
 		fprintf(stderr, "Error in malloc, pointer is NULL.\n");
 		return;
 	}
-
-	// TO BE REMOVED
-	// Array for true solution if requested
-	if (strcmp("error", getenv("OUTPUT_INFO")) == 0)
-	{
-		A = dmalloc_3d_l(loc_Nx, loc_Ny, loc_Nz);
-		if (!A) { fprintf(stderr, "Error in malloc, pointer is NULL.\n"); return; }
-		generate_true_solution(A, information);
-	}
-	
 
 	// Initialise the boundary values
 	if (strcmp("sin", getenv("PROBLEM_NAME")) == 0)
@@ -155,21 +143,19 @@ void test_jacobi_3D(Information *information, char const *solver)
 	// Print the needed information
 	if (strcmp("matrix_slice", getenv("OUTPUT_INFO")) == 0)
 		array_print_3d_slice(U, Nx, Ny, Nz, Nz / 2, "%10g ");
+
 	else if (strcmp("matrix_full", getenv("OUTPUT_INFO")) == 0)
 	{
 		if (size == 1)
 			array_print_3d(U, Nx, Ny, Nz, "%10g ");
 		else
 			print_jacobi3d_z_sliced(U, information, "%10g ");
-	}	
-	else if (strcmp("error", getenv("OUTPUT_INFO")) == 0)
-	{
-		//print_error(information, U);
-		print_error(information, A, U); // TO BE REMOVED
 	}
-		
+	
+	else if (strcmp("error", getenv("OUTPUT_INFO")) == 0)
+		print_error(information, U);
+
 
 	// Free the arrays created for the computation
 	free(U); free(F); free(Unew);
-	free(A); // TO BE REMOVED	
 }
