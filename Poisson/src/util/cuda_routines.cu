@@ -75,3 +75,11 @@ void cuda_set_device(int rank)
 		device = 0;
 	cudaSetDevice(device);
 }
+
+
+// Enable peer access
+void cuda_enable_peer_access(const int access_from, const int access_to)
+{
+	cudaSetDevice(access_from);
+	checkCudaErrors(cudaDeviceEnablePeerAccess(access_to, 0));
+}

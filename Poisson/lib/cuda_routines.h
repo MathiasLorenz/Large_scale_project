@@ -30,6 +30,8 @@ void cuda_synchronize();
 void cuda_set_device(int rank);
 void cuda_get_device_count(int *count);
 
+void cuda_enable_peer_access(const int access_from, const int access_to);
+
 #ifdef __cplusplus
 }
 #endif //__cplusplus
