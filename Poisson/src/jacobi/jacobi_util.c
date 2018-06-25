@@ -151,9 +151,6 @@ void jacobi_iteration(Information *information,
 			}
 		}
 	}
-
-	// Save relative error for this grid
-	information->local_frobenius = sqrt(information->local_frobenius);
 }
 
 // ============================================================================
@@ -182,9 +179,6 @@ void jacobi_iteration_separate(Information *information,
 	double stepk = hk*hk;
 	double f3 = 1.0/3.0;
 	double f6 = 1.0/6.0;
-
-	// For relative error stopping
-	information->local_frobenius = 0.0;
 
 	// Loop over points. Either interior or boundary
 	if (strcmp(ver, "i") == 0) // interior
@@ -264,9 +258,6 @@ void jacobi_iteration_separate(Information *information,
 			}
 		}
 	}
-
-	// Save relative error for this grid
-	information->local_frobenius = sqrt(information->local_frobenius);
 }
 
 // ============================================================================
@@ -375,6 +366,9 @@ bool norm_early_stop(Information *information)
 	else
 		information->frobenius_error = information->local_frobenius;
 
+	information->local_frobenius = 0.0;
+	information->frobenius_error = sqrt(information->frobenius_error);
+	
 	// Returning boolean for stopping
 	return (information->frobenius_error < information->tol);
 }
