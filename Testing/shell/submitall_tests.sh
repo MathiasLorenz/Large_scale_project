@@ -83,39 +83,39 @@ Program()
 	# Define the actual test part of the script 
 
 	# Run the program
-	N="400"
+	N="32 128"
 	#N="10 20 50 100 200 300 400 500 600 700"
 	for n in $N 
 	do
 		echo omp2d
-		#time OUTPUT_INFO=error OMP_NUM_THREADS=$LSB_DJOB_NUMPROC ./jacobiSolver.bin omp2d $n
+		time USE_TOLERANCE=on OUTPUT_INFO=error OMP_NUM_THREADS=$LSB_DJOB_NUMPROC ./jacobiSolver.bin omp2d $n
 		
 		echo omp3d
-		#time OUTPUT_INFO=error OMP_NUM_THREADS=$LSB_DJOB_NUMPROC ./jacobiSolver.bin omp3d $n
+		time USE_TOLERANCE=on OUTPUT_INFO=error OMP_NUM_THREADS=$LSB_DJOB_NUMPROC ./jacobiSolver.bin omp3d $n
 		
 		echo mpi3d_1
-		#time OUTPUT_INFO=error mpiexec -q -n 2 ./jacobiSolver.bin mpi3d_1 $n
+		time USE_TOLERANCE=on OUTPUT_INFO=error mpiexec -q -n 2 ./jacobiSolver.bin mpi3d_1 $n
 		
 		echo mpi3d_2
-		#time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_2 $n
+		time USE_TOLERANCE=on OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_2 $n
 		
 		echo mpi3d_3
-		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_3 $n
+		time USE_TOLERANCE=on OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_3 $n
 		
 		echo cuda_1
-		time OUTPUT_INFO=error ./jacobiSolver.bin cuda_1 $n
+		time USE_TOLERANCE=on OUTPUT_INFO=error ./jacobiSolver.bin cuda_1 $n
 		
 		echo mixed_1
-		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_1 $n
+		time USE_TOLERANCE=on OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_1 $n
 		
 		echo mixed_2
-		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_2 $n
+		time USE_TOLERANCE=on OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_2 $n
 		
 		echo mixed_3
-		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_3 $n
+		time USE_TOLERANCE=on OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_3 $n
 	
 		echo mixed_4
-		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_4 $n
+		time USE_TOLERANCE=on OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_4 $n
 	done
 
 	# -------------------------------------------------------------------------

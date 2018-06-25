@@ -13,7 +13,7 @@
 # -- Technical options
 
 # Ask for n cores placed on R host.
-#BSUB -n 1
+#BSUB -n 4
 #BSUB -R "span[ptile=1]"
 #BSUB -K
 
@@ -83,20 +83,14 @@ Program()
 
 	# Run the program
 	echo "Iteration counts:"
-	N="100 200 250 300 350 400"
+	N="64"
 	for n in $N 
 	do
-		USE_TOLERANCE=off MAX_ITER=10000 OUTPUT_INFO=timing ./jacobiSolver.bin cuda_1 $n
+		echo MPI 3:
+		USE_TOLERANCE=on OUTPUT_INFO=error mpiexec -qn $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_3 $n
+		echo CUDA 1:
+		USE_TOLERANCE=on OUTPUT_INFO=error ./jacobiSolver.bin cuda_1 $n
 	done
-	echo "Timings:"
-	#USE_TOLERANCE=on  MAX_ITER=6680 ./jacobiSolver.bin cuda_1 100
-	#USE_TOLERANCE=off MAX_ITER=6680 ./jacobiSolver.bin cuda_1 100
-
-	#USE_TOLERANCE=on  MAX_ITER=26301 ./jacobiSolver.bin cuda_1 200
-	#USE_TOLERANCE=off MAX_ITER=26301 ./jacobiSolver.bin cuda_1 200
-
-	#USE_TOLERANCE=on  MAX_ITER=6680 ./jacobiSolver.bin cuda_1 400
-	#USE_TOLERANCE=off MAX_ITER=6680 ./jacobiSolver.bin cuda_1 400
 	# -------------------------------------------------------------------------
 	mv -t $DPATH *.dat 
 }
@@ -109,7 +103,7 @@ Visualize()
 {
 	echo ' '
 	echo Visualizing
-	matlab -r "addpath(genpath('../../'));matlab3Dplots('$LSB_JOBNAME','$DPATH/','$FIGS');exit;"
+	# matlab -r "addpath(genpath('../../'));matlab3Dplots('$LSB_JOBNAME','$DPATH/','$FIGS');exit;"
 }
 
 # End of Visualize
