@@ -2,7 +2,7 @@
 clc, clear, close all
 addpath 'functions'
 
-fname = '../data/mixed_3_test-250.dat';
+fname = '../data/cuda_2-100.dat';
 
 my_sol = read3DMatrixFromFile(fname);
 [Nx,Ny,Nz] = size(my_sol);
@@ -86,7 +86,7 @@ surf(true_sol(:, :, max_err_idx));
 %% Plot the error againnnnn
 
 err_mat = abs(my_sol - true_sol);
-idx = 9;
+idx = 2;
 titlestring = sprintf('Error at index %d.', idx);
 CreateFigure(titlestring);
 surf(err_mat(:, :, idx))

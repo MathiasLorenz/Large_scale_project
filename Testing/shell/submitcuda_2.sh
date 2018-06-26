@@ -3,7 +3,7 @@
 # --  General options 
 
 # Naming of the job and queue name
-#BSUB -J all_tests
+#BSUB -J cuda_2
 #BSUB -q gpuv100
 
 # Specify
@@ -12,17 +12,15 @@
 
 # -- Technical options
 
-# Add progress
-#BSUB -K
-
 # Ask for n cores placed on R host.
-#BSUB -n 2
-#BSUB -R "span[ptile=2]"
+#BSUB -n 1
+#BSUB -R "span[ptile=1]"
+#BSUB -K
 
 # Memory specifications. Amount we need and when to kill the
 # program using too much memory.
-#BSUB -R "rusage[mem=10GB]"
-#BSUB -M 10GB
+#BSUB -R "rusage[mem=20GB]"
+#BSUB -M 20GB
 
 # Time specifications (hh:mm)
 #BSUB -W 01:00
@@ -68,6 +66,7 @@ Prepare()
 	
 	# Define modules
 	module load cuda/9.1 mpi/2.1.0-gcc-6.3.0
+	#nvidia-smi
 }
 
 # End of Preparation
@@ -83,42 +82,19 @@ Program()
 	# Define the actual test part of the script 
 
 	# Run the program
-	N="100"
-	#N="10 20 50 100 200 300 400 500 600 700"
+	#N="50"
+	N="20 30 50 100 200"
 	for n in $N 
 	do
-		echo omp2d
-		time OUTPUT_INFO=error OMP_NUM_THREADS=$LSB_DJOB_NUMPROC ./jacobiSolver.bin omp2d $n
+		echo "N = $n"
+		echo "cuda_1 to see the error"
+		OUTPUT_INFO=error ./jacobiSolver.bin cuda_1 $n
 		
-		echo omp3d
-		time OUTPUT_INFO=error OMP_NUM_THREADS=$LSB_DJOB_NUMPROC ./jacobiSolver.bin omp3d $n
-		
-		echo mpi3d_1
-		time OUTPUT_INFO=error mpiexec -q -n 2 ./jacobiSolver.bin mpi3d_1 $n
-		
-		echo mpi3d_2
-		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_2 $n
-		
-		echo mpi3d_3
-		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_3 $n
-		
-		echo cuda_1
-		time OUTPUT_INFO=error ./jacobiSolver.bin cuda_1 $n
+		echo "cuda_2"
+		OUTPUT_INFO=error ./jacobiSolver.bin cuda_2 $n
 
-		echo cuda_2
-		time OUTPUT_INFO=error ./jacobiSolver.bin cuda_2 $n
-		
-		echo mixed_1
-		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_1 $n
-		
-		echo mixed_2
-		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_2 $n
-		
-		echo mixed_3
-		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_3 $n
-	
-		echo mixed_4
-		time OUTPUT_INFO=error mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_4 $n
+		echo "Calc with matrix output"
+		OUTPUT_INFO=matrix_full ./jacobiSolver.bin cuda_2 $n >> $LSB_JOBNAME-$n.dat
 	done
 
 	# -------------------------------------------------------------------------

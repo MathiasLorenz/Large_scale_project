@@ -18,7 +18,7 @@ CFLAGS  = $(OPTIM) $(WARN) $(LIBS) $(CHIP) $(PARA)
 # - CU Flags
 CUOPT 	=-O3
 CUOPTS	=
-CUWARN	=
+CUWARN	=-Wall -Wno-unused-function
 CULIBS	=-lcudart -L/appl/cuda/9.1/lib64
 CUARCH	=-arch=sm_70
 CUPARA	=
@@ -27,7 +27,7 @@ CUPARA	=
 CUDA_PATH ?=/appl/cuda/9.1
 CUINCLUDES =-I$(CUDA_PATH)/include -I$(CUDA_PATH)/samples/common/inc
 
-CUFLAGS=-Xcompiler "$(CUOPT) $(CUPIC) $(CUOMP)" $(CUARCH) $(CUOPTS)
+CUFLAGS=-Xcompiler "$(CUOPT) $(CUPIC) $(CUOMP) $(CUWARN)" $(CUARCH) $(CUOPTS)
 LUFLAGS=$(CUINCLUDES) $(CULIBS)
 
 
@@ -101,6 +101,7 @@ depend :
 # -- Compile dependecies
 # DO NOT DELETE
 
+src/jacobi/jacobi_util.o: lib/matrix_routines.h lib/jacobi_util.h
 src/jacobi/jacobi_openmp_2D.o: lib/matrix_routines.h lib/jacobi_util.h
 src/jacobi/jacobi_openmp_2D.o: lib/poisson.h
 src/jacobi/jacobi_openmp_3D.o: lib/matrix_routines.h lib/jacobi_util.h
@@ -111,7 +112,6 @@ src/jacobi/jacobi_mpi3D_2.o: lib/matrix_routines.h lib/jacobi_util.h
 src/jacobi/jacobi_mpi3D_2.o: lib/poisson.h
 src/jacobi/jacobi_mpi3D_3.o: lib/matrix_routines.h lib/jacobi_util.h
 src/jacobi/jacobi_mpi3D_3.o: lib/poisson.h
-src/jacobi/jacobi_util.o: lib/matrix_routines.h lib/jacobi_util.h
 src/jacobi/jacobi_mixed_1.o: lib/matrix_routines.h lib/jacobi_util.h
 src/jacobi/jacobi_mixed_1.o: lib/poisson.h lib/cuda_routines.h
 src/jacobi/jacobi_mixed_1.o: lib/jacobi_util_cuda.h
@@ -121,9 +121,18 @@ src/jacobi/jacobi_mixed_2.o: lib/jacobi_util_cuda.h
 src/jacobi/jacobi_mixed_3.o: lib/matrix_routines.h lib/jacobi_util.h
 src/jacobi/jacobi_mixed_3.o: lib/poisson.h lib/cuda_routines.h
 src/jacobi/jacobi_mixed_3.o: lib/jacobi_util_cuda.h
+src/jacobi/jacobi_mixed_4.o: lib/matrix_routines.h lib/jacobi_util.h
+src/jacobi/jacobi_mixed_4.o: lib/poisson.h lib/cuda_routines.h
+src/jacobi/jacobi_mixed_4.o: lib/jacobi_util_cuda.h
+src/jacobi/jacobi_mixed_5.o: lib/matrix_routines.h lib/jacobi_util.h
+src/jacobi/jacobi_mixed_5.o: lib/poisson.h lib/cuda_routines.h
+src/jacobi/jacobi_mixed_5.o: lib/jacobi_util_cuda.h
 src/jacobi/jacobi_cuda_1.o: lib/poisson.h lib/jacobi_util.h
 src/jacobi/jacobi_cuda_1.o: lib/matrix_routines.h lib/cuda_routines.h
 src/jacobi/jacobi_cuda_1.o: lib/jacobi_util_cuda.h
+src/jacobi/jacobi_cuda_2.o: lib/poisson.h lib/jacobi_util.h
+src/jacobi/jacobi_cuda_2.o: lib/matrix_routines.h lib/cuda_routines.h
+src/jacobi/jacobi_cuda_2.o: lib/jacobi_util_cuda.h
 src/jacobi/jacobi_util_cuda.o: lib/jacobi_util.h lib/jacobi_util_cuda.h
 src/jacobi/jacobi_util_cuda.o: lib/matrix_routines.h lib/cuda_routines.h
 src/util/main.o: lib/tests.h lib/jacobi_util.h

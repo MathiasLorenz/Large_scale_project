@@ -100,6 +100,8 @@ void cuda_set_device(int rank)
 	cudaSetDevice(device);
 }
 
+// ============================================================================
+// PEER-TO-PEER FUNCTIONS
 
 // Enable peer access between GPU 0 and 1. Restores currently chosen GPU
 void cuda_enable_peer_access()
@@ -113,6 +115,22 @@ void cuda_enable_peer_access()
 	checkCudaErrors(cudaDeviceEnablePeerAccess(1, 0));
 	cudaSetDevice(1);
 	checkCudaErrors(cudaDeviceEnablePeerAccess(0, 0));
+
+	// Set current device back
+	cudaSetDevice(current_device);
+}
+
+void cuda_peer_device_sync()
+{
+	// Get the current device, s.t. it can be set afterwards.
+	int current_device;
+	cudaGetDevice(&current_device);
+
+	// Syncronize
+	cudaSetDevice(0);
+	checkCudaErrors(cudaDeviceSynchronize());
+	cudaSetDevice(1);
+	checkCudaErrors(cudaDeviceSynchronize());
 
 	// Set current device back
 	cudaSetDevice(current_device);
