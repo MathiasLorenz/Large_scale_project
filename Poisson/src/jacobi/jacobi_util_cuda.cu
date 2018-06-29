@@ -369,10 +369,5 @@ __global__ void frobenious_kernel(
 		local_frobenius += (uij - unewij)*(uij - unewij);
 	}
 
-	for (int i = 0; i < blockDim.x; i++)
-	{
-		__syncthreads();
-		if (i == threadIdx.x)
-			information_cuda->local_frobenius += local_frobenius;
-	}
+	atomicAdd(&information_cuda->local_frobenius,local_frobenius);
 }
