@@ -82,18 +82,19 @@ Program()
 	# Define the actual test part of the script 
 	# Run the program
 
-	export USE_TOLERANCE=on
-	export MAX_ITER=100000
+	export MAX_ITER=10894
 	
 	N="128"
 	for n in $N 
 	do
-		echo MPI 3: Time
-			mpiexec -qn $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_3 $n
+		echo CUDA 1: Clean
+			USE_TOLERANCE=off ./jacobiSolver.bin cuda_1 $n
 
-		echo CUDA 1: Time
+		export USE_TOLERANCE=on
+
+		echo CUDA 1: Tolerance
 			./jacobiSolver.bin cuda_1 $n
-
+		
 		echo MPI 3: Error
 			OUTPUT_INFO=error \
 			mpiexec -qn $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_3 $n
