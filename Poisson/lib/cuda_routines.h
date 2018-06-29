@@ -37,6 +37,12 @@ void cuda_destroy_stream(void  *stream);
 void cuda_set_device(int rank);
 void cuda_get_device_count(int *count);
 
+// ============================================================================
+// PEER-TO-PEER FUNCTIONS
+
+void cuda_enable_peer_access();
+void cuda_peer_device_sync();
+
 #ifdef __cplusplus
 }
 #endif //__cplusplus

@@ -18,6 +18,7 @@ void jacobi_mpi3D_2(Information *information, double *U, double *F, double *Unew
 void jacobi_mpi3D_3(Information *information, double *U, double *F, double *Unew);
 
 void jacobi_cuda_1(Information *information, double *U, double *F, double *Unew);
+void jacobi_cuda_2(Information *information, double *U, double *F, double *Unew);
 
 void jacobi_mixed_1(Information *information, double *U, double *F, double *Unew);
 void jacobi_mixed_2(Information *information, double *U, double *F, double *Unew);
