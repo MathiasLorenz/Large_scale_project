@@ -341,7 +341,7 @@ void compute_relative_norm_cuda(
 	Information *information, Information *information_cuda,
 	double *U_cuda, double *Unew_cuda)
 {
-	int N = 1;
+	int N = 1024;
 	frobenious_kernel<<<1,N>>>(information_cuda,U_cuda,Unew_cuda);
 
 	copy_from_device(
@@ -361,7 +361,6 @@ __global__ void frobenious_kernel(
 	int I, J, K;
 	I = loc_Nz; J = loc_Ny; K = loc_Nx;
 
-	//local_frobenius[threadIdx.x] = 0.0;
 	// Loop over all interior points
 	for (int ijk = threadIdx.x; ijk < I*J*K; ijk += blockDim.x) {
 		//int ijk = IND_3D(i, j, k, I, J, K);
@@ -369,5 +368,11 @@ __global__ void frobenious_kernel(
 		double unewij = Unew_cuda[ijk];
 		local_frobenius += (uij - unewij)*(uij - unewij);
 	}
-	information_cuda->local_frobenius += local_frobenius;
+
+	for (int i = 0; i < blockDim.x; i++)
+	{
+		__syncthreads();
+		if (i == threadIdx.x)
+			information_cuda->local_frobenius += local_frobenius;
+	}
 }
