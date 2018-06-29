@@ -66,7 +66,7 @@ Prepare()
 	
 	# Define modules
 	module load cuda/9.1 mpi/2.1.0-gcc-6.3.0
-	nvidia-smi
+	# nvidia-smi
 }
 
 # End of Preparation
@@ -77,19 +77,31 @@ Program()
 {
 	echo ' '
 	echo Running computations
-	
+	echo ' '
 	# -------------------------------------------------------------------------
 	# Define the actual test part of the script 
-
 	# Run the program
-	echo "Iteration counts:"
-	N="64"
+
+	export USE_TOLERANCE=on
+	export MAX_ITER=100000
+	
+	N="128"
 	for n in $N 
 	do
-		echo MPI 3:
-		USE_TOLERANCE=on OUTPUT_INFO=error mpiexec -qn $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_3 $n
-		echo CUDA 1:
-		USE_TOLERANCE=on OUTPUT_INFO=error ./jacobiSolver.bin cuda_1 $n
+		echo MPI 3: Time
+			mpiexec -qn $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_3 $n
+
+		echo CUDA 1: Time
+			./jacobiSolver.bin cuda_1 $n
+
+		echo MPI 3: Error
+			OUTPUT_INFO=error \
+			mpiexec -qn $LSB_DJOB_NUMPROC ./jacobiSolver.bin mpi3d_3 $n
+
+		echo CUDA 1: Error
+			OUTPUT_INFO=error \
+			./jacobiSolver.bin cuda_1 $n
+
 	done
 	# -------------------------------------------------------------------------
 	mv -t $DPATH *.dat 
