@@ -154,26 +154,10 @@ void jacobi_mixed_1(Information *information, double *U, double *F, double *Unew
 		if (rank > 0 && rank < (size - 1) )
 			memcpy(U_ptr_r2, r_buf2, N_buffer*sizeof(double));
 
-		// Stop early if relative error is used
-		/*
-		if (information->use_tol)
-		{
-
-			// Copy norm_diff^2 from device to host and sqrt it
-			copy_from_device(&information->norm_diff, 1*sizeof(double),
-				&information_cuda->norm_diff);
-			//information->norm_diff = sqrt(information->norm_diff);
-			//Information tmp; // ONLY to get tmp.norm_diff, pointers are invalid
-			//copy_from_device_void(&tmp, sizeof(Information), information_cuda);
-			//information->norm_diff = sqrt(tmp.norm_diff);
-
-			MPI_Allreduce(&information->norm_diff, &information->global_norm_diff,
-				1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-
-			if ( (information->global_norm_diff < information->tol) )
-				break;
-		}
-		*/
+		// Stop early if relative error is used.
+		// Second operand is only evaluated if the first is true
+		if (information->use_tol && norm_early_stop(information))
+			{iter++; break;}
     }
 
 	// Save number of iterations

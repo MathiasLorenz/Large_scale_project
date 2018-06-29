@@ -150,6 +150,11 @@ void jacobi_mixed_2(Information *information, double *U, double *F, double *Unew
 			copy_to_device(r_buf2, N_buffer*sizeof(double), U_ptr_r2);
 		
 		cuda_synchronize();
+		
+		// Stop early if relative error is used.
+		// Second operand is only evaluated if the first is true
+		if (information->use_tol && norm_early_stop(information))
+			{iter++; break;}
     }
 
 	// Save number of iterations

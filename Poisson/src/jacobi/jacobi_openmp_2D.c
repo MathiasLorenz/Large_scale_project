@@ -78,7 +78,7 @@ void jacobi_openmp_2D(int Nx, int Ny, int maxit, double threshold,
         norm_diff = sqrt(norm_diff);
 
         if (use_tol && (norm_diff < threshold))
-            break;
+            {iter++;break;}
     }
 
 	// ------------------------------------------------------------------------

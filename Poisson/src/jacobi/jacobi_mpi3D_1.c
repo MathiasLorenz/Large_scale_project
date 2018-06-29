@@ -95,7 +95,7 @@ void jacobi_mpi3D_1(Information *information, double *U, double *F, double *Unew
 		// Stop early if relative error is used.
 		// Second operand is only evaluated if the first is true
 		if (information->use_tol && norm_early_stop(information))
-			break;
+			{iter++; break;}
     }
 
 	// ------------------------------------------------------------------------

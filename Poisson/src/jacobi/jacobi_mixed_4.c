@@ -165,7 +165,10 @@ void jacobi_mixed_4(Information *information, double *U, double *F, double *Unew
 		cuda_synchronize();
 		MPI_Barrier(MPI_COMM_WORLD);
         swap_array( &U_cuda, &Unew_cuda );
-		
+		// Stop early if relative error is used.
+		// Second operand is only evaluated if the first is true
+		if (information->use_tol && norm_early_stop(information))
+			{iter++; break;}
     }
 
 	// Save number of iterations
