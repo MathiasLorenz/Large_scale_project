@@ -15,7 +15,7 @@
 # Ask for n cores placed on R host.
 #BSUB -n 2
 #BSUB -R "span[ptile=2]"
-#BSUB -K
+# #BSUB -K
 
 # Memory specifications. Amount we need and when to kill the
 # program using too much memory.
@@ -23,7 +23,7 @@
 #BSUB -M 50GB
 
 # Time specifications (hh:mm)
-#BSUB -W 01:00
+#BSUB -W 00:10
 
 # GPU options
 #BSUB -gpu "num=2:mode=exclusive_process"
@@ -65,7 +65,7 @@ Prepare()
 	lscpu >> $LSB_JOBNAME.cpu
 	
 	# Define modules
-	module load cuda/9.1 mpi/2.1.0-gcc-6.3.0
+	module load cuda/9.2 mpi/3.1.1-gcc-6.4.0-cuda-9.2
 	nvidia-smi
 }
 
@@ -86,8 +86,8 @@ Program()
 	for n in $N 
 	do
 		>&2 echo "N: $n"
-		#OUTPUT_INFO=matrix_full mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_5 $n >> $LSB_JOBNAME-$n.dat
-		mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_5 $n >> $LSB_JOBNAME-$n.dat
+		OUTPUT_INFO=matrix_full mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_5 $n >> $LSB_JOBNAME-$n.dat
+		#mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin mixed_5 $n >> $LSB_JOBNAME-$n.dat
 	done
 
 

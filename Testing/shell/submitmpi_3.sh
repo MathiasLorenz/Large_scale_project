@@ -62,7 +62,7 @@ Prepare()
 	lscpu >> $LSB_JOBNAME.cpu
 	
 	# Define modules
-	module load cuda/9.1 mpi/2.1.0-gcc-6.3.0
+	module load cuda/9.2 mpi/3.1.1-gcc-6.4.0-cuda-9.2
 }
 
 # End of Preparation

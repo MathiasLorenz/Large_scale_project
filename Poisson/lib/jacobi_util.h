@@ -34,8 +34,6 @@ typedef struct Information {
 	double  local_frobenius;
 	double  frobenius_error;
 
-	// Device array to hold norm information. Same size as kernel block
-	double  *cuda_norm_array;
 } Information;
 
 void write_information(Information *information, int Nx, int Ny, int Nz, int rank, int size);
