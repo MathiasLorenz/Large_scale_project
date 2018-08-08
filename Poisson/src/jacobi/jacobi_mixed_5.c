@@ -36,12 +36,12 @@ void jacobi_mixed_5(Information *information, double *U, double *F, double *Unew
 	cuda_get_device_count(&Ndevices);
 	if ( Ndevices < 1)
 	{
-		fprintf(stderr, "Version mixed_5 must run on a CUDA device.\n");
+		fprintf(stderr, "Version mixed_4 must run on a CUDA device.\n");
 		return;
 	}
 	if ( size < 2)
 	{
-		fprintf(stderr, "Version mixed_5 must run on multiple mpi ranks.\n");
+		fprintf(stderr, "Version mixed_4 must run on multiple mpi ranks.\n");
 		return;
 	}
 
@@ -87,23 +87,26 @@ void jacobi_mixed_5(Information *information, double *U, double *F, double *Unew
 	copy_to_device(U,   arraySizes,U_cuda   );
 	copy_to_device(F,   arraySizes,F_cuda   );
 	copy_to_device(Unew,arraySizes,Unew_cuda);
-	cuda_synchronize();
-	
+
 	// Prepare stop criterion
 	int iter = 0;
-
+	void *i_stream, *b_stream;
+	cuda_create_stream(&i_stream);
+	cuda_create_stream(&b_stream);
 	// ------------------------------------------------------------------------
 	// Run the iterative method
     for(iter = 0; iter < maxit ; iter++){
 		
-		// Compute the iteration of the jacobi method. First boundary
-		jacobi_iteration_cuda_separate(
-			information, information_cuda, U_cuda, F_cuda, Unew_cuda, "b");
 		
-		// Compute interior while boundary is being sent
-		jacobi_iteration_cuda_separate(
-			information, information_cuda, U_cuda, F_cuda, Unew_cuda, "i");
+		// Compute the iteration of the jacobi method. First boundary
+		jacobi_iteration_cuda_separate_stream(
+			information, information_cuda, U_cuda, F_cuda, Unew_cuda, "b",b_stream);
 
+		// Compute interior while boundary is being sent
+		jacobi_iteration_cuda_separate_stream(
+			information, information_cuda, U_cuda, F_cuda, Unew_cuda, "i",i_stream);
+		
+		cuda_stream_synchronize(b_stream);
 		// Extract boundaries
 		double *U_ptr_s1, *U_ptr_s2;
 		double *U_ptr_r1, *U_ptr_r2;
@@ -111,10 +114,14 @@ void jacobi_mixed_5(Information *information, double *U, double *F, double *Unew
 			// First rank needs the last updated index
 			U_ptr_s1 = &Unew_cuda[IND_3D(loc_Nz - 2, 0, 0, I, J, K)];
 			U_ptr_r1 = &Unew_cuda[IND_3D(loc_Nz - 1, 0, 0, I, J, K)];
+
+			//copy_from_device_async(s_buf1, N_buffer*sizeof(double), U_ptr_s1,b_stream);
 		} else if (rank == (size - 1)){
 			// Last rank needs the first updated index
 			U_ptr_s1 = &Unew_cuda[IND_3D(1, 0, 0, I, J, K)];
 			U_ptr_r1 = &Unew_cuda[IND_3D(0, 0, 0, I, J, K)];
+
+			//copy_from_device_async(s_buf1, N_buffer*sizeof(double), U_ptr_s1,b_stream);
 		} else {
 			// All other ranks needs the first and last updated index
 			U_ptr_s1 = &Unew_cuda[IND_3D(1, 0, 0, I, J, K)];
@@ -122,44 +129,50 @@ void jacobi_mixed_5(Information *information, double *U, double *F, double *Unew
 
 			U_ptr_r1 = &Unew_cuda[IND_3D(0, 0, 0, I, J, K)];
 			U_ptr_r2 = &Unew_cuda[IND_3D(loc_Nz - 1, 0, 0, I, J, K)];
+
+			//copy_from_device_async(s_buf1, N_buffer*sizeof(double), U_ptr_s1,b_stream);
+			//copy_from_device_async(s_buf2, N_buffer*sizeof(double), U_ptr_s2,b_stream);
 		}
-		
+		cuda_stream_synchronize(b_stream);
 		// Determine source and destination
 		int neighbour_1, neighbour_2;
 		compute_neighbors(information, &neighbour_1, &neighbour_2);
 
-		printf("Okay, Ready to send\n");
-		printf("%f\n",U_ptr_s1[0]);
-		printf("ITS A POINTER\n");
 		// Send boundaries and receive boundaries
-		MPI_Isend(U_ptr_s1, N_buffer, MPI_DOUBLE, neighbour_1, iter, MPI_COMM_WORLD,
-				&req[0]);
-		printf("Okay, Ready to send time 2\n");
-		if ( rank != 0 && rank != (size - 1) )
-			MPI_Isend(U_ptr_s2, N_buffer, MPI_DOUBLE, neighbour_2, iter, MPI_COMM_WORLD,
-					&req[2]);
-
-		printf("Okay, Ready to receive\n");
 		MPI_Irecv(U_ptr_r1, N_buffer, MPI_DOUBLE, neighbour_1, iter,
 					MPI_COMM_WORLD, &req[1]);
 		if ( rank != 0 && rank != (size - 1) )
 			MPI_Irecv(U_ptr_r2, N_buffer, MPI_DOUBLE, neighbour_2, iter,
 					MPI_COMM_WORLD, &req[3]);
-		printf("Okay, Receive completed\n");
+		
+		MPI_Isend(U_ptr_s1, N_buffer, MPI_DOUBLE, neighbour_1, iter, MPI_COMM_WORLD,
+				&req[0]);
+		if ( rank != 0 && rank != (size - 1) )
+			MPI_Isend(U_ptr_s2, N_buffer, MPI_DOUBLE, neighbour_2, iter, MPI_COMM_WORLD,
+					&req[2]);
+
+
 		// Wait for boundaries to be completed
 		MPI_Waitall(num_req, req, MPI_STATUS_IGNORE);
+		MPI_Barrier(MPI_COMM_WORLD);
 
 		// Synchronize and copy back
-		cuda_synchronize();
+		//copy_to_device_async(r_buf1, N_buffer*sizeof(double), U_ptr_r1,b_stream);
+		//if (rank > 0 && rank < (size - 1) )
+			//copy_to_device_async(r_buf2, N_buffer*sizeof(double), U_ptr_r2,b_stream);
 
 		// Swap the arrays
+		cuda_synchronize();
+		MPI_Barrier(MPI_COMM_WORLD);
         swap_array( &U_cuda, &Unew_cuda );
-		
 		// Stop early if relative error is used.
 		// Second operand is only evaluated if the first is true
 		if (information->use_tol && norm_early_stop(information))
 			{iter++; break;}
     }
+
+	// Save number of iterations
+	information->iter = iter;
 
 	// ------------------------------------------------------------------------
 	// Finalise
@@ -167,7 +180,6 @@ void jacobi_mixed_5(Information *information, double *U, double *F, double *Unew
 
 	// Copy back the result
 	copy_from_device(U,   arraySizes,U_cuda   );
-	cuda_synchronize();
 
 	// Free the arrays
 	cuda_host_free(s_buf1); cuda_host_free(s_buf2);
@@ -175,6 +187,8 @@ void jacobi_mixed_5(Information *information, double *U, double *F, double *Unew
 	cuda_free(U_cuda   );
 	cuda_free(F_cuda   );
 	cuda_free(Unew_cuda);
+	cuda_destroy_stream(i_stream);
+	cuda_destroy_stream(b_stream);
 	free_information_cuda(information_cuda);
 	
 	// Flop Counts:
