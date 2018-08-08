@@ -19,12 +19,12 @@ CFLAGS  = $(OPTIM) $(WARN) $(LIBS) $(CHIP) $(PARA)
 CUOPT 	=-O3
 CUOPTS	=
 CUWARN	=-Wall -Wno-unused-function
-CULIBS	=-lcudart -L/appl/cuda/9.1/lib64
+CULIBS	=-lcudart -L/appl/cuda/9.2/lib64
 CUARCH	=-arch=sm_70
 CUPARA	=
 
 # - CU Library setup
-CUDA_PATH ?=/appl/cuda/9.1
+CUDA_PATH ?=/appl/cuda/9.2
 CUINCLUDES =-I$(CUDA_PATH)/include -I$(CUDA_PATH)/samples/common/inc
 
 CUFLAGS=-Xcompiler "$(CUOPT) $(CUPIC) $(CUOMP) $(CUWARN)" $(CUARCH) $(CUOPTS)
