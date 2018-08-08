@@ -3,7 +3,7 @@
 # --  General options 
 
 # Naming of the job and queue name
-#BSUB -J performance
+#BSUB -J performance_6_1
 #BSUB -q gpuv100
 
 # Specify
