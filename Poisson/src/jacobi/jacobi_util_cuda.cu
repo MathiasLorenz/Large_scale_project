@@ -74,7 +74,7 @@ void copy_information_cuda(Information *information_cuda, Information *informati
 
 void free_information_cuda(Information *information_cuda){
 	free_information_arrays_cuda<<<1,1>>>(information_cuda);
-	cudaFree(information_cuda);
+	checkCudaErrors(cudaFree(information_cuda));
 }
 
 // As we these free's are launched in a kernel we de a normal free and
