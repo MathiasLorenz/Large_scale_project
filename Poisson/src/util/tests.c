@@ -144,7 +144,7 @@ void test_jacobi_3D(Information *information, char const *solver)
 	MEMORY = 3.0 * Nx * Ny * Nz * 8.0 / 1024.0;
 
 	// Print the needed information
-	if (strcmp("matrix_slice", getenv("OUTPUT_INFO")) == 0)
+	if (rank == 0 && strcmp("matrix_slice", getenv("OUTPUT_INFO")) == 0)
 		array_print_3d_slice(U, Nx, Ny, Nz, Nz / 2, "%10g ");
 
 	else if (strcmp("matrix_full", getenv("OUTPUT_INFO")) == 0)
@@ -157,7 +157,6 @@ void test_jacobi_3D(Information *information, char const *solver)
 	
 	else if (strcmp("error", getenv("OUTPUT_INFO")) == 0)
 		print_error(information, U);
-
 
 	// Free the arrays created for the computation
 	free(U); free(F); free(Unew);
