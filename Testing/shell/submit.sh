@@ -1,4 +1,17 @@
 #!/bin/sh
+# submit.sh TESTNAME [TESTNAME ...]
+#
+# This script works as a function which compiles and submit tests for the 
+# jacobiSolver implementation defined in the Poisson folder of the project.
+# 
+# The <TESTNAME> variable refers to the appendix of the submitTESTNAME.sh files
+# located in the folder of this file. These submitTESTNAME.sh files contain the 
+# LSF based jobscripts defining the test which should be run.
+#
+# Note: Jobs with identical jobnames will be terminated to avoid resubmition of 
+# old tests.
+
+
 
 # Define all needed folders relative to project head.
 EPATH=Poisson
