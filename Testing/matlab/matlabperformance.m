@@ -30,7 +30,11 @@ end
 
 
 if ~exist('datPath','var') || isempty(datPath)
-    datPath = '../data/';
+    if ismac
+        datPath = '../data';
+    else
+        datPath = '../data/';
+    end
 end
 addpath(genpath('./'));
 DataFiles = finddata(datPath,DataName);
@@ -38,7 +42,11 @@ DataFiles = finddata(datPath,DataName);
 %% Performance plots
 
 for i = 1:length(DataFiles)
-	FileName = [datPath,DataFiles{i}];
+    if ismac
+        FileName = [[datPath, '/'],DataFiles{i}];
+    else
+        FileName = [datPath,DataFiles{i}];
+    end
     memoryVflops(FileName,DataName,'Performance',getFuncName(FileName));
 end
 if exist('figPath','var') && ~isempty(figPath)
