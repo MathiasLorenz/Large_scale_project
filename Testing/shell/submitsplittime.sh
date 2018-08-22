@@ -3,7 +3,7 @@
 # --  General options 
 
 # Naming of the job and queue name
-#BSUB -J perfmixed
+#BSUB -J splittime
 #BSUB -q gpuv100
 
 # Specify
@@ -82,17 +82,17 @@ Program()
 	# Define the actual test part of the script 
 
 	# Run the programs (Max array size for GPU: 874)
-	#N="32 64 128 254"
+	#N="8 16"
 	N="32 64 128 254 512 1024"
 
-	TEST="mixed_1 mixed_2 mixed_3 mixed_4 mixed_5"
+	# Run the MPI based tests
+	TEST="mixed_2 mixed_5"
 	for t in $TEST
 	do
-		dat=$t.dat
 		for n in $N 
 		do
-			echo "Test: $t, N: $n"
-			mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin $t $n >> $LSB_JOBNAME-$dat
+			echo "N: $n"
+			mpiexec -q -n $LSB_DJOB_NUMPROC ./jacobiSolver.bin $t $n >> $LSB_JOBNAME.dat
 		done
 	done
 
@@ -112,7 +112,7 @@ Visualize()
 {
 	echo ' '
 	echo Visualizing
-	matlab -r "addpath(genpath('../../'));matlabperformance('$LSB_JOBNAME','$DPATH/','$FIGS');exit;"
+	# matlab -r "addpath(genpath('../../'));matlabperformance('$LSB_JOBNAME','$DPATH/','$FIGS');exit;"
 }
 
 # End of Visualize

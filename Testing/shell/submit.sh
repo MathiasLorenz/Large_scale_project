@@ -36,7 +36,7 @@ else
 fi
 
 # Make sure the excecutable is up to date
-module load cuda/9.2 mpi/3.1.1-gcc-6.4.0-cuda-9.2
+module load cuda/9.2 mpi/3.1.1-gcc-6.4.0-cuda-9.2-without-mxm
 cd $EPATH; make realclean; make -s; 
 if [ -f jacobiSolver.bin ]
 then 
