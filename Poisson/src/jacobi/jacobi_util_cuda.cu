@@ -122,9 +122,6 @@ __global__ void jacobi_iteration_kernel(Information *information_cuda,
 	int loc_Ny = information_cuda->loc_Ny[rank];
 	int loc_Nz = information_cuda->loc_Nz[rank];
 
-	// For relative error stopping
-	information_cuda->local_frobenius = 0.0;
-
     int I, J, K;
 	I = loc_Nz; J = loc_Ny; K = loc_Nx;
 
