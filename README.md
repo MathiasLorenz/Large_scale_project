@@ -26,9 +26,9 @@ The repository contain two folders,
 ### Prerequisites
 In order to compile and run the code the following libraries must be available: 
 (the versions specified in paranthesis is the tested versions).
-- GCC	( 6.3.0 built with OpenMP suport )
-- MPI   ( openMPI 2.1.0 )
-- CUDA  ( 9.1 )
+- GCC	( 6.4.0 built with OpenMP suport )
+- MPI   ( openMPI 3.1.1 )
+- CUDA  ( 9.2 )
 
 ### Installing
 The poisson folder should be readily usable by the make utility. Please examine
